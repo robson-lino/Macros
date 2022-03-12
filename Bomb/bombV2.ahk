@@ -456,37 +456,48 @@ recompensa(janela)
     CoordMode, Pixel, Screen
     CoordMode, Mouse, Screen
     WinGetPos, XJ, YJ, W, H, %janela%
-    ImageSearch, X, Y, XJ, YJ, XJ+W, YJ+H, *40 %a_scriptdir%\balance.png
-    X2 := X+105
-    Y2 := Y+60
-    X := X-15
-    Y := Y+20
-    mantem := clipboard
-    clipboard := ""
-    RunWait, %a_scriptdir%\Capture2Text\Capture2Text_CLI.exe --screen-rect "%X% %Y% %X2% %Y2%" --scale-factor 0.8 --whitelist 0123456789`, --clipboard, , Hide
-    recompensa := StrReplace(Clipboard, "`r`n")
-    if (recompensa = "<Error>")
+    ImageSearch, X, Y, XJ, YJ, XJ+W, YJ+H, *40 %a_scriptdir%\bau.png
+    if (ErrorLevel = 0)
     {
-        RunWait, %a_scriptdir%\Capture2Text\Capture2Text_CLI.exe --screen-rect "%X% %Y% %X2% %Y2%" --scale-factor 0.8 --whitelist 0123456789`,  --clipboard , , Hide
-        recompensa := StrReplace(Clipboard, "`r`n")
-    }
-    MsgBox, %recompensa%
-    clipboard := mantem
-    CoordMode, Pixel, Window
-    CoordMode, Mouse, Window
-    FormatTime, DataFormatada, D1 T0
-    if (recompensaAnteriores[(janela)] = "")
-    {
-        recompensaAnteriores[(janela)] := recompensa
-    }
-    else
-    {
-        recompensaAtual := recompensa - recompensaAnteriores[(janela)]
-        FileAppend, %DataFormatada%`,%janela%`,%recompensaAtual%`n, %a_scriptdir%\recompensas.csv
-        if ErrorLevel
+        Random, rand, 1, 20
+        Random, rand2, 1, 20
+        MouseClick, Left, X+rand, Y+rand2
+        Sleep, 500
+        ImageSearch, X, Y, XJ, YJ, XJ+W, YJ+H, *40 %a_scriptdir%\balance.png
+        if (ErrorLevel = 0)
         {
-            FileAppend, %DataFormatada%`,%janela%`,%recompensaAtual%`n, %a_scriptdir%\recompensas.csv
+            X2 := X+105
+            Y2 := Y+60
+            X := X-15
+            Y := Y+20
+            mantem := clipboard
+            clipboard := ""
+            RunWait, %a_scriptdir%\Capture2Text\Capture2Text_CLI.exe --screen-rect "%X% %Y% %X2% %Y2%" --scale-factor 0.8 --whitelist 0123456789`, --clipboard, , Hide
+            recompensa := StrReplace(Clipboard, "`r`n")
+            if (recompensa = "<Error>")
+            {
+                RunWait, %a_scriptdir%\Capture2Text\Capture2Text_CLI.exe --screen-rect "%X% %Y% %X2% %Y2%" --scale-factor 0.8 --whitelist 0123456789`,  --clipboard , , Hide
+                recompensa := StrReplace(Clipboard, "`r`n")
+            }
+            MsgBox, %recompensa%
+            clipboard := mantem
+            CoordMode, Pixel, Window
+            CoordMode, Mouse, Window
+            FormatTime, DataFormatada, D1 T0
+            if (recompensaAnteriores[(janela)] = "")
+            {
+                recompensaAnteriores[(janela)] := recompensa
+            }
+            else
+            {
+                recompensaAtual := recompensa - recompensaAnteriores[(janela)]
+                FileAppend, %DataFormatada%`,%janela%`,%recompensaAtual%`n, %a_scriptdir%\recompensas.csv
+                if ErrorLevel
+                {
+                    FileAppend, %DataFormatada%`,%janela%`,%recompensaAtual%`n, %a_scriptdir%\recompensas.csv
+                }
+                recompensaAnteriores[(janela)] := recompensa
+            }
         }
-        recompensaAnteriores[(janela)] := recompensa
     }
 }
