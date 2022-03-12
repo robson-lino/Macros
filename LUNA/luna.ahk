@@ -33,10 +33,10 @@ GeraLog("Espera o loop " (((((tempo*60)*1000) - (A_TickCount - rodouUltimaVez))/
 return
 
 ^F9::
-tempo := 60
+tempo := 90
 rodouUltimaVez := A_TickCount
 GeraLog("Espera o loop " (((((tempo*60)*1000) - (A_TickCount - rodouUltimaVez))/1000)/60)/60)
-SetTimer EsperaTempo, 5000
+SetTimer EsperaTempo, 300000
 return
 
 
@@ -87,7 +87,7 @@ var1 += %tempo%, Minutes
 FormatTime, DataFormatada, %var1%, time
 GeraLog("O proximo loop será às " DataFormatada)
 Send, {Pause}
-SetTimer EsperaTempo, 60000
+SetTimer EsperaTempo, 300000
 return
 
 
@@ -451,7 +451,7 @@ recompensa(W, H, janela)
     }
     else
     {
-        recompensaAtual := recompensa - recompensaAnterior
+        recompensaAtual := round(recompensa - recompensaAnterior, 2)
         FileAppend, %DataFormatada%`,%janela%`,%recompensaAtual%`n, %a_scriptdir%\recompensas.csv
         if ErrorLevel
         {

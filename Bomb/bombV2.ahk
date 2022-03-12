@@ -10,7 +10,7 @@ SetKeyDelay 40, 50
 CoordMode, Pixel, Window
 CoordMode, Mouse, Window
 Janelas := "Bombcrypto - Perfil 1,Bombcrypto - Perfil 2,Bombcrypto - Perfil 3"
-recompensaAnteriores := {"Bombcrypto - Perfil 1": "","Bombcrypto - Perfil 2": "","Bombcrypto - Perfil 3": ""}
+global recompensaAnteriores := {"Bombcrypto - Perfil 1": 0,"Bombcrypto - Perfil 2": 0,"Bombcrypto - Perfil 3": 0}
 
 
 ^b::
@@ -25,6 +25,7 @@ Loop, parse, Janelas, `,
     WinActivate %A_LoopField%
     WinGetPos, X, Y, W, H,  %A_LoopField%
     gosub, volta
+    recompensa(A_LoopField)
     gosub, hunt
     Sleep, randSleep()
 }
@@ -73,6 +74,14 @@ Loop, parse, Janelas, `,
         Random, rand2, -130, 130
         MouseClick, Left, (W/2)+rand, (H/2)+rand2
         GeraLog("Estava com o Heroes aberto - " A_LoopField)
+    }
+    ImageSearch, X, Y, 0, 0, W, H, *40 %a_scriptdir%\x2.png
+    if (ErrorLevel = 0)
+    {
+        Random, rand, 1, 10
+        Random, rand2, 1, 10
+        MouseClick, Left, X+rand, Y+rand2
+        Sleep, randSleep()+200
     }
     ImageSearch, X, Y, 0, 0, W, H, *40 %a_scriptdir%\hunt.png
     if (ErrorLevel = 0)
@@ -449,13 +458,17 @@ Loop, parse, Janelas, `,
     WinGetPos, X, Y, W, H,  %A_LoopField%
     recompensa(A_LoopField)
 }
+For key, value in recompensaAnteriores
+    MsgBox %key% = %value%
 return
 
 recompensa(janela)
 {
+    GeraLog("Verifica recompensa.")
     CoordMode, Pixel, Screen
     CoordMode, Mouse, Screen
     WinGetPos, XJ, YJ, W, H, %janela%
+    Sleep, 1000
     ImageSearch, X, Y, XJ, YJ, XJ+W, YJ+H, *40 %a_scriptdir%\bau.png
     if (ErrorLevel = 0)
     {
@@ -466,31 +479,35 @@ recompensa(janela)
         ImageSearch, X, Y, XJ, YJ, XJ+W, YJ+H, *40 %a_scriptdir%\balance.png
         if (ErrorLevel = 0)
         {
+            Sleep, 1000
             X2 := X+105
             Y2 := Y+60
             X := X-15
             Y := Y+20
+            MouseMove, X2, Y2
+            Sleep, 200
             mantem := clipboard
             clipboard := ""
             RunWait, %a_scriptdir%\Capture2Text\Capture2Text_CLI.exe --screen-rect "%X% %Y% %X2% %Y2%" --scale-factor 0.8 --whitelist 0123456789`, --clipboard, , Hide
-            recompensa := StrReplace(Clipboard, "`r`n")
+            recompensa := StrReplace(StrReplace(Clipboard, "`r`n"), ",",".")
             if (recompensa = "<Error>")
             {
+                Sleep, 1000
                 RunWait, %a_scriptdir%\Capture2Text\Capture2Text_CLI.exe --screen-rect "%X% %Y% %X2% %Y2%" --scale-factor 0.8 --whitelist 0123456789`,  --clipboard , , Hide
-                recompensa := StrReplace(Clipboard, "`r`n")
+                recompensa := StrReplace(StrReplace(Clipboard, "`r`n"), ",",".")
             }
-            MsgBox, %recompensa%
             clipboard := mantem
             CoordMode, Pixel, Window
             CoordMode, Mouse, Window
             FormatTime, DataFormatada, D1 T0
-            if (recompensaAnteriores[(janela)] = "")
+            recompensaAnterior := recompensaAnteriores[(janela)]
+            if (recompensaAnterior = 0)
             {
                 recompensaAnteriores[(janela)] := recompensa
             }
             else
             {
-                recompensaAtual := recompensa - recompensaAnteriores[(janela)]
+                recompensaAtual := Round(recompensa - recompensaAnterior, 4)
                 FileAppend, %DataFormatada%`,%janela%`,%recompensaAtual%`n, %a_scriptdir%\recompensas.csv
                 if ErrorLevel
                 {
@@ -498,6 +515,14 @@ recompensa(janela)
                 }
                 recompensaAnteriores[(janela)] := recompensa
             }
+        }
+        Sleep, 500
+        ImageSearch, X, Y, 0, 0, W, H, *40 %a_scriptdir%\x2.png
+        if (ErrorLevel = 0)
+        {
+            Random, rand, 1, 10
+            Random, rand2, 1, 10
+            MouseClick, Left, X+rand, Y+rand2
         }
     }
 }

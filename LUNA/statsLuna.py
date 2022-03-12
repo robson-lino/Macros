@@ -55,7 +55,7 @@ with open('recompensas.csv', 'r') as file:
     for jan in janelas:
         msg = msg + f"Para a conta {jan}:{os.linesep}"
         for l in sorted(janelas[jan]):
-            msg = msg + f"No dia {l} foi farmado {janelas[jan][l]:.3f} LUS, na cotação atual R${(janelas[jan][l]*preco):.3f}{os.linesep}"
+            msg = msg + f"No dia {l} foi farmado {janelas[jan][l]:.2f} LUS, na cotação atual R${(janelas[jan][l]*preco):.2f}{os.linesep}"
         msg = msg + f"----- Total farmado na conta {jan}: {lus[jan]:.2f} LUS, na cotação atual R${(lus[jan]*preco):.3f}. -----{os.linesep}{os.linesep}"
     msg = msg + f"Cotação atual da SPE: {preco}.{os.linesep}{os.linesep}"
     print(msg)
