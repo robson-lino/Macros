@@ -384,7 +384,7 @@ return
 GeraLog(msg)
 {
     FormatTime, DataFormatada, D1 T0
-	FileAppend, %DataFormatada% - %msg%`n, %a_scriptdir%\logluna.txt
+	FileAppend, %DataFormatada% - %msg%`n, %a_scriptdir%\logluna.log
 }
 return
 

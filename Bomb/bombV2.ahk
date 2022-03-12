@@ -441,7 +441,7 @@ return
 GeraLog(msg)
 {
     FormatTime, DataFormatada, D1 T0
-	FileAppend, %DataFormatada% - %msg%`n, %a_scriptdir%\logbomb.txt
+	FileAppend, %DataFormatada% - %msg%`n, %a_scriptdir%\logbomb.log
 	if ErrorLevel
 	{
 		MsgBox, Falha na criação do log.
