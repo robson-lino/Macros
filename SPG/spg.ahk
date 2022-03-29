@@ -26,12 +26,6 @@ global ColocouNessaFase := false
 
 end_time := A_TickCount + 180000
 
-^F11::
-GeraLog("Iniciou o macro")
-gosub, luta
-SetTimer, Verifica, 2000
-return
-
 ^F9::
 GeraLog("Iniciou o macro sem o trabalha")
 InputBox, OutputVar, Loop, Quantos minutos a cada verificada`?
@@ -326,6 +320,7 @@ if (ErrorLevel = 0)
 {
     Clica(X, Y)
     WinWait, MetaMask Notification,, 5
+    WinActivate, MetaMask Notification
     if ErrorLevel
     {
         reload()

@@ -130,6 +130,7 @@ Loop, parse, Janelas, `,
     {
         MouseClick, Left, X, Y
         Sleep, randSleep()
+        Sleep, randSleep()
         ImageSearch, X, Y, 0, 0, W, H, *40 %a_scriptdir%\aceito2.png
         if (ErrorLevel = 0)
         {
@@ -508,12 +509,15 @@ recompensa(janela)
             else
             {
                 recompensaAtual := Round(recompensa - recompensaAnterior, 4)
-                FileAppend, %DataFormatada%`,%janela%`,%recompensaAtual%`n, %a_scriptdir%\recompensas.csv
-                if ErrorLevel
+                if recompensaAtual > 0
                 {
                     FileAppend, %DataFormatada%`,%janela%`,%recompensaAtual%`n, %a_scriptdir%\recompensas.csv
+                    if ErrorLevel
+                    {
+                        FileAppend, %DataFormatada%`,%janela%`,%recompensaAtual%`n, %a_scriptdir%\recompensas.csv
+                    }
+                    recompensaAnteriores[(janela)] := recompensa
                 }
-                recompensaAnteriores[(janela)] := recompensa
             }
         }
         Sleep, 500
