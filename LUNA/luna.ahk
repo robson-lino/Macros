@@ -384,21 +384,21 @@ IniciaBoss(W, H, janela)
         ImageSearch, X, Y, 0, 0, W, H, *40 %a_scriptdir%\mais.png
         while (ErrorLevel = 0)
         {
-            energias2 := FindClick("/energia2.png", "r a" Xx-50 "," Yy ",-" W/2 ",-150 e n o100")
-            Sort, energias2, F ReverseDirection D
-            if energias2 != 0
+            energias3 := FindClick("/energia3.png", "r a" Xx-50 "," Yy ",-" W/2 ",-150 e n o100")
+            Sort, energias3, F ReverseDirection D
+            if energias3 != 0
             {
-                Loop, parse, energias2, `n, `r
+                Loop, parse, energias3, `n, `r
                 {
                     if A_index > 3
                         break
-                    GeraLog("Energia 2")
+                    GeraLog("Energia 3")
                     ImageSearch, X, Y, 0, 0, W, H, *40 %a_scriptdir%\mais.png
                     if (ErrorLevel != 0)
                         break
                     X := SubStr(A_LoopField, 1, InStr(A_LoopField, ",")-1)
                     Y := SubStr(A_LoopField, InStr(A_LoopField, ",")+1, 90)
-                    Random, rand, 1, 40
+                    Random, rand, 1, 25
                     Random, rand2, 0, 1
                     if (rand2 = 0)
                     {
@@ -411,7 +411,69 @@ IniciaBoss(W, H, janela)
                     Gosub, loading
                 }
             }
-            if energias2 >= 1
+            ImageSearch, X, Y, 0, 0, W, H, *40 %a_scriptdir%\mais.png
+            if (energias3 = 0 or (energias3 != 0 and ErrorLevel = 0))
+            {
+                energias2 := FindClick("/energia2.png", "r a" Xx-50 "," Yy ",-" W/2 ",-150 e n o100")
+                Sort, energias2, F ReverseDirection D
+                if energias2 != 0
+                {
+                    Loop, parse, energias2, `n, `r
+                    {
+                        if A_index > 3
+                            break
+                        GeraLog("Energia 2")
+                        ImageSearch, X, Y, 0, 0, W, H, *40 %a_scriptdir%\mais.png
+                        if (ErrorLevel != 0)
+                            break
+                        X := SubStr(A_LoopField, 1, InStr(A_LoopField, ",")-1)
+                        Y := SubStr(A_LoopField, InStr(A_LoopField, ",")+1, 90)
+                        Random, rand, 1, 25
+                        Random, rand2, 0, 1
+                        if (rand2 = 0)
+                        {
+                            MouseClick, left, X+rand, Y
+                        }
+                        Else
+                        {
+                            MouseClick, left, X-rand, Y
+                        }
+                        Gosub, loading
+                    }
+                }
+                ImageSearch, X, Y, 0, 0, W, H, *40 %a_scriptdir%\mais.png
+                if (energias2 = 0 (energias2 != 0 and ErrorLevel = 0))
+                {
+                    energias1 := FindClick("/energia1.png", "r a" Xx-50 "," Yy ",-" W/2 ",-150 e n o100")
+                    Sort, energias1, F ReverseDirection D
+                    if energias1 != 0
+                    {
+                        Loop, parse, energias1, `n, `r
+                        {
+                            if A_index > 3
+                                break
+                            GeraLog("Energia 1")
+                            ImageSearch, X, Y, 0, 0, W, H, *40 %a_scriptdir%\mais.png
+                            if (ErrorLevel != 0)
+                                break
+                            X := SubStr(A_LoopField, 1, InStr(A_LoopField, ",")-1)
+                            Y := SubStr(A_LoopField, InStr(A_LoopField, ",")+1, 90)
+                            Random, rand, 1, 25
+                            Random, rand2, 0, 1
+                            if (rand2 = 0)
+                            {
+                                MouseClick, left, X+rand, Y
+                            }
+                            Else
+                            {
+                                MouseClick, left, X-rand, Y
+                            }
+                            Gosub, loading
+                        }
+                    }
+                }
+            }
+            if (energias3 >= 1 or energias2 >= 1 or energias1 >= 1)
                 break
             if (A_Index > 10)
             {
@@ -451,7 +513,7 @@ IniciaBoss(W, H, janela)
                             GeraLog("Selecionado 1")
                             X := SubStr(A_LoopField, 1, InStr(A_LoopField, ",")-1)
                             Y := SubStr(A_LoopField, InStr(A_LoopField, ",")+1, 90)+7
-                            Random, rand, 1, 40
+                            Random, rand, 1, 25
                             Random, rand2, 0, 1
                             if (rand2 = 0)
                             {
