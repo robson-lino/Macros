@@ -28,6 +28,8 @@ global iUltimaAtualizada = A_TickCount
 global TickPrestigio := A_TickCount
 global TempoTotal := 0
 global QntPrestigio := 0
+global auxcomprou := false
+global forcaprestige := false
 
 GeraLog(msg)
 {
@@ -72,7 +74,7 @@ Gui Add, Text, vtxtPode x90 y8 w39 h23 +0x200, NAO
 Gui Add, Radio, hWndhRadPush vRadPush x8 y64 w49 h23, Push
 Gui Add, Radio, hWndhRadFarm vRadFarm x64 y64 w49 h23 +Checked, Farm
 Gui Add, Text, vtxtMana x128 y96 w57 h19 +0x200, 0/0
-Gui Add, Button, hWndhBtnAtualizar vBtnAtualizar gDeuErro x216 y272 w80 h23, Atualizar
+Gui Add, Button, hWndhBtnAtualizar vBtnAtualizar gFazPrestige x216 y272 w80 h23, Atualizar
 Gui Add, Button, vBtnCalibrar gCalibrar x216 y300 w80 h23, Calibrar
 
 Gui Add, Text, x8 y300 w42 h23 +0x200, Media:
@@ -115,10 +117,10 @@ Clica()
     Random, rand2, 1, 10
     if (!CheckMir)
     {
-        MouseClick, Left, 931+rand, 225+rand2
-        MouseClick, Left, 811+rand, 349+rand2
-        MouseClick, Left, 1045+rand, 337+rand2
-        MouseClick, Left, 933+rand, 486+rand2
+        MouseClick, Left, 931+rand, 225+rand2, 4
+        MouseClick, Left, 811+rand, 349+rand2, 4
+        MouseClick, Left, 1045+rand, 337+rand2, 4
+        MouseClick, Left, 933+rand, 486+rand2, 4
     }
     else
     {
@@ -286,6 +288,7 @@ Atualizar()
     Fechaheroi()
     lua()
     VaiProBoss()
+    Travado()
     tempo := A_TickCount - Inicio
 }
 
@@ -416,15 +419,60 @@ Calibrar()
     PixelGetColor, HMColor, HMPixelX, HMPixelY
 }
 
+Travado()
+{
+    if (A_Tickcount - TickPrestigio > 1800000)
+    {
+        if (StageProgess > 98)
+        {
+            GeraLog("Estava mais de 30 minutos e fez o prestige")
+            forcaprestige := true
+            FazPrestige()
+        }
+    }
+    if (A_Tickcount - TickPrestigio > 600000)
+    {
+        if (StageProgess < 85)
+        {
+            if (!auxcomprou)
+            {
+            GeraLog("Estava mais de 30 minutos e fez o prestige")
+            forcaprestige := true
+            FazPrestige()
+            }
+
+        }
+    }
+}
+
 FazPrestige()
 {
     Inicio := A_TickCount
     aumento_percentual := ((stage - stageanterior) / stageanterior) * 100
     GuiControlGet, Edit1
-    if (StageProgess > 100 and stage > Edit1 and aumento_percentual >= 0 and aumento_percentual <= 5)
+    if ((StageProgess > 100 and stage > Edit1 and aumento_percentual >= 0 and aumento_percentual <= 5) or forcaprestige)
     {
+        loop, 5
+        {
+            ImageSearch, Xlinha, Ylinha, 1069, 56, 1171, 242, *60 %a_scriptdir%\fecha.png
+            if !ErrorLevel
+            {
+                MouseClick, left, Xlinha, Ylinha
+                Sleep, 300
+            }
+        }
         GeraLog("Fez o prestigio em " TempoPassado() " no Stage: " stage ", estava configurado para: " Edit1)
-        
+        Mais10 := ((stage - Edit1)/5)+Edit1
+        GeraLog("novo: " Mais10)
+        if (stage - Edit1 < 50)
+        {
+            GuiControl, , Edit1, %Mais10%
+        }
+        else
+        {
+            Mais10 := Edit1+50
+            GuiControl, , Edit1, %Mais10%
+        }
         FechaColeta()
         Sleep, 300
         AbreSkill()
@@ -442,6 +490,8 @@ FazPrestige()
         if (DeuErro())
             return
         GeraLog("Fez prestige")
+        auxcomprou := false
+        QntPrestigio++
         AtualizaMedias()
         TickPrestigio := A_TickCount
         Sleep, 20000
@@ -450,9 +500,7 @@ FazPrestige()
             FazPrestige()
         CompraSkills()
         CompraReliquia()
-        GuiControlGet, Edit1
-        Mais10 := stage - 60
-        GuiControl, , Edit1, % Mais10
+        forcaprestige := false
         GeraLog("Tempo do faz Prestige: " A_TickCount - Inicio)
         return
     }
@@ -461,7 +509,6 @@ FazPrestige()
 AtualizaMedias()
 {
     TempoTotal =+ A_Tickcount - TickPrestigio
-    QntPrestigio++
     Media := TempoTotal/QntPrestigio
     GuiControl, , txtMediaStage, %Media%
     GuiControl, , QntPres, %QntPrestigio%
@@ -500,7 +547,9 @@ VaiProBoss()
     if (ErrorLevel = 0)
     {
         MouseClick, left, X, Y
+        Sleep, 300
         GeraLog("Tava travado fora do boss")
+        Sleep, 300
     }
 }
 
@@ -569,23 +618,27 @@ CompraSkills()
 
 AbreSkill()
 {
-    ImageSearch, Xlinha, Ylinha, 709, 524, 778, 599, *60 %a_scriptdir%\carta.png
+    ImageSearch, Xlinha, Ylinha, 709, 524, 778, 599, *40 %a_scriptdir%\carta.png
     if (ErrorLevel = 0)
     {
+        GeraLog("Achou a carta")
         return
     }
     else
     {
         Send, 1
+        return
     }
 
 }
 FechaSkill()
 {
-    ImageSearch, Xlinha, Ylinha, 709, 524, 778, 599, *60 %a_scriptdir%\carta.png
+    ImageSearch, Xlinha, Ylinha, 709, 524, 778, 599, *40 %a_scriptdir%\carta.png
     if (ErrorLevel = 0)
     {
+        GeraLog("Achou a carta")
         Send, 1
+        return
     }
     else
     {
