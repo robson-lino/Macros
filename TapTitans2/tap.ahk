@@ -1,3 +1,4 @@
+; 0.0.4
 #SingleInstance Force
 SetWorkingDir %A_ScriptDir%
 #MaxThreads 1
@@ -22,6 +23,12 @@ global SCPixelX = 1127
 global SCPixelY = 772
 global HMPixelX = 971
 global HMPixelY = 771
+global FSiCount := 0
+global DSiCount := 0
+global SCiCount := 0
+global HMiCount := 0
+global WCiCount := 0
+global TFiCount := 0
 global StageProgess := 0
 global CheckMir := false
 global iUltimaAtualizada = A_TickCount
@@ -79,7 +86,7 @@ Gui Add, Text, vtxtPode x90 y8 w39 h23 +0x200, NAO
 Gui Add, Radio, hWndhRadPush vPush x8 y64 w49 h23, Push
 Gui Add, Radio, hWndhRadFarm x64 y64 w49 h23 +Checked, Farm
 Gui Add, Text, vtxtMana x128 y96 w57 h19 +0x200, 0/0
-Gui Add, Button, hWndhBtnAtualizar vBtnAtualizar gFazPrestige x216 y272 w80 h23, Atualizar
+Gui Add, Button, hWndhBtnAtualizar vBtnAtualizar gCompraSkills x216 y272 w80 h23, Teste
 Gui Add, Button, vBtnCalibrar gCalibrar x216 y300 w80 h23, Calibrar
 
 Gui Add, Text, x8 y300 w42 h23 +0x200, Media:
@@ -98,15 +105,16 @@ Return
 
 
 Iniciar:
-SetTimer Atualizar, 2500, On, 3
-SetTimer Clica, 200, On, 1
+SetTimer Atualizar, 3000, On, 3
 GuiControlGet, ChkMiR
 if (ChkMiR)
 {
     CheckMir := true
+    SetTimer Clica, 2300, On, 1
 }
 else
 {
+    SetTimer Clica, 900, On, 1
     Settimer CompraHeroi, 60000, On, 4
 }
 Return
@@ -129,36 +137,38 @@ Clica()
     }
     else
     {
+        Random, rand, 1, 10
+        Random, rand2, 1, 10
         MouseMove, 931+rand, 225+rand2
         Send {LButton down}
-        MouseMove, 947, 234
-        MouseMove, 906, 241
-        MouseMove, 877, 253
-        MouseMove, 851, 279
-        MouseMove, 836, 304
-        MouseMove, 828, 335
-        MouseMove, 821, 372
-        MouseMove, 825, 414
-        MouseMove, 839, 451
-        MouseMove, 867, 490
-        MouseMove, 911, 497
-        MouseMove, 952, 497
-        MouseMove, 1000, 496
-        MouseMove, 1035, 471
-        MouseMove, 1054, 438
-        MouseMove, 1071, 381
-        MouseMove, 1068, 329
-        MouseMove, 1043, 278
-        MouseMove, 1007, 247
-        MouseMove, 954, 234
-        MouseMove, 933, 231
+        MouseMove, 947+rand, 234+rand2
+        MouseMove, 906+rand, 241+rand2
+        MouseMove, 877+rand, 253+rand2
+        MouseMove, 851+rand, 279+rand2
+        MouseMove, 836+rand, 304+rand2
+        MouseMove, 828+rand, 335+rand2
+        MouseMove, 821+rand, 372+rand2
+        MouseMove, 825+rand, 414+rand2
+        MouseMove, 839+rand, 451+rand2
+        MouseMove, 867+rand, 490+rand2
+        MouseMove, 911+rand, 497+rand2
+        MouseMove, 952+rand, 497+rand2
+        MouseMove, 1000+rand, 496+rand2
+        MouseMove, 1035+rand, 471+rand2
+        MouseMove, 1054+rand, 438+rand2
+        MouseMove, 1071+rand, 381+rand2
+        MouseMove, 1068+rand, 329+rand2
+        MouseMove, 1043+rand, 278+rand2
+        MouseMove, 1007+rand, 247+rand2
+        MouseMove, 954+rand, 234+rand2
+        MouseMove, 933+rand, 231+rand2
         Send {LButton up}
     }
 }
 
 AbreHeroi()
 {
-    ImageSearch, Xlinha, Ylinha, 714, 545, 780, 600, *60 %a_scriptdir%\weapon.png
+    ImageSearch, OutX, OutY, 714, 545, 780, 600, *60 %a_scriptdir%\weapon.png
     if (ErrorLevel = 0)
     {
         return
@@ -170,7 +180,7 @@ AbreHeroi()
 }
 Fechaheroi()
 {
-    ImageSearch, Xlinha, Ylinha, 714, 545, 780, 600, *60 %a_scriptdir%\weapon.png
+    ImageSearch, OutX, OutY, 714, 545, 780, 600, *60 %a_scriptdir%\weapon.png
     if (ErrorLevel = 0)
     {
         Send, 2
@@ -186,24 +196,24 @@ CLicaCompraHeroi()
 {
     Loop, 4
     {
-        ImageSearch, Xlinha, Ylinha, 1013, 591, 1167, 847, *60 %a_scriptdir%\c1.png
+        ImageSearch, OutX, OutY, 1013, 591, 1167, 847, *60 %a_scriptdir%\c1.png
         if !ErrorLevel
         {
-            MouseClick, left, Xlinha, Ylinha
+            MouseClick, left, OutX, OutY
             Sleep, 70
         }
-        ImageSearch, Xlinha, Ylinha, 1013, 591, 1167, 847, *60 %a_scriptdir%\c2.png
+        ImageSearch, OutX, OutY, 1013, 591, 1167, 847, *60 %a_scriptdir%\c2.png
         if !ErrorLevel
         {
-            MouseClick, left, Xlinha, Ylinha
+            MouseClick, left, OutX, OutY
             Sleep, 70
         }
         loop, 2
         {
-            ImageSearch, Xlinha, Ylinha, 1069, 56, 1171, 242, *60 %a_scriptdir%\fecha.png
+            ImageSearch, OutX, OutY, 1069, 56, 1171, 242, *60 %a_scriptdir%\fecha.png
             if !ErrorLevel
             {
-                MouseClick, left, Xlinha, Ylinha
+                MouseClick, left, OutX, OutY
                 Sleep, 300
             }
             Sleep, 30
@@ -277,10 +287,9 @@ AtualizaStageViaConfig()
 Atualizar()
 {
     Inicio := A_TickCount
-    FechaColeta()
-    Fechaheroi()
-    AtualizaStatusSkillAtiva()
     TempoPassado := TempoPassado()
+    FechaAll()
+    Fechaheroi()
     GuiControl, , txtTempoStage, %TempoPassado%
     AtualizaStage()
     if (A_TickCount-iUltimaAtualizada)>20000
@@ -288,12 +297,10 @@ Atualizar()
         AtualizaStageViaConfig()
     }
     AttMana()
-    AtualizaStatusSkillAtiva()
-    FechaColeta()
-    Fechaheroi()
     lua()
     VaiProBoss()
     Travado()
+    AtualizaStatusSkillAtiva()
     tempo := A_TickCount - Inicio
 }
 
@@ -381,6 +388,9 @@ EstaAtiva(X, Y, skill)
     PixelGetColor, OutputVar, X, Y
     if (OutputVar=%skill%Color)
     {
+        sulfixo := "iCount"
+        nomeContadorVariavel := skill . sulfixo 
+        %nomeContadorVariavel% := 0
         GuiControl, show, txt%skill%Tempo
     }
     Else
@@ -390,32 +400,42 @@ EstaAtiva(X, Y, skill)
         {
             Send, Q
             Sleep, 10
+            DSiCount++
         }
         if (skill = "FS")
         {
             Send, W
             Sleep, 10
+            FSiCount++
         }
         if (skill = "WC")
         {
             Send, E
             Sleep, 10
+            WCiCount++
         }
         if (skill = "HM")
         {
             Send, R
             Sleep, 10
+            HMiCount++
         }
         if (skill = "TF")
         {
             Send, T
             Sleep, 10
+            TFiCount++
         }
         if (skill = "SC")
         {
             Send, Y
             Sleep, 10
+            SCiCount++
         }
+    }
+    If (FSiCount > 7 OR DSiCount > 7 OR SCiCount > 7 OR HMiCount > 7 OR WCiCount > 7 OR TFiCount > 7)
+    {
+        CompraSkills()
     }
 }
 
@@ -466,22 +486,21 @@ FazPrestige()
     Inicio := A_TickCount
     aumento_percentual := ((stage - stageanterior) / stageanterior) * 100
     aumento_percentual_media := ((stage - mediaStage) / mediaStage) * 100
-    GeraLog(stage " - " mediaStage " - " aumento_percentual_media)
     GuiControlGet, Edit1
-    if ((StageProgess > 100 and stage > Edit1 and aumento_percentual >= 0 and aumento_percentual <= 0.5 and aumento_percentual_media < 1) or forcaprestige)
+    if ((StageProgess > 100 and stage > Edit1 and aumento_percentual >= 0 and aumento_percentual <= 0.5 and aumento_percentual_media < 0.7) or forcaprestige)
     {
         loop, 5
         {
-            ImageSearch, Xlinha, Ylinha, 1069, 56, 1171, 242, *60 %a_scriptdir%\fecha.png
+            ImageSearch, OutX, OutY, 1069, 56, 1171, 242, *60 %a_scriptdir%\fecha.png
             if !ErrorLevel
             {
-                MouseClick, left, Xlinha, Ylinha
+                MouseClick, left, OutX, OutY
                 Sleep, 300
             }
         }
         GeraLog(TempoPassado() " no Stage: " stage " - " stageanterior ", config: " Edit1)
         AtualizaTarget()
-        FechaColeta()
+        FechaAll()
         Sleep, 300
         AbreSkill()
         Sleep, 300
@@ -517,7 +536,7 @@ FazPrestige()
 
 AtualizaMedias()
 {
-    TempoTotal =+ A_Tickcount - TickPrestigio
+    TempoTotal += A_Tickcount - TickPrestigio
     Media := TempoTotal/QntPrestigio
     Formatado := FormataMilisegundos(Media)
     GuiControl, , txtMediaStage, %Formatado%
@@ -533,9 +552,10 @@ AtualizaTarget()
     {
         Mais10 := ((stage - Edit1)/5)+Edit1
         GeraLog("novo: " Mais10)
-        if (stage - Edit1 < 50)
+        if (Mais10 - Edit1 < 50)
         {
             GuiControl, , Edit1, %Mais10%
+            return
         }
         else
         {
@@ -558,10 +578,10 @@ DeuErro()
             MouseClick, left, X, Y
             Sleep, 500
         }
-        ImageSearch, Xlinha, Ylinha, 1069, 56, 1171, 242, *60 %a_scriptdir%\fecha.png
+        ImageSearch, OutX, OutY, 1069, 56, 1171, 242, *60 %a_scriptdir%\fecha.png
         if !ErrorLevel
         {
-            MouseClick, left, Xlinha, Ylinha
+            MouseClick, left, OutX, OutY
             Sleep, 300
         }
         Send, 1
@@ -597,21 +617,30 @@ ProcuraEClicaSkill()
 {
     loop, 15
     {
-        ImageSearch, Xlinha, Ylinha, 1069, 56, 1171, 242, *60 %a_scriptdir%\fecha.png
+        ImageSearch, OutX, OutY, 1069, 56, 1171, 242, *60 %a_scriptdir%\fecha.png
         if !ErrorLevel
         {
-            MouseClick, left, Xlinha, Ylinha
+            MouseClick, left, OutX, OutY
             Sleep, 300
         }
-        ImageSearch, Xlinha, Ylinha, 1021, 555, 1168, 881, *85 %a_scriptdir%\spell.png
+        ImageSearch, OutX, OutY, 1021, 555, 1168, 881, *85 %a_scriptdir%\spell.png
         if !ErrorLevel
         {
-            VaiClicaSkill(Xlinha, Ylinha)
+            VaiClicaSkill(OutX, OutY)
         }
-        ImageSearch, Xlinha, Ylinha, 1021, 555, 1168, 881, *85 %a_scriptdir%\spell2.png
+        ImageSearch, OutX, OutY, 1021, 555, 1168, 881, *85 %a_scriptdir%\spell2.png
         if !ErrorLevel
         {
-            VaiClicaSkill(Xlinha, Ylinha)
+            VaiClicaSkill(OutX, OutY)
+        }
+        ImageSearch, OutX, OutY, 1026, 601, 1170, 848, *85 %a_scriptdir%\fr.png
+        if !ErrorLevel
+        {
+            MouseClick, left, OutX, OutY
+            Sleep, 300
+            MouseClick, left, 939, 664
+            Sleep, 30
+            break
         }
     }
 }
@@ -619,11 +648,17 @@ ProcuraEClicaSkill()
 CompraSkills()
 {
     Inicio := A_TickCount
+    FSiCount := 0
+    DSiCount := 0
+    SCiCount := 0
+    HMiCount := 0
+    WCiCount := 0
+    TFiCount := 0
     Click, 943, 359
     Sleep, 300
     AbreSkill()
     Sleep, 300
-    ImageSearch, Xlinha, Ylinha, 709, 524, 778, 599, *60 %a_scriptdir%\carta.png
+    ImageSearch, OutX, OutY, 709, 524, 778, 599, *60 %a_scriptdir%\carta.png
     if (ErrorLevel = 0)
     {
         Click, 1098, 626
@@ -649,7 +684,7 @@ CompraSkills()
 
 AbreSkill()
 {
-    ImageSearch, Xlinha, Ylinha, 709, 524, 778, 599, *40 %a_scriptdir%\carta.png
+    ImageSearch, OutX, OutY, 709, 524, 778, 599, *40 %a_scriptdir%\carta.png
     if (ErrorLevel = 0)
     {
         return
@@ -661,9 +696,19 @@ AbreSkill()
     }
 
 }
+
+FechaXzin()
+{
+    ImageSearch, OutX, OutY, 1111, 501, 1166, 523, *40 %a_scriptdir%\xzin.png
+    if (ErrorLevel = 0)
+    {
+        MouseClick, left, OutX, OutY,
+    }
+}
+
 FechaSkill()
 {
-    ImageSearch, Xlinha, Ylinha, 709, 524, 778, 599, *40 %a_scriptdir%\carta.png
+    ImageSearch, OutX, OutY, 709, 524, 778, 599, *40 %a_scriptdir%\carta.png
     if (ErrorLevel = 0)
     {
         Send, 1
@@ -673,42 +718,13 @@ FechaSkill()
     {
         return
     }
-}
-
-StageEstavel()
-{
-    listStage.Sort()
-    if (listStage.Length()>= 5)
-    {
-        meio := Round(listStage.MaxIndex() / 2)
-        If Mod(listStage.MaxIndex(), 2) = 0
-        {
-            ; Se a lista tiver um número par de elementos, a mediana é a média entre os dois elementos do meio
-            mediana := (listStage[meio] + listStage[meio+1]) / 2
-        }
-        Else
-        {
-            ; Se a lista tiver um número ímpar de elementos, a mediana é o elemento do meio
-            mediana := listStage[meio+1]
-        }
-    }
-    GuiControl, , txtMediana, %mediana%
-    if (listStage.Length()>= 20)
-        listStage := []
-    if ((mediana / stage) * 100 > 60)
-    {
-        GuiControl, , txtPode, % "Sim"
-        return true
-    }
-    GuiControl, , txtPode, % "Nao"
-    return false
 }
 
 StatusSkill(X, Y, W, H, skill)
 {
     nome := ""
     tempo := ""
-    FechaColeta()
+    FechaAll()
     nome := "txt" . skill
     tempo := RegExReplace(RegExReplace(RetornaText(X, Y, W, H), "[íi{[<]",":"), "[^\d:]", "")
     if (StrLen(tempo)> 2)
@@ -739,7 +755,7 @@ AtivaSkills(porcentagem)
     
 }
 
-FechaColeta()
+FechaAll()
 {
     if (SubStr(RetornaText(835, 662, 207, 56), 1, 3)="Col")
     {
@@ -750,11 +766,21 @@ FechaColeta()
     {
         MouseClick left, 742, 56
     }
+    FechaXzin()
+    loop, 2
+    {
+        ImageSearch, OutX, OutY, 1069, 56, 1171, 242, *60 %a_scriptdir%\fecha.png
+        if !ErrorLevel
+        {
+            MouseClick, left, OutX, OutY
+            Sleep, 300
+        }
+    }
 }
 
 lua()
 {
-    ImageSearch, Xlinha, Ylinha, 1031, 53, 1168, 130, *60 %a_scriptdir%\lua.png
+    ImageSearch, OutX, OutY, 1031, 53, 1168, 130, *60 %a_scriptdir%\lua.png
     if (ErrorLevel = 0)
     {
         MouseClick left, 742, 56
