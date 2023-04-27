@@ -29,7 +29,12 @@ global TickPrestigio := A_TickCount
 global TempoTotal := 0
 global QntPrestigio := 0
 global auxcomprou := false
-global forcaprestige := false
+global forcaprestige := 
+global totalStage := 0
+global qntStage := 0
+global mediaStage := 0
+global media := 0
+
 
 GeraLog(msg)
 {
@@ -59,7 +64,7 @@ Gui Add, Text, hWndhtxtTempoStage vtxtTempoStage x140 y8 w30 h23 +0x200, 0
 Gui Add, Text, x170 y8 w39 h23 +0x200, Med:
 Gui Add, Text, hWndhtxtMediana vtxtMediana x205 y8 w42 h23 +0x200, 0
 Gui Add, Progress, vPrgStage x176 y40 w120 h20 -Smooth, 10
-Gui Add, Edit, x48 y40 w120 h21 +Number vEdit1, 103400
+Gui Add, Edit, x48 y40 w120 h21 +Number vEdit1, 104030
 Gui Add, Text, x8 y40 w36 h23 +0x200, Target
 Gui Add, Progress, vPrgMana x8 y96 w120 h20 -Smooth, 100
 Gui Add, CheckBox, vChkMiR x8 y144 w63 h23, MiR
@@ -71,8 +76,8 @@ Gui Add, Radio, hWndhRadBos vQual x8 y216 w63 h23, BoS
 Gui Add, Radio, hWndhRadAll x80 y216 w63 h23 +Checked, All
 Gui Add, Text, x8 y8 w30 h23 +0x200, Atual:
 Gui Add, Text, vtxtPode x90 y8 w39 h23 +0x200, NAO
-Gui Add, Radio, hWndhRadPush vRadPush x8 y64 w49 h23, Push
-Gui Add, Radio, hWndhRadFarm vRadFarm x64 y64 w49 h23 +Checked, Farm
+Gui Add, Radio, hWndhRadPush vPush x8 y64 w49 h23, Push
+Gui Add, Radio, hWndhRadFarm x64 y64 w49 h23 +Checked, Farm
 Gui Add, Text, vtxtMana x128 y96 w57 h19 +0x200, 0/0
 Gui Add, Button, hWndhBtnAtualizar vBtnAtualizar gFazPrestige x216 y272 w80 h23, Atualizar
 Gui Add, Button, vBtnCalibrar gCalibrar x216 y300 w80 h23, Calibrar
@@ -344,6 +349,17 @@ AttMana()
 
 AttBarraStage()
 {
+    if (qntStage >= 0 and qntStage <= 10)
+    {
+        totalStage += stage
+        qntStage++
+        mediaStage := (totalStage/qntStage)
+    }
+    else
+    {
+        totalStage := 0
+        qntStage := 0
+    }
     GuiControlGet, Edit1
     listStage.Push(stage)
     StageProgess := (stage / Edit1) * 100
@@ -449,8 +465,10 @@ FazPrestige()
 {
     Inicio := A_TickCount
     aumento_percentual := ((stage - stageanterior) / stageanterior) * 100
+    aumento_percentual_media := ((stage - mediaStage) / mediaStage) * 100
+    GeraLog(stage " - " mediaStage " - " aumento_percentual_media)
     GuiControlGet, Edit1
-    if ((StageProgess > 100 and stage > Edit1 and aumento_percentual >= 0 and aumento_percentual <= 5) or forcaprestige)
+    if ((StageProgess > 100 and stage > Edit1 and aumento_percentual >= 0 and aumento_percentual <= 0.5 and aumento_percentual_media < 1) or forcaprestige)
     {
         loop, 5
         {
@@ -461,7 +479,58 @@ FazPrestige()
                 Sleep, 300
             }
         }
-        GeraLog("Fez o prestigio em " TempoPassado() " no Stage: " stage ", estava configurado para: " Edit1)
+        GeraLog(TempoPassado() " no Stage: " stage " - " stageanterior ", config: " Edit1)
+        AtualizaTarget()
+        FechaColeta()
+        Sleep, 300
+        AbreSkill()
+        Sleep, 300
+        loop, 5
+        {
+            SobeUmaPagina()
+        }
+        Sleep, 500
+        MouseClick, left, 1101, 726
+        Sleep, 300
+        MouseClick, left, 931, 769
+        Sleep, 300
+        if (DeuErro())
+            return
+        GeraLog("Apertou no prestige!")
+        auxcomprou := false
+        QntPrestigio++
+        AtualizaMedias()
+        TickPrestigio := A_TickCount
+        totalStage := 0
+        qntStage := 0
+        Sleep, 20000
+        AtualizaStageViaConfig()
+        if (stage > 100000 and stage < 180000)
+            FazPrestige()
+        CompraSkills()
+        CompraReliquia()
+        forcaprestige := false
+        GeraLog("Tempo do FazPrestige(): " A_TickCount - Inicio)
+        return
+    }
+}
+
+AtualizaMedias()
+{
+    TempoTotal =+ A_Tickcount - TickPrestigio
+    Media := TempoTotal/QntPrestigio
+    Formatado := FormataMilisegundos(Media)
+    GuiControl, , txtMediaStage, %Formatado%
+    GuiControl, , txtQntPres, %QntPrestigio%
+
+}
+
+AtualizaTarget()
+{
+    GuiControlGet, Push
+    GuiControlGet, Edit1
+    if (Push)
+    {
         Mais10 := ((stage - Edit1)/5)+Edit1
         GeraLog("novo: " Mais10)
         if (stage - Edit1 < 50)
@@ -473,47 +542,9 @@ FazPrestige()
             Mais10 := Edit1+50
             GuiControl, , Edit1, %Mais10%
         }
-        FechaColeta()
-        Sleep, 300
-        AbreSkill()
-        Sleep, 300
-        loop, 5
-        {
-            SobeUmaPagina()
-        }
-        Sleep, 500
-        GeraLog("Subiu")
-        MouseClick, left, 1101, 726
-        Sleep, 300
-        MouseClick, left, 931, 769
-        Sleep, 300
-        if (DeuErro())
-            return
-        GeraLog("Fez prestige")
-        auxcomprou := false
-        QntPrestigio++
-        AtualizaMedias()
-        TickPrestigio := A_TickCount
-        Sleep, 20000
-        AtualizaStageViaConfig()
-        if (stage > 100000 and stage < 180000)
-            FazPrestige()
-        CompraSkills()
-        CompraReliquia()
-        forcaprestige := false
-        GeraLog("Tempo do faz Prestige: " A_TickCount - Inicio)
-        return
     }
 }
 
-AtualizaMedias()
-{
-    TempoTotal =+ A_Tickcount - TickPrestigio
-    Media := TempoTotal/QntPrestigio
-    GuiControl, , txtMediaStage, %Media%
-    GuiControl, , QntPres, %QntPrestigio%
-
-}
 DeuErro()
 {
     ImageSearch, X, Y, 859, 570, 1010, 620, *60 %a_scriptdir%\k.png
@@ -621,7 +652,6 @@ AbreSkill()
     ImageSearch, Xlinha, Ylinha, 709, 524, 778, 599, *40 %a_scriptdir%\carta.png
     if (ErrorLevel = 0)
     {
-        GeraLog("Achou a carta")
         return
     }
     else
@@ -636,7 +666,6 @@ FechaSkill()
     ImageSearch, Xlinha, Ylinha, 709, 524, 778, 599, *40 %a_scriptdir%\carta.png
     if (ErrorLevel = 0)
     {
-        GeraLog("Achou a carta")
         Send, 1
         return
     }
@@ -824,9 +853,25 @@ DesceUmaPagina()
     Sleep, 200
 }
 
-TempoPassado() {
+TempoPassado() 
+{
     millisec := A_Tickcount - TickPrestigio
     ; Calcula o número total de segundos
+    totalSec := Floor(millisec / 1000)
+
+    ; Calcula o número de minutos
+    minutes := Floor(totalSec / 60)
+
+    ; Calcula o número de segundos restantes
+    seconds := Mod(totalSec, 60)
+
+    ; Retorna o resultado formatado como minutos:segundos
+    return minutes ":" Format("{:02d}", seconds)
+
+}
+
+FormataMilisegundos(millisec)
+{
     totalSec := Floor(millisec / 1000)
 
     ; Calcula o número de minutos
