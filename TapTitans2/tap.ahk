@@ -110,7 +110,7 @@ GuiControlGet, ChkMiR
 if (ChkMiR)
 {
     CheckMir := true
-    SetTimer Clica, 2300, On, 1
+    SetTimer Clica, 2500, On, 1
 }
 else
 {
