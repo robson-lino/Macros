@@ -23,8 +23,11 @@ global SCPixelY = 772
 global HMPixelX = 971
 global HMPixelY = 771
 global StageProgess := 0
+global CheckMir := false
 global iUltimaAtualizada = A_TickCount
 global TickPrestigio := A_TickCount
+global TempoTotal := 0
+global QntPrestigio := 0
 
 GeraLog(msg)
 {
@@ -54,9 +57,10 @@ Gui Add, Text, hWndhtxtTempoStage vtxtTempoStage x140 y8 w30 h23 +0x200, 0
 Gui Add, Text, x170 y8 w39 h23 +0x200, Med:
 Gui Add, Text, hWndhtxtMediana vtxtMediana x205 y8 w42 h23 +0x200, 0
 Gui Add, Progress, vPrgStage x176 y40 w120 h20 -Smooth, 10
-Gui Add, Edit, x48 y40 w120 h21 +Number vEdit1, 102450
+Gui Add, Edit, x48 y40 w120 h21 +Number vEdit1, 103400
 Gui Add, Text, x8 y40 w36 h23 +0x200, Target
 Gui Add, Progress, vPrgMana x8 y96 w120 h20 -Smooth, 100
+Gui Add, CheckBox, vChkMiR x8 y144 w63 h23, MiR
 Gui Add, CheckBox, vChkPrestige x8 y168 w63 h23 +Checked, Prestige
 Gui Add, CheckBox, vChkFairy x8 y192 w63 h23 +Checked, Fairy
 Gui Add, Button, vPrestige gPrestige x96 y272 w80 h23, Prestige
@@ -68,8 +72,15 @@ Gui Add, Text, vtxtPode x90 y8 w39 h23 +0x200, NAO
 Gui Add, Radio, hWndhRadPush vRadPush x8 y64 w49 h23, Push
 Gui Add, Radio, hWndhRadFarm vRadFarm x64 y64 w49 h23 +Checked, Farm
 Gui Add, Text, vtxtMana x128 y96 w57 h19 +0x200, 0/0
-Gui Add, Button, hWndhBtnAtualizar vBtnAtualizar gCompraSkills x216 y272 w80 h23, Atualizar
+Gui Add, Button, hWndhBtnAtualizar vBtnAtualizar gDeuErro x216 y272 w80 h23, Atualizar
 Gui Add, Button, vBtnCalibrar gCalibrar x216 y300 w80 h23, Calibrar
+
+Gui Add, Text, x8 y300 w42 h23 +0x200, Media:
+Gui Add, Text, hWndhtxtMediaStage vtxtMediaStage x45 y300 w30 h23 +0x200, 0
+Gui Add, Text, x8 y320 w42 h23 +0x200, Qnt:
+Gui Add, Text, hWndhtxtQntPres vtxtQntPres x45 y320 w30 h23 +0x200, 0
+
+
 
 Gui Show, x1243 y271 w303 h420, TapMacro
 Ativa()
@@ -78,20 +89,64 @@ Return
 Prestige:
 Return
 
+
 Iniciar:
 SetTimer Atualizar, 2500, On, 3
 SetTimer Clica, 200, On, 1
-Settimer CompraHeroi, 60000, On, 4
+GuiControlGet, ChkMiR
+if (ChkMiR)
+{
+    CheckMir := true
+}
+else
+{
+    Settimer CompraHeroi, 60000, On, 4
+}
 Return
+
+F10::
+MouseGetPos, OutputVarX, OutputVarY
+GeraLog(OutputVarX ", " OutputVarY)
+return
 
 Clica()
 {
     Random, rand, 1, 10
     Random, rand2, 1, 10
-    MouseClick, Left, 931+rand, 225+rand2
-    MouseClick, Left, 811+rand, 349+rand2
-    MouseClick, Left, 1045+rand, 337+rand2
-    MouseClick, Left, 933+rand, 486+rand2
+    if (!CheckMir)
+    {
+        MouseClick, Left, 931+rand, 225+rand2
+        MouseClick, Left, 811+rand, 349+rand2
+        MouseClick, Left, 1045+rand, 337+rand2
+        MouseClick, Left, 933+rand, 486+rand2
+    }
+    else
+    {
+        MouseMove, 931+rand, 225+rand2
+        Send {LButton down}
+        MouseMove, 947, 234
+        MouseMove, 906, 241
+        MouseMove, 877, 253
+        MouseMove, 851, 279
+        MouseMove, 836, 304
+        MouseMove, 828, 335
+        MouseMove, 821, 372
+        MouseMove, 825, 414
+        MouseMove, 839, 451
+        MouseMove, 867, 490
+        MouseMove, 911, 497
+        MouseMove, 952, 497
+        MouseMove, 1000, 496
+        MouseMove, 1035, 471
+        MouseMove, 1054, 438
+        MouseMove, 1071, 381
+        MouseMove, 1068, 329
+        MouseMove, 1043, 278
+        MouseMove, 1007, 247
+        MouseMove, 954, 234
+        MouseMove, 933, 231
+        Send {LButton up}
+    }
 }
 
 AbreHeroi()
@@ -230,7 +285,7 @@ Atualizar()
     FechaColeta()
     Fechaheroi()
     lua()
-    GeraLog((stageanterior " - " stage))
+    VaiProBoss()
     tempo := A_TickCount - Inicio
 }
 
@@ -364,11 +419,12 @@ Calibrar()
 FazPrestige()
 {
     Inicio := A_TickCount
+    aumento_percentual := ((stage - stageanterior) / stageanterior) * 100
     GuiControlGet, Edit1
-    if (StageProgess > 100 and stage > Edit1)
+    if (StageProgess > 100 and stage > Edit1 and aumento_percentual >= 0 and aumento_percentual <= 5)
     {
-        GeraLog("Fez o prestigio em " TempoPassado() " no Stage: " stage)
-        TickPrestigio := A_TickCount
+        GeraLog("Fez o prestigio em " TempoPassado() " no Stage: " stage ", estava configurado para: " Edit1)
+        
         FechaColeta()
         Sleep, 300
         AbreSkill()
@@ -382,15 +438,69 @@ FazPrestige()
         MouseClick, left, 1101, 726
         Sleep, 300
         MouseClick, left, 931, 769
+        Sleep, 300
+        if (DeuErro())
+            return
         GeraLog("Fez prestige")
+        AtualizaMedias()
+        TickPrestigio := A_TickCount
         Sleep, 20000
         AtualizaStageViaConfig()
-        if (stage > 100000 and stage > 180000)
+        if (stage > 100000 and stage < 180000)
             FazPrestige()
         CompraSkills()
         CompraReliquia()
+        GuiControlGet, Edit1
+        Mais10 := stage - 60
+        GuiControl, , Edit1, % Mais10
         GeraLog("Tempo do faz Prestige: " A_TickCount - Inicio)
         return
+    }
+}
+
+AtualizaMedias()
+{
+    TempoTotal =+ A_Tickcount - TickPrestigio
+    QntPrestigio++
+    Media := TempoTotal/QntPrestigio
+    GuiControl, , txtMediaStage, %Media%
+    GuiControl, , QntPres, %QntPrestigio%
+
+}
+DeuErro()
+{
+    ImageSearch, X, Y, 859, 570, 1010, 620, *60 %a_scriptdir%\k.png
+    if (ErrorLevel = 0)
+    {
+        MouseClick, left, X, Y
+        Sleep, 500
+        ImageSearch, X, Y, 859, 570, 1010, 620, *60 %a_scriptdir%\k.png
+        if (ErrorLevel = 0)
+        {
+            MouseClick, left, X, Y
+            Sleep, 500
+        }
+        ImageSearch, Xlinha, Ylinha, 1069, 56, 1171, 242, *60 %a_scriptdir%\fecha.png
+        if !ErrorLevel
+        {
+            MouseClick, left, Xlinha, Ylinha
+            Sleep, 300
+        }
+        Send, 1
+        GeraLog("Deu erro - WTF")
+        return true
+    }
+    return false
+}
+
+
+VaiProBoss()
+{
+    ImageSearch, X, Y, 1052, 65, 1163, 108, *60 %a_scriptdir%\g.png
+    if (ErrorLevel = 0)
+    {
+        MouseClick, left, X, Y
+        GeraLog("Tava travado fora do boss")
     }
 }
 
@@ -401,10 +511,6 @@ VaiClicaSkill(X, Y)
     MouseClick, left, X-122, Y
     Sleep, 500
 }
-
-^F8::
-DesceUmaPagina()
-Return
 
 
 ProcuraEClicaSkill()
@@ -451,6 +557,11 @@ CompraSkills()
             ProcuraEClicaSkill()
             SobeUmaPagina()
         }
+    }
+    else
+    {
+        AbreSkill()
+        CompraSkills()
     }
     FechaSkill()
     GeraLog("CompraSkills: " A_TickCount - Inicio)
