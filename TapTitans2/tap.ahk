@@ -1,4 +1,4 @@
-; 0.1.0
+; 0.1.1
 #SingleInstance Force
 SetWorkingDir %A_ScriptDir%
 #MaxThreads 1
