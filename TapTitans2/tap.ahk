@@ -275,7 +275,7 @@ CompraHeroi()
     }
     CLicaCompraHeroi()
     Fechaheroi()
-    GeraLog("ComprouHerois: " A_TickCount - Inicio)
+    ;GeraLog("ComprouHerois: " A_TickCount - Inicio)
 
 }
 
@@ -658,13 +658,13 @@ AtualizaTarget()
                 if (Mais10 - Edit1 > 300)
                 {
                     Mais10 := Mais10+1000
-                    GeraLog("novo: " Mais10)
+                    GeraLog("Novo Target: " Mais10)
                     GuiControl, , Edit1, %Mais10%
                 }
                 else
                 {
                     Mais10 := Mais10+200
-                    GeraLog("novo: " Mais10)
+                    GeraLog("Novo Target: " Mais10)
                     GuiControl, , Edit1, %Mais10%
                 }
             }
@@ -674,13 +674,13 @@ AtualizaTarget()
             Mais10 := ((stage - Edit1)/5)+Edit1
             if (Mais10 - Edit1 < 50)
             {
-                GeraLog("novo: " Mais10)
+                GeraLog("Novo Target: " Mais10)
                 GuiControl, , Edit1, %Mais10%
                 return
             }
             else
             {
-                GeraLog("novo: " Mais10)
+                GeraLog("Novo Target: " Mais10)
                 Mais10 := Edit1+50
                 GuiControl, , Edit1, %Mais10%
             }
@@ -832,11 +832,9 @@ FechaXzin()
 
 FechaSkill()
 {
-    GeraLog("Fechou")
     ImageSearch, OutX, OutY, 709, 524, 778, 599, *40 %a_scriptdir%\carta.png
     if (ErrorLevel = 0)
     {
-        GeraLog("Fechou")
         Send, 1
         return
     }
