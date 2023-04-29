@@ -1,4 +1,4 @@
-; 0.1.1
+; 0.1.2
 #SingleInstance Force
 SetWorkingDir %A_ScriptDir%
 #MaxThreads 1
@@ -622,15 +622,13 @@ FazPrestige()
         totalStage := 0
         qntStage := 0
         Sleep, 20000
-        if (!ChkAbsal)
-            AtualizaStageViaConfig()
-        else 
-            AtualizaStageViaAba()
         CompraSkills()
         CompraReliquia()
+        Clica()
         ;GeraLog("Tempo do FazPrestige(): " A_TickCount - Inicio)
         return
     }
+    return
 }
 
 AtualizaMedias()
@@ -657,13 +655,13 @@ AtualizaTarget()
             {
                 if (Mais10 - Edit1 > 300)
                 {
-                    Mais10 := Mais10+1000
+                    Mais10 := Mais10+500
                     GeraLog("Novo Target: " Mais10)
                     GuiControl, , Edit1, %Mais10%
                 }
                 else
                 {
-                    Mais10 := Mais10+200
+                    Mais10 := Mais10+100
                     GeraLog("Novo Target: " Mais10)
                     GuiControl, , Edit1, %Mais10%
                 }
@@ -771,7 +769,6 @@ ProcuraEClicaSkill()
 CompraSkills()
 {
     Inicio := A_TickCount
-    Ativa()
     FSiCount := 0
     DSiCount := 0
     SCiCount := 0
@@ -804,6 +801,7 @@ CompraSkills()
     }
     FechaSkill()
     ;GeraLog("CompraSkills: " A_TickCount - Inicio)
+    return
 }
 
 AbreSkill()
@@ -1000,6 +998,7 @@ Ativa()
 {
     WinActivate BlueStacks
     WinGetPos, X, Y, W, H, BlueStacks
+    return
 }
 
 Return
