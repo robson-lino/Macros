@@ -1,4 +1,4 @@
-; 0.0.4
+; 0.1.0
 #SingleInstance Force
 SetWorkingDir %A_ScriptDir%
 #MaxThreads 1
@@ -41,6 +41,13 @@ global totalStage := 0
 global qntStage := 0
 global mediaStage := 0
 global media := 0
+global alternado := false
+global nenhum := false
+global Qual
+global qntVezesAll := 0
+global TravadoCount := 0
+global ChkAbsal := false
+global ChkPrestige := true
 
 
 GeraLog(msg)
@@ -71,33 +78,37 @@ Gui Add, Text, hWndhtxtTempoStage vtxtTempoStage x140 y8 w30 h23 +0x200, 0
 Gui Add, Text, x170 y8 w39 h23 +0x200, Med:
 Gui Add, Text, hWndhtxtMediana vtxtMediana x205 y8 w42 h23 +0x200, 0
 Gui Add, Progress, vPrgStage x176 y40 w120 h20 -Smooth, 10
-Gui Add, Edit, x48 y40 w120 h21 +Number vEdit1, 104030
+Gui Add, Edit, x48 y40 w120 h21 +Number vEdit1, 105000
 Gui Add, Text, x8 y40 w36 h23 +0x200, Target
 Gui Add, Progress, vPrgMana x8 y96 w120 h20 -Smooth, 100
 Gui Add, CheckBox, vChkMiR x8 y144 w63 h23, MiR
 Gui Add, CheckBox, vChkPrestige x8 y168 w63 h23 +Checked, Prestige
 Gui Add, CheckBox, vChkFairy x8 y192 w63 h23 +Checked, Fairy
-Gui Add, Button, vPrestige gPrestige x96 y272 w80 h23, Prestige
+Gui Add, Button, vPrestige gFazPrestige x96 y272 w80 h23, Prestige
 Gui Add, Button, vBtnIniciar gIniciar x8 y272 w80 h23, Iniciar
-Gui Add, Radio, hWndhRadBos vQual x8 y216 w63 h23, BoS
-Gui Add, Radio, hWndhRadAll x80 y216 w63 h23 +Checked, All
+
+Gui Add, Radio, vQual x8 y216 w37 h23, BoS
+Gui Add, Radio, x50 y216 w37 h23, All
+Gui Add, Radio, x90 y216 w70 h23 +Checked, Alternado
+Gui Add, Radio, x160 y216 w70 h23, Nenhum
+
 Gui Add, Text, x8 y8 w30 h23 +0x200, Atual:
 Gui Add, Text, vtxtPode x90 y8 w39 h23 +0x200, NAO
 Gui Add, Radio, hWndhRadPush vPush x8 y64 w49 h23, Push
-Gui Add, Radio, hWndhRadFarm x64 y64 w49 h23 +Checked, Farm
+Gui Add, Radio, hWndhRadFarm x60 y64 w49 h23 +Checked, Farm
+Gui Add, CheckBox, hWndhRadFarm vChkAbsal x120 y64 w49 h23, Absal
+
 Gui Add, Text, vtxtMana x128 y96 w57 h19 +0x200, 0/0
 Gui Add, Button, hWndhBtnAtualizar vBtnAtualizar gCompraSkills x216 y272 w80 h23, Teste
-Gui Add, Button, vBtnCalibrar gCalibrar x216 y300 w80 h23, Calibrar
+Gui Add, Button, vBtnCalibrar gPause x216 y300 w80 h23, Pause
 
 Gui Add, Text, x8 y300 w42 h23 +0x200, Media:
 Gui Add, Text, hWndhtxtMediaStage vtxtMediaStage x45 y300 w30 h23 +0x200, 0
 Gui Add, Text, x8 y320 w42 h23 +0x200, Qnt:
 Gui Add, Text, hWndhtxtQntPres vtxtQntPres x45 y320 w30 h23 +0x200, 0
 
-
-
 Gui Show, x1243 y271 w303 h420, TapMacro
-Ativa()
+
 Return
 
 Prestige:
@@ -105,20 +116,32 @@ Return
 
 
 Iniciar:
-SetTimer Atualizar, 3000, On, 3
+Ativa()
+;SetTimer Atualizar, 3000, On, 3
 GuiControlGet, ChkMiR
 if (ChkMiR)
 {
     CheckMir := true
-    SetTimer Clica, 2500, On, 1
 }
 else
 {
-    SetTimer Clica, 900, On, 1
     Settimer CompraHeroi, 60000, On, 4
 }
+ClicaEAtualiza()
 Return
 
+ClicaEAtualiza()
+{
+    SetTimer ClicaEAtualiza, off
+    Inicio := A_TickCount
+    Clica()
+    Clica()
+    Clica()
+    Clica()
+    Atualizar()
+    SetTimer ClicaEAtualiza, 500, ON, 3
+
+}
 F10::
 MouseGetPos, OutputVarX, OutputVarY
 GeraLog(OutputVarX ", " OutputVarY)
@@ -126,19 +149,33 @@ return
 
 Clica()
 {
+    FechaAll()
     Random, rand, 1, 10
     Random, rand2, 1, 10
     if (!CheckMir)
     {
-        MouseClick, Left, 931+rand, 225+rand2, 4
-        MouseClick, Left, 811+rand, 349+rand2, 4
-        MouseClick, Left, 1045+rand, 337+rand2, 4
-        MouseClick, Left, 933+rand, 486+rand2, 4
+        MouseClick, left, 931+rand, 225+rand2
+        MouseClick, left, 947+rand, 234+rand2
+        MouseClick, left, 906+rand, 241+rand2
+        MouseClick, left, 877+rand, 253+rand2
+        MouseClick, left, 851+rand, 279+rand2
+        MouseClick, left, 836+rand, 304+rand2
+        MouseClick, left, 828+rand, 335+rand2
+        MouseClick, left, 821+rand, 372+rand2
+        MouseClick, left, 825+rand, 414+rand2
+        MouseClick, left, 839+rand, 451+rand2
+        MouseClick, left, 867+rand, 490+rand2
+        MouseClick, left, 911+rand, 497+rand2
+        MouseClick, left, 952+rand, 497+rand2
+        MouseClick, left, 1071+rand, 381+rand2
+        MouseClick, left, 1068+rand, 329+rand2
+        MouseClick, left, 1043+rand, 278+rand2
+        MouseClick, left, 1007+rand, 247+rand2
+        MouseClick, left, 954+rand, 234+rand2
+        MouseClick, left, 933+rand, 231+rand2
     }
     else
     {
-        Random, rand, 1, 10
-        Random, rand2, 1, 10
         MouseMove, 931+rand, 225+rand2
         Send {LButton down}
         MouseMove, 947+rand, 234+rand2
@@ -236,6 +273,7 @@ CompraHeroi()
         CLicaCompraHeroi()
         SobeUmaPagina()
     }
+    CLicaCompraHeroi()
     Fechaheroi()
     GeraLog("ComprouHerois: " A_TickCount - Inicio)
 
@@ -276,12 +314,56 @@ AtualizaStageViaConfig()
         if (A_Index>50)
         {
             iUltimaAtualizada := A_TickCount
-            stage := 80000
             Break
         }
     }
     Sleep, 30
     MouseClick left, 727, 99
+}
+
+AtualizaStageViaAba()
+{
+    Inicio := A_TickCount
+    AbreSkill()
+    Sleep, 500
+    ImageSearch, X, Y, 1027, 703, 1159, 764, *90 %a_scriptdir%\prest.png
+    if (!ErrorLevel)
+    {
+        MouseClick, left, X, Y
+        Sleep, 500
+        loop, 10
+        {
+            stagetemp := RetornaText(765, 692, 146, 52)
+            stagetemp := RegExReplace(stagetemp, "\D", "")
+            if ((StrLen(stagetemp)=5 or StrLen(stagetemp)=6) and stagetemp is digit)
+            {
+                stageanterior := stage
+                stage := stagetemp
+                GuiControl, , TxtStage, %stage%
+                loop, 4
+                {
+                    FechaAll()
+                    Sleep, 20
+                }
+                AttBarraStage()
+                FazPrestige()
+                iUltimaAtualizada := A_TickCount
+                break
+            }
+        }
+        loop, 4
+        {
+            FechaAll()
+            Sleep, 20
+        }
+    }
+    else
+    {
+        SobeUmaPagina()
+        FechaXzin()
+        Sleep, 500
+    }
+    ;GeraLog("Atualiza: " A_TickCount - Inicio)
 }
 
 Atualizar()
@@ -291,10 +373,18 @@ Atualizar()
     FechaAll()
     Fechaheroi()
     GuiControl, , txtTempoStage, %TempoPassado%
-    AtualizaStage()
-    if (A_TickCount-iUltimaAtualizada)>20000
+    GuiControlGet, ChkAbsal
+    if (!ChkAbsal)
     {
-        AtualizaStageViaConfig()
+        AtualizaStage()
+        if (A_TickCount-iUltimaAtualizada)>20000
+        {
+            AtualizaStageViaConfig()
+        }
+    }
+    else
+    {
+        AtualizaStageViaAba()
     }
     AttMana()
     lua()
@@ -341,6 +431,8 @@ AttMana()
     {
         Send, Y
         Sleep, 30
+        Send, Y
+        Sleep, 30
         Send, T
         Sleep, 30
         Send, R
@@ -375,12 +467,12 @@ AttBarraStage()
 
 AtualizaStatusSkillAtiva()
 {
+    EstaAtiva(SCPixelX, SCPixelY, "SC")
+    EstaAtiva(TFPixelX, TFPixelY, "TF")
     EstaAtiva(DSPixelX, DSPixelY, "DS")
     EstaAtiva(FSPixelX, FSPixelY, "FS")
     EstaAtiva(WCPixelX, WCPixelY, "WC")
     EstaAtiva(HMPixelX, HMPixelY, "HM")
-    EstaAtiva(TFPixelX, TFPixelY, "TF")
-    EstaAtiva(SCPixelX, SCPixelY, "SC")
 }
 
 EstaAtiva(X, Y, skill)
@@ -395,6 +487,7 @@ EstaAtiva(X, Y, skill)
     }
     Else
     {
+        Sleep, 50
         GuiControl, Hide, txt%skill%Tempo
         if (skill = "DS")
         {
@@ -433,7 +526,7 @@ EstaAtiva(X, Y, skill)
             SCiCount++
         }
     }
-    If (FSiCount > 7 OR DSiCount > 7 OR SCiCount > 7 OR HMiCount > 7 OR WCiCount > 7 OR TFiCount > 7)
+    If (FSiCount > 3 OR DSiCount > 3 OR SCiCount > 3 OR HMiCount > 3 OR WCiCount > 3 OR TFiCount > 3)
     {
         CompraSkills()
     }
@@ -459,25 +552,16 @@ Travado()
 {
     if (A_Tickcount - TickPrestigio > 1800000)
     {
-        if (StageProgess > 98)
+        if (TravadoCount > 0)
         {
-            GeraLog("Estava mais de 30 minutos e fez o prestige")
-            forcaprestige := true
-            FazPrestige()
+            CheckMir := false
+            Settimer CompraHeroi, 60000, On, 4
         }
-    }
-    if (A_Tickcount - TickPrestigio > 600000)
-    {
-        if (StageProgess < 85)
-        {
-            if (!auxcomprou)
-            {
-            GeraLog("Estava mais de 30 minutos e fez o prestige")
-            forcaprestige := true
-            FazPrestige()
-            }
-
-        }
+        GeraLog("Estava mais de 30 minutos e fez o prestige")
+        forcaprestige := true
+        FazPrestige()
+        TravadoCount++
+        
     }
 }
 
@@ -487,8 +571,14 @@ FazPrestige()
     aumento_percentual := ((stage - stageanterior) / stageanterior) * 100
     aumento_percentual_media := ((stage - mediaStage) / mediaStage) * 100
     GuiControlGet, Edit1
-    if ((StageProgess > 100 and stage > Edit1 and aumento_percentual >= 0 and aumento_percentual <= 0.5 and aumento_percentual_media < 0.7) or forcaprestige)
+    GuiControlGet, ChkAbsal
+    GuiControlGet, ChkPrestige
+    if ((StageProgess > 100 and stage > Edit1 and aumento_percentual >= 0 and aumento_percentual <= 0.5 and aumento_percentual_media < 0.7 and ChkPrestige) 
+    or (ChkAbsal StageProgess > 100 and stage > Edit1 and ChkPrestige)
+    or (forcaprestige))
     {
+        TravadoCount := 0
+        forcaprestige := false
         loop, 5
         {
             ImageSearch, OutX, OutY, 1069, 56, 1171, 242, *60 %a_scriptdir%\fecha.png
@@ -498,24 +588,33 @@ FazPrestige()
                 Sleep, 300
             }
         }
-        GeraLog(TempoPassado() " no Stage: " stage " - " stageanterior ", config: " Edit1)
-        AtualizaTarget()
         FechaAll()
         Sleep, 300
         AbreSkill()
         Sleep, 300
-        loop, 5
+        ImageSearch, X, Y, 1027, 703, 1159, 764, *80 %a_scriptdir%\prest.png
+        while (ErrorLevel)
         {
             SobeUmaPagina()
+            ImageSearch, X, Y, 1027, 703, 1159, 764, *80 %a_scriptdir%\prest.png
         }
         Sleep, 500
-        MouseClick, left, 1101, 726
+        stagetemp := RetornaText(765, 692, 146, 52)
+        stagetemp := RegExReplace(stagetemp, "\D", "")
+        if ((StrLen(stagetemp)=5 or StrLen(stagetemp)=6) and stagetemp is digit)
+        {
+            stageanterior := stage
+            stage := stagetemp
+            GuiControl, , TxtStage, %stage%
+        }
+        GeraLog(TempoPassado() " no Stage: " stage " - " stageanterior ", config: " Edit1)
+        AtualizaTarget()
+        MouseClick, left, X, Y
         Sleep, 300
         MouseClick, left, 931, 769
         Sleep, 300
         if (DeuErro())
             return
-        GeraLog("Apertou no prestige!")
         auxcomprou := false
         QntPrestigio++
         AtualizaMedias()
@@ -523,13 +622,13 @@ FazPrestige()
         totalStage := 0
         qntStage := 0
         Sleep, 20000
-        AtualizaStageViaConfig()
-        if (stage > 100000 and stage < 180000)
-            FazPrestige()
+        if (!ChkAbsal)
+            AtualizaStageViaConfig()
+        else 
+            AtualizaStageViaAba()
         CompraSkills()
         CompraReliquia()
-        forcaprestige := false
-        GeraLog("Tempo do FazPrestige(): " A_TickCount - Inicio)
+        ;GeraLog("Tempo do FazPrestige(): " A_TickCount - Inicio)
         return
     }
 }
@@ -550,17 +649,41 @@ AtualizaTarget()
     GuiControlGet, Edit1
     if (Push)
     {
-        Mais10 := ((stage - Edit1)/5)+Edit1
-        GeraLog("novo: " Mais10)
-        if (Mais10 - Edit1 < 50)
+        GuiControlGet, ChkAbsal
+        if (ChkAbsal)
         {
-            GuiControl, , Edit1, %Mais10%
-            return
+            Mais10 := ((stage - Edit1))+Edit1
+            if (Edit1 < Mais10)
+            {
+                if (Mais10 - Edit1 > 300)
+                {
+                    Mais10 := Mais10+1000
+                    GeraLog("novo: " Mais10)
+                    GuiControl, , Edit1, %Mais10%
+                }
+                else
+                {
+                    Mais10 := Mais10+200
+                    GeraLog("novo: " Mais10)
+                    GuiControl, , Edit1, %Mais10%
+                }
+            }
         }
         else
         {
-            Mais10 := Edit1+50
-            GuiControl, , Edit1, %Mais10%
+            Mais10 := ((stage - Edit1)/5)+Edit1
+            if (Mais10 - Edit1 < 50)
+            {
+                GeraLog("novo: " Mais10)
+                GuiControl, , Edit1, %Mais10%
+                return
+            }
+            else
+            {
+                GeraLog("novo: " Mais10)
+                Mais10 := Edit1+50
+                GuiControl, , Edit1, %Mais10%
+            }
         }
     }
 }
@@ -606,16 +729,16 @@ VaiProBoss()
 
 VaiClicaSkill(X, Y)
 {
-    MouseClick, left, X, Y
-    Sleep, 500
-    MouseClick, left, X-122, Y
-    Sleep, 500
+    MouseClick, left, X, Y-20
+    Sleep, 100
+    MouseClick, left, X-122, Y-20
+    Sleep, 20
 }
 
 
 ProcuraEClicaSkill()
 {
-    loop, 15
+    loop, 5
     {
         ImageSearch, OutX, OutY, 1069, 56, 1171, 242, *60 %a_scriptdir%\fecha.png
         if !ErrorLevel
@@ -648,6 +771,7 @@ ProcuraEClicaSkill()
 CompraSkills()
 {
     Inicio := A_TickCount
+    Ativa()
     FSiCount := 0
     DSiCount := 0
     SCiCount := 0
@@ -658,7 +782,7 @@ CompraSkills()
     Sleep, 300
     AbreSkill()
     Sleep, 300
-    ImageSearch, OutX, OutY, 709, 524, 778, 599, *60 %a_scriptdir%\carta.png
+    ImageSearch, OutX, OutY, 1026, 546, 1161, 595, *40 %a_scriptdir%\buy.png
     if (ErrorLevel = 0)
     {
         Click, 1098, 626
@@ -667,7 +791,7 @@ CompraSkills()
             ProcuraEClicaSkill()
             DesceUmaPagina()
         }
-        loop, 3
+        loop, 4
         {
             ProcuraEClicaSkill()
             SobeUmaPagina()
@@ -679,12 +803,12 @@ CompraSkills()
         CompraSkills()
     }
     FechaSkill()
-    GeraLog("CompraSkills: " A_TickCount - Inicio)
+    ;GeraLog("CompraSkills: " A_TickCount - Inicio)
 }
 
 AbreSkill()
 {
-    ImageSearch, OutX, OutY, 709, 524, 778, 599, *40 %a_scriptdir%\carta.png
+    ImageSearch, OutX, OutY, 1026, 546, 1161, 595, *40 %a_scriptdir%\buy.png
     if (ErrorLevel = 0)
     {
         return
@@ -708,9 +832,11 @@ FechaXzin()
 
 FechaSkill()
 {
+    GeraLog("Fechou")
     ImageSearch, OutX, OutY, 709, 524, 778, 599, *40 %a_scriptdir%\carta.png
     if (ErrorLevel = 0)
     {
+        GeraLog("Fechou")
         Send, 1
         return
     }
@@ -761,14 +887,15 @@ FechaAll()
     {
         MouseClick, left, 932, 695
     }
-    Sleep, 30
     if (SubStr(RetornaText(824, 129, 211, 60), 1, 3)="Opt")
     {
         MouseClick left, 742, 56
     }
-    FechaXzin()
-    loop, 2
+    ImageSearch, OutX, OutY, 1069, 56, 1171, 242, *60 %a_scriptdir%\fecha.png
+    if !ErrorLevel
     {
+        MouseClick, left, OutX, OutY
+        Sleep, 300
         ImageSearch, OutX, OutY, 1069, 56, 1171, 242, *60 %a_scriptdir%\fecha.png
         if !ErrorLevel
         {
@@ -776,6 +903,7 @@ FechaAll()
             Sleep, 300
         }
     }
+    FechaXzin()
 }
 
 lua()
@@ -798,14 +926,33 @@ lua()
     }
 
 }
+
 CompraReliquia()
 {
-    GuiControlGet, Qual
-    if Qual
+    Gui, Submit, NoHide
+    if (Qual = 1)
+    {
         BoS()
-    else
+    }
+    else if (Qual = 2)
+    {
         All()
-
+    }
+    else if (Qual = 3)
+    {
+        if (qntVezesAll < 2)
+        {
+            All()
+            alternado := false
+            qntVezesAll++5
+        }
+        else
+        {
+            BoS()
+            alternado := true
+            qntVezesAll := 0
+        }
+    }
 }
 
 
@@ -849,7 +996,7 @@ Return
 GuiClose:
     ExitApp
 
-Pause::Pause
+Pause::Pause,,1
 
 Ativa()
 {
