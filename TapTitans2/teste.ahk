@@ -26,6 +26,11 @@ GeraLog(msg)
 	}
 }
 
+F10::
+MouseGetPos, OutputVarX, OutputVarY
+GeraLog(OutputVarX ", " OutputVarY)
+return
+
 +LButton::
 MouseGetPos, OriginX, OriginY
 WinGetActiveStats, Title, WindowWidth, WindowHeight, WindowX, WindowY
