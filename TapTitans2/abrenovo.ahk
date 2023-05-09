@@ -23,6 +23,7 @@ loop,
     ControlGet, PushMais, Checked,, Button11, TapMacro ahk_class AutoHotkeyGUI ahk_exe AutoHotkey.exe
     ControlGet, Farm, Checked,, Button12, TapMacro ahk_class AutoHotkeyGUI ahk_exe AutoHotkey.exe
     ControlGet, Absal, Checked,, Button13, TapMacro ahk_class AutoHotkeyGUI ahk_exe AutoHotkey.exe
+    ControlGet, HS, Checked,, Button14, TapMacro ahk_class AutoHotkeyGUI ahk_exe AutoHotkey.exe
     ControlGet, MiR, Checked,, Button1, TapMacro ahk_class AutoHotkeyGUI ahk_exe AutoHotkey.exe
     ControlGet, ChkPrestige, Checked,, Button2, TapMacro ahk_class AutoHotkeyGUI ahk_exe AutoHotkey.exe
     ControlGet, BOS, Checked,, Button6, TapMacro ahk_class AutoHotkeyGUI ahk_exe AutoHotkey.exe
@@ -60,7 +61,10 @@ loop,
             Control, Check,, Button13, TapMacro
         else
             Control, Uncheck,, Button13, TapMacro
-        
+         if (HS)
+            Control, Check,, Button14, TapMacro
+        else
+            Control, Uncheck,, Button13, TapMacro
         if (MiR)
             Control, Check,, Button1, TapMacro
         else
