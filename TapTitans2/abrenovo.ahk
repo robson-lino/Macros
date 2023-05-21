@@ -56,15 +56,16 @@ loop,
             Control, Check,, Button12, TapMacro
         else
             Control, Uncheck,, Button12, TapMacro
-        
+
         if (Absal)
             Control, Check,, Button13, TapMacro
         else
             Control, Uncheck,, Button13, TapMacro
+
          if (HS)
             Control, Check,, Button14, TapMacro
         else
-            Control, Uncheck,, Button13, TapMacro
+            Control, Uncheck,, Button14, TapMacro
         if (MiR)
             Control, Check,, Button1, TapMacro
         else
