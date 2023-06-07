@@ -1,4 +1,4 @@
-; 0.2.0 - Beta
+; 0.2.1
 #SingleInstance Force
 SetWorkingDir %A_ScriptDir%
 #MaxThreads 1
@@ -118,7 +118,7 @@ Gui Add, Text, hWndhtxtTempoStage vtxtTempoStage x140 y8 w30 h23 +0x200, 0
 Gui Add, Text, x170 y8 w39 h23 +0x200, Med:
 Gui Add, Text, hWndhtxtMediana vtxtMediana x205 y8 w42 h23 +0x200, 0
 Gui Add, Progress, vPrgStage x176 y40 w120 h20 -Smooth, 10
-Gui Add, Edit, x48 y40 w120 h21 +Number vEdit1, 115800
+Gui Add, Edit, x48 y40 w120 h21 +Number vEdit1, 116200
 Gui Add, Text, x8 y40 w36 h23 +0x200, Target
 Gui Add, Progress, vPrgMana x8 y96 w120 h20 -Smooth, 100
 Gui Add, CheckBox, vChkMiR x8 y144 w63 h23, MiR
@@ -170,6 +170,8 @@ else
 {
     ;SetTimer CompraHeroi, 240000, On, 4
 }
+if (!JogoAberto())
+    FechaJogoEAbre()
 FechaAll()
 ClicaEAtualiza()
 Return
@@ -198,7 +200,6 @@ Clica()
     GuiControlGet, ChkAbsal
     if (!ChkAbsal)
     {
-        
         if (!CheckMir)
         {
             ;GeraLog(ContratoAtivo())
@@ -264,7 +265,7 @@ Clica()
                     ClicaRandom(1051, 246, 2)
                     ClicaRandom(935, 242, 2)
                     ClicaRandom(827, 245, 2)
-                    ClicaRandom(731, 241, 2)
+                    ClicaRandom(769, 254, 2)
                     ClicaRandom(939, 426, 2)
                 }
             }
@@ -372,7 +373,7 @@ Clica()
         ClicaRandom(1051, 246, 2)
         ClicaRandom(935, 242, 2)
         ClicaRandom(827, 245, 2)
-        ClicaRandom(731, 241, 2)
+        ClicaRandom(769, 254, 2)
         ClicaRandom(939, 426, 2)
         Send, {L down}
         Sleep, 20
@@ -473,6 +474,8 @@ AbreHeroi()
     {
         Send, 2
         GooglePlay()
+        if (!JogoAberto())
+            FechaJogoEAbre()
         Sleep, 120
     }
 }
@@ -498,18 +501,13 @@ CLicaCompraHeroi()
     {
         FechaColetaRapida()
         ;ImageSearch, OutX, OutY, 1011, 159, 1163, 807, *80 %a_scriptdir%\c1.png
-        ImageSearch, OutX, OutY, 1011, 159, 1163, 807, *60 %a_scriptdir%\c3.png
+        ;ImageSearch, OutX, OutY, 1011, 159, 1163, 807, *60 %a_scriptdir%\c3.png
+        ImageSearch, OutX, OutY, 1023, 160, 1054, 848, *60 %a_scriptdir%\c3.png
         if !ErrorLevel
         {
             ClicaRandom(OutX+30, OutY+20, 15)
             Sleep, 100
         }
-        ;ImageSearch, OutX, OutY, 1011, 159, 1163, 807, *60 %a_scriptdir%\c2.png
-        ;if !ErrorLevel
-        ;{
-        ;    ClicaRandom(OutX-10, OutY+20, 15)
-        ;    Sleep, 100
-        ;}
     }
 }
 
@@ -624,6 +622,7 @@ ProcuraAteAchar(X, Y, H, W, var, img, mili)
             AchouOutY := OutY
             return true
         }
+        FechaColetaRapida()
     }
     return false
 }
@@ -647,7 +646,7 @@ IncrementaAchou()
 {
     if (A_TickCount - InicioAchou > 60000)
     {
-        GeraLog("Estava com: " qntAchou)
+        GeraLog("Estava com " qntAchou)
         qntAchou := 0
         InicioAchou := A_TickCount
     }
@@ -679,7 +678,6 @@ AtualizaStageViaAba()
     Inicio := A_TickCount
     Fechou := false
     Achou := false
-    FechaAll()
     contrato := ContratoAtivo()
     AbreSkill()
     if (ProcuraAteAchar(1022, 250, 1164, 322, 100, "prest", 1000))
@@ -1150,7 +1148,8 @@ FazPrestige()
         CompraSkills()
         FechaAll()
         AtualizaStatusSkillAtiva()
-        Clica()
+        Sleep, 300
+        AtualizaStatusSkillAtiva()
         CompraReliquia()
         ;SobeTudo()
         ;GeraLog("Tempo do FazPrestige(): " A_TickCount - Inicio)
@@ -1426,7 +1425,7 @@ AbreSkill()
     else
     {
         Send, 1
-        GooglePlay()
+        ;GooglePlay()
         if !(ProcuraAteAchar(1112, 50, 1166, 75, 23, "xzin", 700))
         {
             Ativa()
@@ -1516,20 +1515,18 @@ FechaAll()
         GeraLog("Estava com lag, fechou e abriu")
         FechaJogoEAbre()
     }
-    if (!JogoAberto())
-        FechaJogoEAbre()
     ;GeraLog("FechaAll: " A_TickCount - Inicio)
 }
 
 FechaColetaRapida()
 {
     ;Inicio := A_TickCount
-    ImageSearch, OutX, OutY, 851, 678, 878, 699, *20 %a_scriptdir%\azul.png
+    ImageSearch, OutX, OutY, 878, 679, 918, 714, *20 %a_scriptdir%\azul.png
     if (ErrorLevel = 0)
     {
         ClicaRandom(932, 695, 5)
         ;MouseClick, left, 932, 695
-        ProcuraAteNaoAchar( 851, 678, 878, 699, 20, "azul", 2000)
+        ProcuraAteNaoAchar( 878, 679, 918, 714, 20, "azul", 2000)
         return true
     }
     return false
@@ -1571,7 +1568,7 @@ BoS()
     Sleep, 500
     while (!ProcuraAteAchar(705, 165, 771, 378, 40, "BoS", 700))
     {
-        if (A_Index > 40)
+        if (A_Index > 10)
         {
             return
         }
@@ -1626,20 +1623,18 @@ SobeUmaPagina()
 {
     MouseMove, 892, 600
     Send {LButton down}
-    MouseMove, 901, 846, 25
+    MouseMove, 901, 846, 10
     Sleep, 50
     Send {LButton up}
-    Sleep, 50
 }
 
 DesceUmaPagina()
 {
     MouseMove, 901, 846
     Send {LButton down}
-    MouseMove, 892, 600, 25
+    MouseMove, 892, 600, 10
     Sleep, 50
     Send {LButton up}
-    Sleep, 50
 }
 
 TempoPassado() 
@@ -1679,6 +1674,10 @@ ClanRaid()
     ImageSearch, OutX, OutY, 745, 55, 801, 100, *60 %a_scriptdir%\raid.png
     if (ErrorLevel = 0)
     {
+        Loop, 15
+        {
+            SoundBeep, 300, 1000
+        }
         MouseClick, left, OutX, OutY
         Sleep, 3000
         ImageSearch, OutX, OutY, 831, 680, 1038, 772, *60 %a_scriptdir%\fundoazul.png
@@ -1711,8 +1710,11 @@ ClanRaid()
             {
                 if (ParteTemVida(A_LoopField))
                 {
-                    parte := A_LoopField
-                    break
+                    if (!AlvoEmQualParte(A_LoopField, "x"))
+                    {
+                        parte := A_LoopField
+                        break
+                    }
                 }
             }
         }
@@ -2186,6 +2188,12 @@ AlvoEmQualParte(parte, tipo)
         MouseMove, OutX, OutY
         return true
     }
+    ImageSearch, OutX, OutY, EntradaX, EntradaY, EntradaH, EntradaW, *100 %a_scriptdir%\%tipo%2.png
+    if !ErrorLevel
+    {
+        MouseMove, OutX, OutY
+        return true
+    }
 }
 
 
@@ -2341,7 +2349,37 @@ ParteTemVida(parte)
 }
 
 F9::
-FechaJogoEAbre()
+Loop, 15
+{
+    SoundBeep, 300, 1000
+}
+return
+
+^F9::
+;parte := "nenhuma"
+GeraLog("Com alvo")
+Loop, parse, listaPartes, `,
+{
+    if (AlvoEmQualParte(A_LoopField, "alvo"))
+    {
+        if (ParteTemVida(A_LoopField))
+        {
+            GeraLog(A_LoopField)
+            ;break
+        }
+    }
+}
+GeraLog("Sem alvo")
+Loop, parse, listaPartes, `,
+{
+    if (ParteTemVida(A_LoopField))
+    {
+        if (!AlvoEmQualParte(A_LoopField, "x"))
+        {
+            GeraLog(A_LoopField)
+        }
+    }
+}
 return
 
 
@@ -2411,33 +2449,48 @@ GooglePlay()
 FechaSeta()
 {
     ;Inicio := A_TickCount
-    ImageSearch, OutX, OutY, 718, 119, 749, 377, *10 %a_scriptdir%\seta.png
+    ImageSearch, OutX, OutY, 707, 174, 760, 410, *50 %a_scriptdir%\seta.png
     if !ErrorLevel
     {
-        ClicaRandom(OutX+15, OutY+25, 1)
+        ClicaRandom(OutX, OutY+5, 1)
     }
     ;GeraLog(A_TickCount - Inicio)
 }
 
 FechaJogoEAbre()
 {
-    GeraLog("Fechou o jogo e abriu")
+    GeraLog("Fechou o jogo")
+    qntAchou := 0
     MouseClick, left, 1889, 856
     Sleep, 5000
     MouseClick, left, 1256, 114
     Sleep, 5000
+    GeraLog("Abriu o jogo")
     MouseClick, left, 1057, 288
-    Sleep, 60000
+    Sleep, 30000
     GeraLog("Terminou de abrir")
 }
 
 JogoAberto()
 {
-    ImageSearch, OutX, OutY, 1104, 849, 1157, 879, *10 %a_scriptdir%\baudireita.png
+    ImageSearch, OutX, OutY, 1104, 849, 1157, 879, *90 %a_scriptdir%\baudireita.png
     if !ErrorLevel
     {
         return true
     }
-    GeraLog("O jogo não estava aberto")
-    return false
+    loop, 
+    {
+        FechaAll()
+        ImageSearch, OutX, OutY, 1104, 849, 1157, 879, *90 %a_scriptdir%\baudireita.png
+        if !ErrorLevel
+        {
+            return true
+        }
+        if (A_Index > 50)
+        {
+            GeraLog("Jogo não estava aberto")
+            return false
+        }
+    }    
+    
 }
