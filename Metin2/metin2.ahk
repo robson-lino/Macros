@@ -1,97 +1,40 @@
 #SingleInstance Force
-Process, Priority, , High
-#MaxThreads 2
-
-#Include FindClick.ahk
+#MaxThreads 1
 
 DefaultDirs = a_scriptdir
 
-
-SendMode Event
-SetKeyDelay 40, 50
 CoordMode, Pixel, Window
 CoordMode, Mouse, Window
-Janelas := "Aeldra"
-global clt := 1
+global listaPeixes := "p1,p2,p3,p4"
+
+#Include, ocr.ahk
+#include, utilitarios.ahk
+#include, metin2_pesca.ahk
+
+SetKeyDelay, 25, 25
+
 Pause::Pause
 
-#IfWinActive Aeldra
-~LButton::
-Send, '
-Send, '
-Send, '
-Send, '
-return
-
-#IfWinActive Aeldra
-^F8::
-Goto, skill
-return
-
-skill:
-Send, ^g
-Sleep, 300
-Send, {F1}
-Sleep, 300
-Send, ^g
-Sleep, 300
-Send, ^g
-Sleep, 300
-Send, {F2}
-Sleep, 300
-Send, ^g
-return
-
-
-^F9::
-clt := 1
-SetTimer, skill, 700000
-Gosub, skill
-loop
+F9::
+loop,
 {
-	Send, {space down}
-	Sleep, 300
-	loop, 80
-	{
-		Send, 3
-		Sleep, randSleep()
-		Send, '
-	}
-	Sleep, randSleep()
-	Sleep, randSleep()
-	Send, '
-	Send, {space up}
-	if (clt = 1)
-	{
-		Send, {w down}
-		Sleep, 5500
-		Send, {w up}
-		clt := 2
-	}
-	else
-	{
-		Send, {s down}
-		Sleep, 5500
-		Send, {s up}
-		clt := 1
-	}
+	AbreInventario()
+	UsaTodosOsPeixes()
+	ProcuraIsca()
+	EsperaFisgar()
+	Sleep, 1500
 }
-Return
+return
 
-
-randSleep()
+F11::
+GeraLog(listaPeixes)
+Loop, parse, listaPeixes, `,
 {
-    Random, rand, 3000, 5000
-    return rand
-}
-
-GeraLog(msg)
-{
-    FormatTime, DataFormatada, D1 T0
-	FileAppend, %DataFormatada% - %msg%`n, %a_scriptdir%\metin2.log
-	if ErrorLevel
+	GeraLog(A_LoopField)
+	ImageSearch, OutX, OutY, 1439, 521, 1602, 865, *40 %a_scriptdir%\%A_LoopField%.png
+	if !ErrorLevel
 	{
-		FileAppend, %DataFormatada% - %msg%`n, %a_scriptdir%\metin2.log
+		MouseClick, right, OutX, OutY
 	}
 }
 return
