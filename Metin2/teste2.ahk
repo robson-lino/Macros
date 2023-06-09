@@ -9,7 +9,6 @@ global X1,Y1,X2,Y2,PixelColor1,PixelColor2
 CoordMode, Pixel, Window
 CoordMode, Mouse, Window
 
-#include, utilitarios.ahk
 
 F10::
 if (vezes)
@@ -27,5 +26,15 @@ else
     MouseGetPos, X1, Y1
     PixelGetColor, PixelColor1, X1, Y2
     GeraLog(X1 ", " Y1 " - " PixelColor1)
+}
+
+GeraLog(msg)
+{
+    FormatTime, DataFormatada, D1 T0
+	FileAppend, %DataFormatada% - %msg%`n, %a_scriptdir%\metin2.log
+	if ErrorLevel
+	{
+		FileAppend, %DataFormatada% - %msg%`n, %a_scriptdir%\metin2.log
+	}
 }
 return

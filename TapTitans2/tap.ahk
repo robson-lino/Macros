@@ -162,7 +162,7 @@ Return
 
 Iniciar:
 Ativa()
-Random, randVerificaClan, 1800000, 5400000
+Random, randVerificaClan, 60000, 120000
 ;SetTimer Atualizar, 3000, On, 3
 GuiControlGet, ChkMiR
 if (ChkMiR)
@@ -205,9 +205,11 @@ Clica()
     {
         if (!CheckMir)
         {
+            GeraLog("Entrou no clica")
             ;GeraLog(ContratoAtivo())
             if(!ContratoAtivo())
             {
+                GeraLog("Contrato não ativo")
                 loop, 4
                 {
                     Random, grand, -4, 4
@@ -321,7 +323,6 @@ Clica()
                     ClicaRandom(939, 426, 2)
                 }
             }
-            AtualizaStageViaAba()
         }
         else
         {
@@ -835,9 +836,10 @@ Atualizar()
     {
         GeraLog("Entrou no verifica clan")
         GeraLog(A_tickcount - ultimaVerificadaClan " > " randVerificaClan)
-        ClanRaid()
         ultimaVerificadaClan := A_tickcount
-        Random, randVerificaClan, 1800000, 5400000
+        Random, randVerificaClan, 60000, 120000
+        ClanRaid()
+        
     }
     else
     {
@@ -1825,6 +1827,10 @@ ClanRaid()
         }
         Sleep, 3000
     }
+    else
+    {
+        Random, randVerificaClan, 1800000, 3600000
+    }
 }
 
 AttPagina()
@@ -2541,7 +2547,7 @@ FechaJogoEAbre()
     Sleep, 5000
     GeraLog("Abriu o jogo")
     MouseClick, left, 1057, 288
-    Sleep, 30000
+    Sleep, 60000
     GeraLog("Terminou de abrir")
 }
 

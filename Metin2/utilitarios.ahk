@@ -3,6 +3,14 @@ SetWorkingDir %A_ScriptDir%
 #MaxThreads 1
 SetKeyDelay, 25, 25
 
+Gui +AlwaysOnTop
+Gui Add, Text, x9 y13 w120 h23 +0x200, Contas:
+Gui Add, Radio, hWndhRadRau vConta x10 y46 w50 h23, Rau
+Gui Add, Radio, hWndhRadHati x64 y46 w50 h23, Hati
+
+Gui Show, x159 y78 w249 h418, Window
+Return
+
 ProcuraAteAchar(X, Y, H, W, var, img, mili)
 {   
     ;Inicio := A_TickCount
@@ -52,3 +60,4 @@ randSleep()
     Random, rand, 3000, 5000
     return rand
 }
+
