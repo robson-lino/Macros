@@ -1,11 +1,11 @@
-; 0.2.1
+; 0.2.2
 #SingleInstance Force
 SetWorkingDir %A_ScriptDir%
 #MaxThreads 1
 
 #Include, ocr.ahk
 
-DefaultDirs = a_scriptdirs
+DefaultDirs = a_scriptdir
 
 CoordMode, Pixel, Screen
 CoordMode, Mouse, Screen
@@ -77,7 +77,9 @@ global prestmili := 1000
 global listaPartes := "cabeça,ombro esquerdo,ombro direito,mão esquerda,mão direita,torso,perna direita,perna esquerda"
 global InicioAchou := A_TickCount
 global qntAchou := 0
-
+global ultimaVerificadaClan := A_TickCount
+global randVerificaClan
+global grand, grand2
 
 
 
@@ -160,6 +162,7 @@ Return
 
 Iniciar:
 Ativa()
+Random, randVerificaClan, 1800000, 5400000
 ;SetTimer Atualizar, 3000, On, 3
 GuiControlGet, ChkMiR
 if (ChkMiR)
@@ -205,56 +208,105 @@ Clica()
             ;GeraLog(ContratoAtivo())
             if(!ContratoAtivo())
             {
-                loop, 3
+                loop, 4
                 {
-                    loop, 4
+                    Random, grand, -4, 4
+                    Random, grand2, -4, 4
+                    ;AtualizaStage()
+                    ClicaRandomRapido(934, 242)
+                    ;Sleep, 20
+                    ClicaRandomRapido(1011, 278)
+                    ;Sleep, 20
+                    ClicaRandomRapido(1035, 350)
+                    ;Sleep, 20
+                    ClicaRandomRapido(1015, 425)
+                    ;Sleep, 20
+                    ClicaRandomRapido(951, 462)
+                    ;Sleep, 20
+                    ClicaRandomRapido(884, 454)
+                    ;Sleep, 20
+                    ClicaRandomRapido(838, 401)
+                    ;Sleep, 20
+                    ClicaRandomRapido(824, 336)
+                    ;Sleep, 20
+                    ClicaRandomRapido(859, 266)
+                    ;Sleep, 20
+                    if (FechaColetaRapida())
                     {
-                        ;AtualizaStage()
-                        Send, a
-                        Sleep, 20
-                        Send, b
-                        Sleep, 20
-                        Send, c
-                        Sleep, 20
-                        Send, d
-                        Sleep, 20
-                        Send, o
-                        Sleep, 20
-                        Send, f
-                        Sleep, 20
-                        Send, g
-                        Sleep, 20
-                        Send, h
-                        Sleep, 20
-                        Send, i
-                        Sleep, 20
-                        if (FechaColetaRapida())
+                        loop, 3
                         {
-                            loop, 3
-                            {
-                                Send, a
-                                Sleep, 20
-                                Send, b
-                                Sleep, 20
-                                Send, c
-                                Sleep, 20
-                                Send, d
-                                Sleep, 20
-                                Send, o
-                                Sleep, 20
-                                Send, f
-                                Sleep, 20
-                                Send, g
-                                Sleep, 20
-                                Send, h
-                                Sleep, 20
-                                Send, i
-                                Sleep, 20
-                            }
-                            break
+                            ClicaRandomRapido(934, 242)
+                            ;Sleep, 20
+                            ClicaRandomRapido(1011, 278)
+                            ;Sleep, 20
+                            ClicaRandomRapido(1035, 350)
+                            ;Sleep, 20
+                            ClicaRandomRapido(1015, 425)
+                            ;Sleep, 20
+                            ClicaRandomRapido(951, 462)
+                            ;Sleep, 20
+                            ClicaRandomRapido(884, 454)
+                            ;Sleep, 20
+                            ClicaRandomRapido(838, 401)
+                            ;Sleep, 20
+                            ClicaRandomRapido(846, 355)
+                            ;Sleep, 20
+                            ClicaRandomRapido(859, 266)
+                            ;Sleep, 20
                         }
+                        break
                     }
                 }
+                ;loop, 3
+                ;{
+                ;    loop, 4
+                ;    {
+                ;        ;AtualizaStage()
+                ;        Send, a
+                ;        Sleep, 20
+                ;        Send, b
+                ;        Sleep, 20
+                ;        Send, c
+                ;        Sleep, 20
+                ;        Send, d
+                ;        Sleep, 20
+                ;        Send, o
+                ;        Sleep, 20
+                ;        Send, f
+                ;        Sleep, 20
+                ;        Send, g
+                ;        Sleep, 20
+                ;        Send, h
+                ;        Sleep, 20
+                ;        Send, i
+                ;        Sleep, 20
+                ;        if (FechaColetaRapida())
+                ;        {
+                ;            loop, 3
+                ;            {
+                ;                Send, a
+                ;                Sleep, 20
+                ;                Send, b
+                ;                Sleep, 20
+                ;                Send, c
+                ;                Sleep, 20
+                ;                Send, d
+                ;                Sleep, 20
+                ;                Send, o
+                ;                Sleep, 20
+                ;                Send, f
+                ;                Sleep, 20
+                ;                Send, g
+                ;                Sleep, 20
+                ;                Send, h
+                ;                Sleep, 20
+                ;                Send, i
+                ;                Sleep, 20
+                ;            }
+                ;            break
+                ;        }
+                ;    }
+                ;}
             }
             else
             {
@@ -779,7 +831,18 @@ Atualizar()
     ;    AtualizaStageViaConfig()
     ;}
     VaiProBoss()
-    ClanRaid()
+    if ((A_tickcount - ultimaVerificadaClan) > randVerificaClan)
+    {
+        GeraLog("Entrou no verifica clan")
+        GeraLog(A_tickcount - ultimaVerificadaClan " > " randVerificaClan)
+        ClanRaid()
+        ultimaVerificadaClan := A_tickcount
+        Random, randVerificaClan, 1800000, 5400000
+    }
+    else
+    {
+        GeraLog(A_tickcount - ultimaVerificadaClan " > " randVerificaClan)
+    }
     Presente()
     Ovo()
     lua()
@@ -1288,7 +1351,7 @@ VaiClicaSkill(X, Y)
     ClicaRandom(X, Y, 5)
     ;MouseClick, left, X, Y
     Sleep, 170
-    ClicaRandom(X-150, Y, 5)
+    ClicaRandom(X-130, Y, 2)
     ;MouseClick, left, X-122, Y
     Sleep, 170
     ComprouSkill++
@@ -1510,7 +1573,7 @@ FechaAll()
             }
         }
     }
-    If (qntAchou > 600)
+    If (qntAchou > 300)
     {
         GeraLog("Estava com lag, fechou e abriu")
         FechaJogoEAbre()
@@ -1566,22 +1629,30 @@ BoS()
 {
     Send, 5
     Sleep, 500
-    while (!ProcuraAteAchar(705, 165, 771, 378, 40, "BoS", 700))
+    ImageSearch, OutX, OutY, 1024, 841, 1083, 879, *40 %a_scriptdir%\reliquia.png
+    if (ErrorLevel = 0)
     {
-        if (A_Index > 10)
+        while (!ProcuraAteAchar(705, 165, 771, 378, 40, "BoS", 700))
         {
-            return
+            if (A_Index > 10)
+            {
+                return
+            }
+            SobeUmaPagina()
         }
-        SobeUmaPagina()
+        loop, 10
+        {
+            ClicaRandom(AchouOutX+380, AchouOutY+5, 5)
+            Sleep, 150
+        }
+        Sleep, 500
+        Send, 5
+        Sleep, 500
     }
-    loop, 10
+    Else
     {
-        ClicaRandom(AchouOutX+380, AchouOutY+5, 5)
-        Sleep, 150
+        BoS()
     }
-    Sleep, 500
-    Send, 5
-    Sleep, 500
 }
 
 All()
@@ -1674,9 +1745,10 @@ ClanRaid()
     ImageSearch, OutX, OutY, 745, 55, 801, 100, *60 %a_scriptdir%\raid.png
     if (ErrorLevel = 0)
     {
-        Loop, 15
+        Loop, 5
         {
             SoundBeep, 300, 1000
+            Sleep, 300
         }
         MouseClick, left, OutX, OutY
         Sleep, 3000
@@ -2349,10 +2421,7 @@ ParteTemVida(parte)
 }
 
 F9::
-Loop, 15
-{
-    SoundBeep, 300, 1000
-}
+BoS()
 return
 
 ^F9::
@@ -2382,6 +2451,11 @@ Loop, parse, listaPartes, `,
 }
 return
 
+
+ClicaRandomRapido(X, Y)
+{
+    MouseClick, left, X+grand, Y+grand2
+}
 
 ClicaRandom(X, Y, var)
 {
