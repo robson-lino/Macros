@@ -80,7 +80,7 @@ TaLogado()
 			Send, {Enter}
 		}
 		GeraLog("Saiu do loop")
-		ProcuraAteAchar(52, 263, 148, 325, 40, "flag", 30000)
+		ProcuraAteAcharSemLogar(52, 263, 148, 325, 40, "flag", 30000)
 		Send, {Enter}
 		SetKeyDelay, 25, 25
 	}
@@ -192,6 +192,23 @@ ProcuraAteAchar(X, Y, H, W, var, img, mili)
     ;Inicio := A_TickCount
     ;Ativa()
 	TaLogado()
+    Comeco := A_TickCount
+    while ((A_TickCount - Comeco) < mili)
+    {
+        ImageSearch, OutX, OutY, X, Y, H, W, *%var% %a_scriptdir%\%img%.png
+        if (!ErrorLevel)
+        {
+            AchouOutX := OutX
+            AchouOutY := OutY
+            return true
+        }
+    }
+    return false
+}
+ProcuraAteAcharSemLogar(X, Y, H, W, var, img, mili)
+{   
+    ;Inicio := A_TickCount
+    ;Ativa()
     Comeco := A_TickCount
     while ((A_TickCount - Comeco) < mili)
     {
