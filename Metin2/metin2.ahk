@@ -5,11 +5,10 @@ DefaultDirs = a_scriptdir
 
 CoordMode, Pixel, Window
 CoordMode, Mouse, Window
-global listaPeixes := "p1,p2,p3,p4"
 
 #Include, ocr.ahk
-#include, utilitarios.ahk
 #include, metin2_pesca.ahk
+#include, utilitarios.ahk
 
 SetKeyDelay, 25, 25
 

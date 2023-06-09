@@ -3,7 +3,7 @@ SetWorkingDir %A_ScriptDir%
 #MaxThreads 1
 SetKeyDelay, 25, 25
 
-global listaPeixes := "p1,p2,p3,p4,p5"
+global listaPeixes := "p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15"
 DefaultDirs = a_scriptdir
 
 CoordMode, Pixel, Window
@@ -101,9 +101,11 @@ UsaTodosOsPeixes()
 {
     Loop, parse, listaPeixes, `,
     {
+        GeraLog("Procura " A_LoopField)
         ImageSearch, OutX, OutY, 1439, 521, 1602, 865, *60 %a_scriptdir%\%A_LoopField%.png
         if !ErrorLevel
         {
+            GeraLog("achou " A_LoopField)
             MouseClick, right, OutX, OutY
         }
     }
