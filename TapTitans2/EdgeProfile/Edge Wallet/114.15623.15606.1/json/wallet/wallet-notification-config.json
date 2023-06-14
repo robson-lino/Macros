@@ -1,0 +1,27 @@
+{
+  "eligible_types": [
+    "CardExpired",
+    "CardExpiring",
+    "PasswordLeakage",
+    "PersonalizedOffersAvailable",
+    "UpcomingHotelReservations",
+    "SignupCryptoWallet",
+    "CardTokenizationEligible",
+    "FeaturePromotion",
+    "DonationSummary",
+    "RoamCard",
+    "PackageTracking"
+  ],
+  "snooze_time_in_hour": 168,
+  "refresh_time_in_hour": 12,
+  "rotate_time_in_hour": 12,
+  "notification_build_time_after_start_up_in_second": 60,
+  "card_expired_evaluation_in_months": 1,
+  "feature_promotion_notification_config": {
+    "Memberships": {
+      "promotion_start_utc": "2023-05-25T00:00:00.000Z",
+      "promotion_end_utc": "2023-06-29T00:00:00.000Z",
+      "promotion_interval_in_days": 1
+    }
+  }
+}

@@ -1,7 +1,6 @@
 #SingleInstance Force
-SendMode Event
 SetKeyDelay 40, 50
 
-^F9::
+^F11::
 Run, tap.ahk
 return

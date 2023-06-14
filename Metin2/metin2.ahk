@@ -8,9 +8,10 @@ DefaultDirs = a_scriptdir
 CoordMode, Pixel, Window
 CoordMode, Mouse, Window
 
-global listaPeixes := "p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15"
+global listaPeixes := "p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,p16,p17,p18,p19,p20,p21,p22,p23,p24,p25"
 global Conta
 global Conta1,Conta2,Conta3
+global p := 1
 
 ;global Conta1 := "XXXXXXX,XXXXXXXXX"
 ;global Conta2 := "rlino001,08567315L123"
@@ -43,21 +44,19 @@ for key, value in quelixodelinguagem
     %key% := value.ID . "," . value.Senha
 
 Pause::Pause
+F8::Pause
 
 F9::
 loop,
 {
 	TaLogado()
 	AbreInventario()
-	UsaTodosOsPeixes()
+	JogaTintaFora()
+	;UsaTodosOsPeixes()
 	ProcuraIsca()
 	EsperaFisgar()
 	Sleep, 1500
 }
-return
-
-F11::
-TaLogado()
 return
 
 TaLogado()
@@ -65,10 +64,11 @@ TaLogado()
 	ImageSearch, OutX, OutY, 673, 223, 904, 395, *20 %a_scriptdir%\login.png
 	if !ErrorLevel
 	{
+		GeraLog("Estava deslogado")
 		SetKeyDelay, -1, -1
 		Gui, Submit, NoHide
 		GeraLog(Conta)
-		MouseClick, left, 876, 566
+		ClicaRandom(876, 566, 5)
 		Loop, parse, Conta%Conta%, `,
 		{
 			Loop, 30
@@ -79,7 +79,6 @@ TaLogado()
 			Sleep, 30
 			Send, {Enter}
 		}
-		GeraLog("Saiu do loop")
 		ProcuraAteAcharSemLogar(52, 263, 148, 325, 40, "flag", 30000)
 		Send, {Enter}
 		SetKeyDelay, 25, 25
@@ -101,11 +100,25 @@ EsperaFisgar()
             Sleep, 30
 			ImageSearch, OutX, OutY, 744, 415, 879, 556, *20 %a_scriptdir%\peixe.png
             if !ErrorLevel
-                MouseClick, left, OutX, OutY
+                ClicaRandom(OutX, OutY, 3)
+		}
+		else
+		{
+			ImageSearch, OutX, OutY, 1439, 521, 1602, 865, *30 %a_scriptdir%\p%p%.png
+			if !ErrorLevel
+			{
+				ClicaRandomDIreito(OutX, OutY, 3)
+				p++
+			}
+			else
+			{
+				p++
+			}
+			if (p = 26)
+				p := 1
 		}
 		ImageSearch, OutX, OutY, 776, 357, 830, 375, *20 %a_scriptdir%\pescaria.png
 	}
-	Sleep, 3000
 }
 
 ProcuraIsca()
@@ -113,20 +126,92 @@ ProcuraIsca()
 	ImageSearch, OutX, OutY, 1439, 521, 1602, 865, *40 %a_scriptdir%\isca.png
 	if !ErrorLevel
 	{
-		MouseClick, right, OutX, OutY
+		ClicaRandomDIreito(OutX, OutY, 3)
 		return
 	}
 	ImageSearch, OutX, OutY, 1439, 521, 1602, 865, *40 %a_scriptdir%\minhoca.png
 	if !ErrorLevel
 	{
-		MouseClick, right, OutX, OutY
+		ClicaRandomDIreito(OutX+10, OutY+5, 3)
 		return
 	}
-	GeraLog("Sem isca")
+	CompraIsca()
 	; Futura troca de aba
 }
 
+F11::
+TaLogado()
+return
 
+
+
+F5::
+Manual()
+return
+
+
+CompraManual()
+{
+	ImageSearch, OutX, OutY, 0, 0, A_ScreenWidth, A_ScreenHeight, *60 *TransBlack %a_scriptdir%\pescador.png
+	if !ErrorLevel
+	{
+		ClicaRandom(OutX+20, OutY+20, 3)
+		Sleep, 300
+		ClicaRandom(805, 364, 3)
+		Sleep, 300
+		ClicaRandomDIreito(1303, 93, 3)
+		Sleep, 300
+		ClicaRandom(1374, 62, 3)
+	}
+}
+Manual()
+{
+	ImageSearch, OutX, OutY, 14, 40, 295, 61, *60 %a_scriptdir%\manual.png
+	if ErrorLevel
+	{
+		ImageSearch, OutX, OutY, 1439, 521, 1602, 865, *40 %a_scriptdir%\manualpesca.png
+		if !ErrorLevel
+		{
+			ClicaRandomDIreito(OutX, OutY, 3)
+			return
+		}
+		else
+		{
+			CompraManual()
+		}
+	}
+}
+
+CompraIsca()
+{
+	ImageSearch, OutX, OutY, 0, 0, A_ScreenWidth, A_ScreenHeight, *60 *TransBlack %a_scriptdir%\pescador.png
+	if !ErrorLevel
+	{
+		ClicaRandom(OutX+20, OutY+20, 3)
+		Sleep, 300
+		ClicaRandom(805, 364, 3)
+		Sleep, 300
+		ClicaRandomDIreito(1301, 120, 3)
+		Sleep, 300
+		ClicaRandom(1374, 62, 3)
+	}
+}
+
+JogaTintaFora()
+{
+	ImageSearch, OutX, OutY, 1439, 521, 1602, 865, *40 *TransBlack %a_scriptdir%\tinta.png
+	if !ErrorLevel
+	{
+		MouseMove, OutX, OutY
+		Sleep, 20
+		Send {LButton down}
+		MouseMove, 829, 357
+		Send {LButton up}
+		Sleep, 20
+		ClicaRandom(765, 492, 3)
+		Sleep, 20
+	}
+}
 
 AbreSkill()
 {
@@ -144,8 +229,19 @@ ClicaSkillPesca()
 	ImageSearch, OutX, OutY, 40, 284, 279, 681, *40 %a_scriptdir%\skillpesca.png
 	if !ErrorLevel
 	{
-		MouseClick, right, OutX+5, OutY+5
-	    MouseMove, 804, 359
+		ClicaRandomDIreito(OutX+5, OutY+5, 3)
+		MouseMove, 804, 359
+	}
+	while (!ProcuraAteAchar(776, 357, 830, 375, 20, "pescaria", 100))
+	{
+		ImageSearch, OutX, OutY, 40, 284, 279, 681, *40 %a_scriptdir%\skillpesca.png
+		if !ErrorLevel
+		{
+			ClicaRandomDIreito(OutX+5, OutY+5, 3)
+			MouseMove, 804, 359
+		}
+		if (A_index > 5)
+			return
 	}
 }
 
@@ -176,12 +272,12 @@ UsaTodosOsPeixes()
 {
     Loop, parse, listaPeixes, `,
     {
-        GeraLog("Procura " A_LoopField)
+        ;GeraLog("Procura " A_LoopField)
         ImageSearch, OutX, OutY, 1439, 521, 1602, 865, *30 %a_scriptdir%\%A_LoopField%.png
         if !ErrorLevel
         {
             GeraLog("achou " A_LoopField)
-            MouseClick, right, OutX, OutY
+            ClicaRandomDIreito(OutX, OutY, 3)
         }
     }
 }
@@ -251,4 +347,28 @@ randSleep()
 {
     Random, rand, 3000, 5000
     return rand
+}
+
+
+RetornaText(X, Y, W, H)
+{
+    hBitmap := HBitmapFromScreen(X, Y, W, H)
+    pIRandomAccessStream := HBitmapToRandomAccessStream(hBitmap)
+    DllCall("DeleteObject", "Ptr", hBitmap)
+    text := StrReplace(ocr(pIRandomAccessStream), "`n","")
+    return text 
+}
+
+ClicaRandom(X, Y, var)
+{
+    Random, rand, -var, var
+    Random, rand2, -var, var
+    MouseClick, left, X+rand, Y+rand2
+}
+
+ClicaRandomDireito(X, Y, var)
+{
+    Random, rand, -var, var
+    Random, rand2, -var, var
+    MouseClick, right, X+rand, Y+rand2
 }

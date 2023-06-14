@@ -39,7 +39,7 @@ loop,
     {
         ; Executa
         Run, tap.ahk
-        Sleep, 300
+        Sleep, 30000
 
         ControlSetText, Edit1, %Target%, TapMacro
         if (Push)
