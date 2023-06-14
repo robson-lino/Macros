@@ -1,9 +1,27 @@
-; 0.2.2
+; 0.2.3
 #SingleInstance Force
 SetWorkingDir %A_ScriptDir%
 #MaxThreads 1
 
 #Include, ocr.ahk
+#Include edge.ahk
+global ChromeInst,ChromeProfile,PageInst
+FileCreateDir, ChromeProfile
+;ChromeInst := new Edge(A_ScriptDir "\EdgeProfile",, "--no-first-run")
+
+; --- Connect to the page ---
+
+if !(PageInst := ChromeInst.GetPage())
+{
+	;MsgBox, Could not retrieve page!
+	;ChromeInst.Kill()
+}
+else
+{
+    ;PageInst.Call("Page.navigate", {"url": "https://dontpad.com/robsonlino/taptitans.log"})
+	;PageInst.WaitForLoad()
+    ;Sleep, 15000
+}
 
 DefaultDirs = a_scriptdir
 
@@ -46,7 +64,7 @@ global SextaiCount := 0
 global StageProgess := 0
 global CheckMir := false
 global iUltimaAtualizada = A_TickCount
-global TickPrestigio := A_TickCount
+global TickPrestigio
 global TempoTotal := 0
 global QntPrestigio := 0
 global auxcomprou := false
@@ -70,28 +88,51 @@ global indo := true
 global AchouOutX := ""
 global AchouOutY := ""
 global ComprouSkill
-global Boost := A_TickCount - 1800000
+global Boost := A_TickCount - MinToMili(60)
 global aumento_percentual_media := 0
 global StageProgess
 global prestmili := 1000
-global listaPartes := "cabeça,ombro esquerdo,ombro direito,mão esquerda,mão direita,torso,perna direita,perna esquerda"
+global listaPartes := "cabeça,torso,ombro esquerdo,ombro direito,mão esquerda,mão direita,perna direita,perna esquerda"
 global InicioAchou := A_TickCount
 global qntAchou := 0
 global ultimaVerificadaClan := A_TickCount
 global randVerificaClan
+global Aviso := true
 global grand, grand2
 
 
 
-GeraLog(msg)
+GeraLog(msg, sms=false)
 {
     FormatTime, DataFormatada, D1 T0
 	FileAppend, %DataFormatada% - %msg%`n, %a_scriptdir%\taptitans.log
+    CARALHOOO := DataFormatada . " - " . msg . "\r\n"
+    Mensagem := "document.getElementById(""text"").value = document.getElementById(""text"").value + """ . CARALHOOO . """"
+    Result := PageInst.Evaluate(Mensagem)
+    Result := PageInst.Evaluate("if (document.getElementsByClassName(""btn"")[1]) document.getElementsByClassName(""btn"")[1].click()")
 	if ErrorLevel
 	{
-		FileAppend, %DataFormatada% - %msg%`n, %a_scriptdir%\taptitans.log
+	    FileAppend, %DataFormatada% - %msg%`n, %a_scriptdir%\taptitans.log
 	}
+    If (sms)
+    {
+        SendSMS("`n" DataFormatada " - " msg)
+    }
 }
+
+OnExit("ExitFunc")
+
+ExitFunc()
+{
+    try
+		PageInst.Call("Browser.close") ; Fails when running headless
+	catch
+		ChromeInst.Kill()
+	PageInst.Disconnect()
+    ExitApp
+    ExitFunc()
+}
+
 GeraLogTempoPrest(msg)
 {
     FormatTime, DataFormatada, D1 T0
@@ -120,7 +161,7 @@ Gui Add, Text, hWndhtxtTempoStage vtxtTempoStage x140 y8 w30 h23 +0x200, 0
 Gui Add, Text, x170 y8 w39 h23 +0x200, Med:
 Gui Add, Text, hWndhtxtMediana vtxtMediana x205 y8 w42 h23 +0x200, 0
 Gui Add, Progress, vPrgStage x176 y40 w120 h20 -Smooth, 10
-Gui Add, Edit, x48 y40 w120 h21 +Number vEdit1, 116200
+Gui Add, Edit, x48 y40 w120 h21 +Number vEdit1, 116900
 Gui Add, Text, x8 y40 w36 h23 +0x200, Target
 Gui Add, Progress, vPrgMana x8 y96 w120 h20 -Smooth, 100
 Gui Add, CheckBox, vChkMiR x8 y144 w63 h23, MiR
@@ -161,21 +202,17 @@ Return
 
 
 Iniciar:
+WinActivate, taptitans.log
+Sleep, 300
+TickPrestigio := A_TickCount
 Ativa()
-Random, randVerificaClan, 60000, 120000
-;SetTimer Atualizar, 3000, On, 3
+Random, randVerificaClan, MinToMili(1), MinToMili(2)
 GuiControlGet, ChkMiR
 if (ChkMiR)
-{
     CheckMir := true
-}
-else
-{
-    ;SetTimer CompraHeroi, 240000, On, 4
-}
 if (!JogoAberto())
-    FechaJogoEAbre()
-FechaAll()
+    FechaBluestacksEAbre()
+FechaAllRapido()
 ClicaEAtualiza()
 Return
 
@@ -183,8 +220,6 @@ ClicaEAtualiza()
 {
     SetTimer ClicaEAtualiza, off
     Ativa()
-    ;AtualizaStatusSkillAtiva()
-    ;Inicio := A_TickCount
     Clica()
     Clica()
     Atualizar()
@@ -198,117 +233,117 @@ Clica()
     Random, rand2, 1, 3
     TempoPassado := TempoPassado()
     GuiControl, , txtTempoStage, %TempoPassado%
-    FechaAll()
+    FechaAllRapido()
     AtualizaStageViaAba()
     GuiControlGet, ChkAbsal
     if (!ChkAbsal)
     {
         if (!CheckMir)
         {
-            GeraLog("Entrou no clica")
+            ;GeraLog("Entrou no clica")
             ;GeraLog(ContratoAtivo())
             if(!ContratoAtivo())
             {
-                GeraLog("Contrato não ativo")
-                loop, 4
-                {
-                    Random, grand, -4, 4
-                    Random, grand2, -4, 4
-                    ;AtualizaStage()
-                    ClicaRandomRapido(934, 242)
-                    ;Sleep, 20
-                    ClicaRandomRapido(1011, 278)
-                    ;Sleep, 20
-                    ClicaRandomRapido(1035, 350)
-                    ;Sleep, 20
-                    ClicaRandomRapido(1015, 425)
-                    ;Sleep, 20
-                    ClicaRandomRapido(951, 462)
-                    ;Sleep, 20
-                    ClicaRandomRapido(884, 454)
-                    ;Sleep, 20
-                    ClicaRandomRapido(838, 401)
-                    ;Sleep, 20
-                    ClicaRandomRapido(824, 336)
-                    ;Sleep, 20
-                    ClicaRandomRapido(859, 266)
-                    ;Sleep, 20
-                    if (FechaColetaRapida())
-                    {
-                        loop, 3
-                        {
-                            ClicaRandomRapido(934, 242)
-                            ;Sleep, 20
-                            ClicaRandomRapido(1011, 278)
-                            ;Sleep, 20
-                            ClicaRandomRapido(1035, 350)
-                            ;Sleep, 20
-                            ClicaRandomRapido(1015, 425)
-                            ;Sleep, 20
-                            ClicaRandomRapido(951, 462)
-                            ;Sleep, 20
-                            ClicaRandomRapido(884, 454)
-                            ;Sleep, 20
-                            ClicaRandomRapido(838, 401)
-                            ;Sleep, 20
-                            ClicaRandomRapido(846, 355)
-                            ;Sleep, 20
-                            ClicaRandomRapido(859, 266)
-                            ;Sleep, 20
-                        }
-                        break
-                    }
-                }
-                ;loop, 3
+                ;GeraLog("Contrato não ativo")
+                ;loop, 4
                 ;{
-                ;    loop, 4
+                ;    Random, grand, -4, 4
+                ;    Random, grand2, -4, 4
+                ;    ;AtualizaStage()
+                ;    ClicaRandomRapido(934, 242)
+                ;    ;Sleep, 20
+                ;    ClicaRandomRapido(1011, 278)
+                ;    ;Sleep, 20
+                ;    ClicaRandomRapido(1035, 350)
+                ;    ;Sleep, 20
+                ;    ClicaRandomRapido(1015, 425)
+                ;    ;Sleep, 20
+                ;    ClicaRandomRapido(951, 462)
+                ;    ;Sleep, 20
+                ;    ClicaRandomRapido(884, 454)
+                ;    ;Sleep, 20
+                ;    ClicaRandomRapido(838, 401)
+                ;    ;Sleep, 20
+                ;    ClicaRandomRapido(824, 336)
+                ;    ;Sleep, 20
+                ;    ClicaRandomRapido(859, 266)
+                ;    ;Sleep, 20
+                ;    if (FechaColetaRapida())
                 ;    {
-                ;        ;AtualizaStage()
-                ;        Send, a
-                ;        Sleep, 20
-                ;        Send, b
-                ;        Sleep, 20
-                ;        Send, c
-                ;        Sleep, 20
-                ;        Send, d
-                ;        Sleep, 20
-                ;        Send, o
-                ;        Sleep, 20
-                ;        Send, f
-                ;        Sleep, 20
-                ;        Send, g
-                ;        Sleep, 20
-                ;        Send, h
-                ;        Sleep, 20
-                ;        Send, i
-                ;        Sleep, 20
-                ;        if (FechaColetaRapida())
+                ;        loop, 3
                 ;        {
-                ;            loop, 3
-                ;            {
-                ;                Send, a
-                ;                Sleep, 20
-                ;                Send, b
-                ;                Sleep, 20
-                ;                Send, c
-                ;                Sleep, 20
-                ;                Send, d
-                ;                Sleep, 20
-                ;                Send, o
-                ;                Sleep, 20
-                ;                Send, f
-                ;                Sleep, 20
-                ;                Send, g
-                ;                Sleep, 20
-                ;                Send, h
-                ;                Sleep, 20
-                ;                Send, i
-                ;                Sleep, 20
-                ;            }
-                ;            break
+                ;            ClicaRandomRapido(934, 242)
+                ;            ;Sleep, 20
+                ;            ClicaRandomRapido(1011, 278)
+                ;            ;Sleep, 20
+                ;            ClicaRandomRapido(1035, 350)
+                ;            ;Sleep, 20
+                ;            ClicaRandomRapido(1015, 425)
+                ;            ;Sleep, 20
+                ;            ClicaRandomRapido(951, 462)
+                ;            ;Sleep, 20
+                ;            ClicaRandomRapido(884, 454)
+                ;            ;Sleep, 20
+                ;            ClicaRandomRapido(838, 401)
+                ;            ;Sleep, 20
+                ;            ClicaRandomRapido(846, 355)
+                ;            ;Sleep, 20
+                ;            ClicaRandomRapido(859, 266)
+                ;            ;Sleep, 20
                 ;        }
+                ;        break
                 ;    }
                 ;}
+                loop, 3
+                {
+                    loop, 4
+                    {
+                        ;AtualizaStage()
+                        Send, a
+                        Sleep, 20
+                        Send, b
+                        Sleep, 20
+                        Send, c
+                        Sleep, 20
+                        Send, d
+                        Sleep, 20
+                        Send, o
+                        Sleep, 20
+                        Send, f
+                        Sleep, 20
+                        Send, g
+                        Sleep, 20
+                        Send, h
+                        Sleep, 20
+                        Send, i
+                        Sleep, 20
+                        if (FechaColetaRapida())
+                        {
+                            loop, 3
+                            {
+                                Send, a
+                                Sleep, 20
+                                Send, b
+                                Sleep, 20
+                                Send, c
+                                Sleep, 20
+                                Send, d
+                                Sleep, 20
+                                Send, o
+                                Sleep, 20
+                                Send, f
+                                Sleep, 20
+                                Send, g
+                                Sleep, 20
+                                Send, h
+                                Sleep, 20
+                                Send, i
+                                Sleep, 20
+                            }
+                            break
+                        }
+                    }
+                }
             }
             else
             {
@@ -321,6 +356,14 @@ Clica()
                     ClicaRandom(827, 245, 2)
                     ClicaRandom(769, 254, 2)
                     ClicaRandom(939, 426, 2)
+                    ;loop, 5
+                    ;{
+                    ;    Send, a
+                    ;    Sleep, 20
+                    ;    Send, b
+                    ;    Sleep, 20
+                    ;    Send, i
+                    ;}
                 }
             }
         }
@@ -365,60 +408,60 @@ Clica()
     }
     else
     {
-        if(!ContratoAtivo())
-        {
-            loop, 3
-            {
-                AttMana()
-                loop, 4
-                {
-                    ;AtualizaStage()
-                    Send, a
-                    Sleep, 20
-                    Send, b
-                    Sleep, 20
-                    Send, c
-                    Sleep, 20
-                    Send, d
-                    Sleep, 20
-                    Send, o
-                    Sleep, 20
-                    Send, f
-                    Sleep, 20
-                    Send, g
-                    Sleep, 20
-                    Send, h
-                    Sleep, 20
-                    Send, i
-                    Sleep, 20
-                    if (FechaColetaRapida())
-                    {
-                        loop, 3
-                        {
-                            Send, a
-                            Sleep, 20
-                            Send, b
-                            Sleep, 20
-                            Send, c
-                            Sleep, 20
-                            Send, d
-                            Sleep, 20
-                            Send, o
-                            Sleep, 20
-                            Send, f
-                            Sleep, 20
-                            Send, g
-                            Sleep, 20
-                            Send, h
-                            Sleep, 20
-                            Send, i
-                            Sleep, 20
-                        }
-                        break
-                    }
-                }
-            }
-        }
+        ;if(!ContratoAtivo())
+        ;{
+        ;    loop, 3
+        ;    {
+        ;        AttMana()
+        ;        loop, 4
+        ;        {
+        ;            ;AtualizaStage()
+        ;            Send, a
+        ;            Sleep, 20
+        ;            Send, b
+        ;            Sleep, 20
+        ;            Send, c
+        ;            Sleep, 20
+        ;            Send, d
+        ;            Sleep, 20
+        ;            Send, o
+        ;            Sleep, 20
+        ;            Send, f
+        ;            Sleep, 20
+        ;            Send, g
+        ;            Sleep, 20
+        ;            Send, h
+        ;            Sleep, 20
+        ;            Send, i
+        ;            Sleep, 20
+        ;            if (FechaColetaRapida())
+        ;            {
+        ;                loop, 3
+        ;                {
+        ;                    Send, a
+        ;                    Sleep, 20
+        ;                    Send, b
+        ;                    Sleep, 20
+        ;                    Send, c
+        ;                    Sleep, 20
+        ;                    Send, d
+        ;                    Sleep, 20
+        ;                    Send, o
+        ;                    Sleep, 20
+        ;                    Send, f
+        ;                    Sleep, 20
+        ;                    Send, g
+        ;                    Sleep, 20
+        ;                    Send, h
+        ;                    Sleep, 20
+        ;                    Send, i
+        ;                    Sleep, 20
+        ;                }
+        ;                break
+        ;            }
+        ;        }
+        ;    }
+        ;}
         Send, {L up}
         AttMana()
         Send, {L down}
@@ -526,9 +569,8 @@ AbreHeroi()
     else
     {
         Send, 2
-        GooglePlay()
         if (!JogoAberto())
-            FechaJogoEAbre()
+            FechaBluestacksEAbre()
         Sleep, 120
     }
 }
@@ -538,7 +580,6 @@ Fechaheroi()
     if (ErrorLevel = 0)
     {
         Send, 2
-        GooglePlay()
         Sleep, 120
     }
     else
@@ -553,13 +594,10 @@ CLicaCompraHeroi()
     Loop, 5
     {
         FechaColetaRapida()
-        ;ImageSearch, OutX, OutY, 1011, 159, 1163, 807, *80 %a_scriptdir%\c1.png
-        ;ImageSearch, OutX, OutY, 1011, 159, 1163, 807, *60 %a_scriptdir%\c3.png
-        ImageSearch, OutX, OutY, 1023, 160, 1054, 848, *60 %a_scriptdir%\c3.png
+        ImageSearch, OutX, OutY, 1115, 144, 1133, 852, *30 %a_scriptdir%\c7.png
         if !ErrorLevel
         {
-            ClicaRandom(OutX+30, OutY+20, 15)
-            Sleep, 100
+            ClicaRandomDois(OutX, OutY+5, 25, 2)
         }
     }
 }
@@ -576,7 +614,7 @@ CompraHeroiRapido()
     {
         SobeUmaPagina()
     }
-    FechaAll()
+    FechaAllRapido()
 }
 
 CompraHeroi()
@@ -695,6 +733,22 @@ ProcuraAteNaoAchar(X, Y, H, W, var, img, mili)
     return false
 }
 
+ProcuraPixelAteNaoAchar(X, Y, color, mili)
+{   
+    Comeco := A_TickCount
+    while ((A_TickCount - Comeco) < mili)
+    {
+        PixelGetColor, OutputVar, X, Y
+        if (OutputVar != color)
+        {
+            return true
+        }
+        IncrementaAchou()
+    }
+    return false
+}
+
+
 IncrementaAchou()
 {
     if (A_TickCount - InicioAchou > 60000)
@@ -706,6 +760,7 @@ IncrementaAchou()
     Else
     {
         qntAchou++
+        ;GeraLog("Estava com " qntAchou)
     }
 }
 
@@ -782,7 +837,7 @@ AtualizaStageViaAba()
                         stage := stagetemp
                         GuiControl, , TxtStage, %stage%
                         AttBarraStage()
-                        FechaAll()
+                        FechaAllRapido()
                         Sleep, 40
                         Fechou := true
                         GeraLog("TempoAtt: " FormataMilisegundos(A_TickCount - iUltimaAtualizada) " - " stage " - %" StageProgess)
@@ -792,7 +847,7 @@ AtualizaStageViaAba()
                     }
                 }
             }
-            FechaAll()
+            FechaAllRapido()
         }
         else
         {
@@ -815,43 +870,59 @@ AtualizaStageViaAba()
         AtualizaStageViaAba()
     }
     ;GeraLog("Atualizou via Aba: " A_TickCount - Inicio)
-    FechaAll()
+    FechaAllRapido()
     AttMana()
     CompraHeroiRapido()
 }
 
 Atualizar()
 {
-    ;Inicio := A_TickCount
-    GooglePlay()
-    FechaAll()
-    ;AtualizaStage()
-    ;AtualizaStage()
-    ;if ((A_TickCount-iUltimaAtualizada)>5000)
-    ;{
-    ;    AtualizaStageViaConfig()
-    ;}
+    FechaAllRapido()
     VaiProBoss()
-    if ((A_tickcount - ultimaVerificadaClan) > randVerificaClan)
-    {
-        GeraLog("Entrou no verifica clan")
-        GeraLog(A_tickcount - ultimaVerificadaClan " > " randVerificaClan)
-        ultimaVerificadaClan := A_tickcount
-        Random, randVerificaClan, 60000, 120000
-        ClanRaid()
-        
-    }
-    else
-    {
-        GeraLog(A_tickcount - ultimaVerificadaClan " > " randVerificaClan)
-    }
+    VerificaClanRaid()
     Presente()
     Ovo()
     lua()
     FechaSeta()
-    ;AtualizaStatusSkillAtiva()
     tempo := A_TickCount - Inicio
-    ;GeraLog("Atualizar: " A_TickCount - Inicio)
+}
+
+SoloRaid()
+{
+    ImageSearch, OutX, OutY, 787, 54, 841, 101, *90 *TransBlack %a_scriptdir%\soloraid.png
+    if !ErrorLevel
+    {
+        GeraLog("Achou")
+        Sleep, 3000
+        ClicaRandom(1017, 673, 5)
+        Sleep, 1000
+        ClicaRandom(1032, 739, 5)
+    }
+}
+
+VerificaClanRaid()
+{
+    if ((A_tickcount - ultimaVerificadaClan) > randVerificaClan)
+    {
+        GeraLog("Entrou no verifica clan")
+        ;GeraLog(A_tickcount - ultimaVerificadaClan " > " randVerificaClan)
+        ultimaVerificadaClan := A_tickcount
+        ClanRaid()
+
+    }
+    else
+    {
+        ;GeraLog(A_tickcount - ultimaVerificadaClan " > " randVerificaClan)
+        if (randVerificaClan-((A_tickcount - ultimaVerificadaClan)) < MinToMili(10) and randVerificaClan > 120001 and Aviso)
+        {
+            ImageSearch, OutX, OutY, 745, 55, 801, 100, *60 %a_scriptdir%\raid.png
+            if (ErrorLevel = 0)
+            {
+                GeraLog("Faltam menos de 10 minutos para atacar a Raid.", true)
+                Aviso := false
+            }
+        }
+    }
 }
 
 RetornaText(X, Y, W, H)
@@ -866,7 +937,7 @@ RetornaText(X, Y, W, H)
 AttMana()
 {
     ;Inicio := A_Tickcount
-    FechaAll()
+    FechaAllRapido()
     AtualizaStatusSkillAtiva()
     ;mana := RegExReplace(RetornaText(677, 714, 175, 74), "\D(?<!\/)", "")
     mana := RegExReplace(RetornaText(696, 727, 108, 43), "\D(?<!\/)", "")
@@ -952,7 +1023,6 @@ AttMana()
         }
         else
         {
-            GeraLog("passou")
             Loop, 2
             {
                 Send, {L up}
@@ -1020,7 +1090,7 @@ AttBarraStage()
 
 AtualizaStatusSkillAtiva()
 {
-    FechaAll()
+    FechaAllRapido()
     ;Inicio := A_TickCount
     EstaAtiva("Sexta")
     EstaAtiva("Quinta")
@@ -1036,7 +1106,7 @@ EstaAtiva(skill)
     X := %skill%PixelX
     Y := %skill%PixelY
     ;Inicio := A_TickCount
-    FechaAll()
+    FechaAllRapido()
     PixelGetColor, OutputVar, X, Y
     if (OutputVar=%skill%Color)
     {
@@ -1099,9 +1169,9 @@ EstaAtiva(skill)
         }
     }
     ;GeraLog("EstaAtiva(): " A_TickCount - Inicio)
-    If (PrimeiraiCount >= 30 OR SegundaiCount >= 30 OR TerceiraiCount >= 30 OR QuartaiCount >= 30 OR QuintaiCount >= 30 OR SextaiCount >= 30)
+    If (PrimeiraiCount >= 15 OR SegundaiCount >= 15 OR TerceiraiCount >= 15 OR QuartaiCount >= 15 OR QuintaiCount >= 15 OR SextaiCount >= 15)
     {
-        GeraLog(PrimeiraiCount SegundaiCount TerceiraiCount QuartaiCount QuintaiCount SextaiCount)
+        GeraLog("Não comprou uma : " PrimeiraiCount SegundaiCount TerceiraiCount QuartaiCount QuintaiCount SextaiCount)
         CompraSkills()
     }
 }
@@ -1182,6 +1252,7 @@ FazPrestige()
     if ((StageProgess > 100 and stage > Edit1 and ChkPrestige)
     or (forcaprestige and ChkPrestige))
     {
+        GeraLog("FazPrestige: " TempoPassado() " : " stage " - " stageanterior " - " Edit1)
         GeraLogTempoPrest(TempoPassado() " : " stage " - " stageanterior " - " Edit1)
         TravadoCount := 0
         forcaprestige := false
@@ -1195,7 +1266,7 @@ FazPrestige()
                     {
                         return
                     }
-                    FechaAll()
+                    FechaAllRapido()
                     AbreSkill()
                     SobeUmaPagina()
                 }
@@ -1211,7 +1282,7 @@ FazPrestige()
         Sleep, 5000
         AtualizaInfosPrest()
         CompraSkills()
-        FechaAll()
+        FechaAllRapido()
         AtualizaStatusSkillAtiva()
         Sleep, 300
         AtualizaStatusSkillAtiva()
@@ -1311,7 +1382,7 @@ DeuErro()
             Sleep, 300
         }
         Send, 1
-        GeraLog("Deu erro - WTF")
+        GeraLog("Deu erro - WTF", true)
         return true
     }
     return false
@@ -1342,7 +1413,7 @@ VaiProBoss()
             }
             else
             {
-                GeraLog("travaod fora do boss, mas não estava mais que 99%")
+                GeraLog("travado fora do boss, mas não estava mais que 99%")
             }
         }
     }
@@ -1359,6 +1430,34 @@ VaiClicaSkill(X, Y)
     ComprouSkill++
 }
 
+
+ProcuraEClicaSkillRapido()
+{
+    Inicio := A_TickCount
+    loop, 50
+    {
+        PixelSearch, OutX, OutY, 1035, 429, 1039, 835, 0x0698F6, 30, Fast
+        if !ErrorLevel
+        {
+            MouseClick, left, OutX+15, OutY
+            loop, 10
+            {
+                PixelSearch, OutX, OutY, 1010, 421, 1016, 837, 0x2929C3, 5, Fast
+                if !ErrorLevel
+                {
+                    ComprouSkill++
+                    MouseClick, left, OutX-5, OutY
+                    Sleep, 100
+                    Break
+                }
+            }
+        }
+        FechaXgrande1()
+        if (ComprouSkill >= 6)
+            Break
+    }
+    GeraLog("ProcuraEClicaSkillRapido: " A_TickCount - Inicio)
+}
 
 ProcuraEClicaSkill()
 {
@@ -1411,12 +1510,12 @@ SobeTudo()
         SobeTudo()
     }
     FechaSkill()
-    FechaAll()
+    FechaAllRapido()
 }
 
 CompraSkills()
 {
-    ;Inicio := A_TickCount
+    Inicio := A_TickCount
     ComprouSkill := 0
     PrimeiraiCount := 0
     SegundaiCount := 0
@@ -1424,33 +1523,18 @@ CompraSkills()
     QuartaiCount := 0
     QuintaiCount := 0
     SextaiCount := 0
-    FechaAll()
+    FechaAllRapido()
     AbreSkill()
     ImageSearch, OutX, OutY, 702, 842, 780, 880, *40 %a_scriptdir%\espada.png
     if (ErrorLevel = 0)
     {
+        Sleep, 100
         ClicaRandom(1097, 184, 5)
-        ;Click, 1098, 626
-        loop, 3
-        {
-            FechaColetaRapida()
-            ProcuraEClicaSkill()
-            if (ComprouSkill >= 6)
-                break
-            DesceUmaPagina()
-        }
-        loop, 4
-        {
-            FechaColetaRapida()
-            ProcuraEClicaSkill()
-            if (ComprouSkill >= 6)
-                break
-            SobeUmaPagina()
-        }
-        if (A_TickCount - Boost > 1800000)
+        ProcuraEClicaSkillRapido()
+        if (A_TickCount - Boost > MinToMili(30))
         {
             DesceUmaPagina()
-            loop, 5
+            loop, 15
             {
                 ImageSearch, OutX, OutY, 1022, 406, 1165, 834, *120 %a_scriptdir%\fr.png
                 if !ErrorLevel
@@ -1469,12 +1553,11 @@ CompraSkills()
     }
     else
     {
-        FechaColetaRapida()
-        AbreSkill()
+        GeraLog("CompraSkills: " A_TickCount - Inicio)
         CompraSkills()
     }
-    FechaAll()
-    ;GeraLog("CompraSkills: " A_TickCount - Inicio)
+    FechaAllRapido()
+    GeraLog("CompraSkills: " A_TickCount - Inicio)
     return
 }
 
@@ -1490,11 +1573,11 @@ AbreSkill()
     else
     {
         Send, 1
-        ;GooglePlay()
         if !(ProcuraAteAchar(1112, 50, 1166, 75, 23, "xzin", 700))
         {
             Ativa()
-            FechaAll()
+            FechaAllRapido()
+            JogoAberto()
             AbreSkill()
         }
         ;GeraLog("AbreSkill: " A_TickCount - Inicio)
@@ -1520,7 +1603,6 @@ FechaSkill()
     if (ErrorLevel = 0)
     {
         Send, 1
-        GooglePlay()
         Sleep, 115
         return
     }
@@ -1534,7 +1616,7 @@ StatusSkill(X, Y, W, H, skill)
 {
     nome := ""
     tempo := ""
-    FechaAll()
+    FechaAllRapido()
     nome := "txt" . skill
     tempo := RegExReplace(RegExReplace(RetornaText(X, Y, W, H), "[íi{[<]",":"), "[^\d:]", "")
     if (StrLen(tempo)> 2)
@@ -1550,7 +1632,7 @@ StatusSkill(X, Y, W, H, skill)
 
 FechaAll()
 {
-    ;Inicio := A_TickCount
+    Inicio := A_TickCount
     ;ImageSearch, OutX, OutY, 858, 681, 1169, 740, *120 %a_scriptdir%\relic.png
     ImageSearch, OutX, OutY, 706, 689, 743, 733, *120 %a_scriptdir%\attack.png
     if ErrorLevel
@@ -1575,27 +1657,31 @@ FechaAll()
             }
         }
     }
-    If (qntAchou > 300)
+    GuiControlGet, ChkAbsal
+    if (!ChkAbsal)
     {
-        GeraLog("Estava com lag, fechou e abriu")
-        FechaJogoEAbre()
+        If (qntAchou > 450)
+        {
+            GeraLog("Estava com lag, fechou e abriu")
+            FechaBluestacksEAbre()
+        }
     }
-    ;GeraLog("FechaAll: " A_TickCount - Inicio)
+    GeraLog("FechaAll: " A_TickCount - Inicio)
 }
 
 FechaColetaRapida()
 {
     ;Inicio := A_TickCount
-    ImageSearch, OutX, OutY, 878, 679, 918, 714, *20 %a_scriptdir%\azul.png
-    if (ErrorLevel = 0)
+    PixelGetColor, OutputVar, 931, 713
+    if (OutputVar = "0xCFA63E")
     {
-        ClicaRandom(932, 695, 5)
-        ;MouseClick, left, 932, 695
-        ProcuraAteNaoAchar( 878, 679, 918, 714, 20, "azul", 2000)
+        ClicaRandom(931, 713, 5)
+        ProcuraPixelAteNaoAchar(931, 713, "0xCFA63E", 2000)
+        ;GeraLog("FechaColetaRapida: " A_TickCount - Inicio)
         return true
     }
-    return false
     ;GeraLog("FechaColetaRapida: " A_TickCount - Inicio)
+    return false
 }
 
 CompraReliquia()
@@ -1611,11 +1697,11 @@ CompraReliquia()
     }
     else if (Qual = 3)
     {
-        if (qntVezesAll < 2)
+        if (alternado)
         {
             All()
             alternado := false
-            qntVezesAll++5
+            qntVezesAll++
         }
         else
         {
@@ -1631,36 +1717,32 @@ BoS()
 {
     Send, 5
     Sleep, 500
-    ImageSearch, OutX, OutY, 1024, 841, 1083, 879, *40 %a_scriptdir%\reliquia.png
-    if (ErrorLevel = 0)
+    Cima()
+    while (!ProcuraAteAchar(705, 165, 771, 378, 40, "BoS", 700))
     {
-        while (!ProcuraAteAchar(705, 165, 771, 378, 40, "BoS", 700))
+        if (A_Index > 10)
         {
-            if (A_Index > 10)
-            {
-                return
-            }
-            SobeUmaPagina()
+            return
         }
-        loop, 10
-        {
-            ClicaRandom(AchouOutX+380, AchouOutY+5, 5)
-            Sleep, 150
-        }
-        Sleep, 500
-        Send, 5
-        Sleep, 500
+        SobeUmaPagina()
     }
-    Else
+    loop, 10
     {
-        BoS()
+        ClicaRandom(AchouOutX+380, AchouOutY+5, 5)
+        Sleep, 150
     }
+    Sleep, 500
+    Send, 5
+    Sleep, 500
+
+
 }
 
 All()
 {
     Sleep, 500
     Send, 5
+    Cima()
     ProcuraAteAchar(1029, 103, 1165, 265, 40, "all", 700)
     loop, 10
     {
@@ -1685,10 +1767,9 @@ GuiClose:
 
 Pause::Pause,,1
 
-F11::Pause,,1
-
 Ativa()
 {
+    WinActivate BlueStacks
     Click, 931 60 Right
 }
 
@@ -1747,11 +1828,12 @@ ClanRaid()
     ImageSearch, OutX, OutY, 745, 55, 801, 100, *60 %a_scriptdir%\raid.png
     if (ErrorLevel = 0)
     {
-        Loop, 5
+        loop, 5
         {
-            SoundBeep, 300, 1000
-            Sleep, 300
+            SoundBeep, 300, 300
         }
+        GeraLog("Entrou no Raid", true)
+        Aviso := true
         MouseClick, left, OutX, OutY
         Sleep, 3000
         ImageSearch, OutX, OutY, 831, 680, 1038, 772, *60 %a_scriptdir%\fundoazul.png
@@ -1797,15 +1879,15 @@ ClanRaid()
         {
             MouseClick, left, OutX, OutY
             Sleep, 1500
-            ImageSearch, OutX, OutY, 964, 589, 1069, 632, *60 %a_scriptdir%\fig2.png
-            if (ErrorLevel = 0)
-            {
-                MouseClick, left, OutX, OutY
-                Sleep, 300
-                AtacarParte(parte)
-            }
-            else
-            {
+            ;ImageSearch, OutX, OutY, 964, 589, 1069, 632, *60 %a_scriptdir%\fig2.png
+            ;if (ErrorLevel = 0)
+            ;{
+            ;    MouseClick, left, OutX, OutY
+            ;    Sleep, 300
+            ;    AtacarParte(parte)
+            ;}
+            ;else
+            ;{
                 while (TrocaAba())
                 {
                     Sleep, 500
@@ -1819,17 +1901,17 @@ ClanRaid()
                     }
                 }
 
-            }
+            ;}
         }
         loop, 2
         {
-            FechaAll()
+            FechaAllRapido()
         }
         Sleep, 3000
     }
     else
     {
-        Random, randVerificaClan, 1800000, 3600000
+        Random, randVerificaClan, MinToMili(30), MinToMili(60)
     }
 }
 
@@ -2012,8 +2094,8 @@ Ovo()
     if !ErrorLevel
     {
         MouseClick, left, OutX, OutY
-        Sleep, 300
-        MouseClick, left, 1121, 297
+        Sleep, 3000
+        MouseClick, left, 1099, 820
         Sleep, 300
     }
     ;GeraLog(A_TickCount - inicio)
@@ -2206,67 +2288,67 @@ AlvoEmQualParte(parte, tipo)
 {
     if (parte="cabeça")
     {
-        EntradaX = 893
-        EntradaY = 220
-        EntradaH = 972
-        EntradaW = 309
-    }
-    if (parte="ombro esquerdo")
-    {
-        EntradaX = 802
-        EntradaY = 235
-        EntradaH = 881
-        EntradaW = 315
-    }
-    if (parte="ombro direito")
-    {
-        EntradaX = 971
-        EntradaY = 224
-        EntradaH = 1059
-        EntradaW = 315
-    }
-    if (parte="mão esquerda")
-    {
-        EntradaX = 801
-        EntradaY = 329
-        EntradaH = 880
-        EntradaW = 399
-    }
-    if (parte="mão direita")
-    {
-        EntradaX = 979
-        EntradaY = 329
-        EntradaH = 1065
-        EntradaW = 398
-    }
-    if (parte="perna esquerda")
-    {
-        EntradaX = 861
-        EntradaY = 390
-        EntradaH = 931
-        EntradaW = 454
-    }
-    if (parte="perna direita")
-    {
-        EntradaX = 927
-        EntradaY = 383
-        EntradaH = 1002
-        EntradaW = 456
+        EntradaX = 920
+        EntradaY = 268
+        EntradaH = 945
+        EntradaW = 294
     }
     if (parte="torso")
     {
-        EntradaX = 889
-        EntradaY = 308
-        EntradaH = 969
-        EntradaW = 374
+        EntradaX = 920
+        EntradaY = 333
+        EntradaH = 944
+        EntradaW = 359
     }
-    ImageSearch, OutX, OutY, EntradaX, EntradaY, EntradaH, EntradaW, *100 %a_scriptdir%\%tipo%.png
+    if (parte="ombro esquerdo")
+    {
+        EntradaX = 837
+        EntradaY = 285
+        EntradaH = 860
+        EntradaW = 309
+    }
+    if (parte="ombro direito")
+    {
+        EntradaX = 998
+        EntradaY = 286
+        EntradaH = 1023
+        EntradaW = 309
+    }
+    if (parte="mão esquerda")
+    {
+        EntradaX = 837
+        EntradaY = 370
+        EntradaH = 860
+        EntradaW = 394
+    }
+    if (parte="mão direita")
+    {
+        EntradaX = 998
+        EntradaY = 368
+        EntradaH = 1024
+        EntradaW = 396
+    }
+    if (parte="perna esquerda")
+    {
+        EntradaX = 884
+        EntradaY = 418
+        EntradaH = 908
+        EntradaW = 443
+    }
+    if (parte="perna direita")
+    {
+        EntradaX = 960
+        EntradaY = 418
+        EntradaH = 985
+        EntradaW = 443
+    }
+    ImageSearch, OutX, OutY, EntradaX, EntradaY, EntradaH, EntradaW, *40 %a_scriptdir%\%tipo%.png
     if !ErrorLevel
     {
         MouseMove, OutX, OutY
         return true
     }
-    ImageSearch, OutX, OutY, EntradaX, EntradaY, EntradaH, EntradaW, *100 %a_scriptdir%\%tipo%2.png
+    ImageSearch, OutX, OutY, EntradaX, EntradaY, EntradaH, EntradaW, *40 %a_scriptdir%\%tipo%2.png
     if !ErrorLevel
     {
         MouseMove, OutX, OutY
@@ -2285,14 +2367,14 @@ ParteTemVida(parte)
             ImageSearch, OutX, OutY, 884, 212, 974, 300, *10 %a_scriptdir%\armor.png
             if !ErrorLevel
             {
-                MouseMove, OutX, OutY
+                ;MouseMove, OutX, OutY
                 return true
             }
             ; Cabeça vida
             ImageSearch, OutX, OutY, 884, 212, 974, 300, *10 %a_scriptdir%\vida.png
             if !ErrorLevel
             {
-                MouseMove, OutX, OutY
+                ;MouseMove, OutX, OutY
                 return true
             }
         }
@@ -2302,7 +2384,7 @@ ParteTemVida(parte)
             ImageSearch, OutX, OutY, 803, 229, 891, 315, *10 %a_scriptdir%\armor.png
             if !ErrorLevel
             {
-                MouseMove, OutX, OutY
+                ;MouseMove, OutX, OutY
                 return true
             }
 
@@ -2310,7 +2392,7 @@ ParteTemVida(parte)
             ImageSearch, OutX, OutY, 803, 229, 891, 315, *10 %a_scriptdir%\vida.png
             if !ErrorLevel
             {
-                MouseMove, OutX, OutY
+                ;MouseMove, OutX, OutY
                 return true
             }
         }
@@ -2320,7 +2402,7 @@ ParteTemVida(parte)
             ImageSearch, OutX, OutY, 969, 215, 1074, 316, *10 %a_scriptdir%\armor.png
             if !ErrorLevel
             {
-                MouseMove, OutX, OutY
+                ;MouseMove, OutX, OutY
                 return true
             }
 
@@ -2328,7 +2410,7 @@ ParteTemVida(parte)
             ImageSearch, OutX, OutY, 969, 215, 1074, 316, *10 %a_scriptdir%\vida.png
             if !ErrorLevel
             {
-                MouseMove, OutX, OutY
+                ;MouseMove, OutX, OutY
                 return true
             }
         }
@@ -2338,7 +2420,7 @@ ParteTemVida(parte)
             ImageSearch, OutX, OutY, 883, 303, 978, 370, *10 %a_scriptdir%\armor.png
             if !ErrorLevel
             {
-                MouseMove, OutX, OutY
+                ;MouseMove, OutX, OutY
                 return true
             }
 
@@ -2346,7 +2428,7 @@ ParteTemVida(parte)
             ImageSearch, OutX, OutY, 883, 303, 978, 370, *10 %a_scriptdir%\vida.png
             if !ErrorLevel
             {
-                MouseMove, OutX, OutY
+                ;MouseMove, OutX, OutY
                 return true
             }
         }
@@ -2356,7 +2438,7 @@ ParteTemVida(parte)
             ImageSearch, OutX, OutY, 792, 303, 888, 397, *10 %a_scriptdir%\armor.png
             if !ErrorLevel
             {
-                MouseMove, OutX, OutY
+                ;MouseMove, OutX, OutY
                 return true
             } 
 
@@ -2364,7 +2446,7 @@ ParteTemVida(parte)
             ImageSearch, OutX, OutY, 792, 303, 888, 397, *10 %a_scriptdir%\vida.png
             if !ErrorLevel
             {
-                MouseMove, OutX, OutY
+                ;MouseMove, OutX, OutY
                 return true
             } 
         }
@@ -2374,7 +2456,7 @@ ParteTemVida(parte)
             ImageSearch, OutX, OutY, 977, 309, 1073, 405, *10 %a_scriptdir%\armor.png
             if !ErrorLevel
             {
-                MouseMove, OutX, OutY
+                ;MouseMove, OutX, OutY
                 return true
             }    
 
@@ -2382,7 +2464,7 @@ ParteTemVida(parte)
             ImageSearch, OutX, OutY, 977, 309, 1073, 405, *10 %a_scriptdir%\vida.png
             if !ErrorLevel
             {
-                MouseMove, OutX, OutY
+                ;MouseMove, OutX, OutY
                 return true
             }
         }
@@ -2392,7 +2474,7 @@ ParteTemVida(parte)
             ImageSearch, OutX, OutY, 849, 393, 931, 453, *10 %a_scriptdir%\armor.png
             if !ErrorLevel
             {
-                MouseMove, OutX, OutY
+                ;MouseMove, OutX, OutY
                 return true
             }    
 
@@ -2400,7 +2482,7 @@ ParteTemVida(parte)
             ImageSearch, OutX, OutY, 849, 393, 931, 453, *10 %a_scriptdir%\vida.png
             if !ErrorLevel
             {
-                MouseMove, OutX, OutY
+                ;MouseMove, OutX, OutY
                 return true
             }
         }
@@ -2410,7 +2492,7 @@ ParteTemVida(parte)
             ImageSearch, OutX, OutY, 927, 372, 1004, 463, *10 %a_scriptdir%\armor.png
             if !ErrorLevel
             {
-                MouseMove, OutX, OutY
+                ;MouseMove, OutX, OutY
                 return true
             }
 
@@ -2418,7 +2500,7 @@ ParteTemVida(parte)
             ImageSearch, OutX, OutY, 927, 372, 1004, 463, *10 %a_scriptdir%\vida.png
             if !ErrorLevel
             {
-                MouseMove, OutX, OutY
+                ;MouseMove, OutX, OutY
                 return true
             }
         }
@@ -2426,11 +2508,7 @@ ParteTemVida(parte)
     return false
 }
 
-F9::
-BoS()
-return
-
-^F9::
+^F1::
 ;parte := "nenhuma"
 GeraLog("Com alvo")
 Loop, parse, listaPartes, `,
@@ -2469,6 +2547,12 @@ ClicaRandom(X, Y, var)
     Random, rand2, -var, var
     MouseClick, left, X+rand, Y+rand2
 }
+ClicaRandomDois(X, Y, var, var2)
+{
+    Random, rand, -var, var
+    Random, rand2, -var2, var2
+    MouseClick, left, X+rand, Y-rand2
+}
 
 ClicaRandomComFecha(X, Y, var)
 {
@@ -2483,10 +2567,11 @@ ClicaRandomComFecha(X, Y, var)
 Cima()
 {
     ;Inicio2 := A_TickCount
-    ImageSearch, OutX, OutY, 1040, 494, 1109, 525, *40 %a_scriptdir%\cima.png
+    ImageSearch, OutX, OutY, 1039, 496, 1109, 524, *40 %a_scriptdir%\cima.png
     if !ErrorLevel
     {
-        ClicaRandom(OutX, OutY, 3)
+        GeraLog("Cima")
+        ClicaRandom(OutX+5, OutY+5, 3)
         Sleep, 150
     }
     ;GeraLog("Cima:" A_TickCount - Inicio2)
@@ -2510,20 +2595,6 @@ lua()
         MouseClick left, 930, 89
         Sleep, 400
     }
-}
-
-GooglePlay()
-{
-    ;Inicio := A_TickCount
-    ImageSearch, OutX, OutY, 263, 103, 515, 175, *60 %a_scriptdir%\googleplay.png
-    if (ErrorLevel = 0)
-    {
-        MouseClick, left, 1894, 854
-        Sleep, 1500
-        MouseClick, left, 1894, 854
-        Sleep, 20000
-    }
-    ;GeraLog("GooglePlay: " A_TickCount - Inicio)
 }
 
 FechaSeta()
@@ -2551,6 +2622,29 @@ FechaJogoEAbre()
     GeraLog("Terminou de abrir")
 }
 
+FechaBluestacksEAbre()
+{
+    ImageSearch, OutX, OutY, 1727, 6, 1915, 45, *90 %a_scriptdir%\xbluestacks.png
+    MouseClick, left, OutX, OutY
+    Sleep, 1000
+    MouseClick, left, 1105, 499
+    Sleep, 1000
+    GeraLog("Fechou o bluestacks")
+    Run, "C:\Program Files\BlueStacks_nxt\HD-Player.exe" --instance Pie64 --cmd launchApp --package "com.gamehivecorp.taptitans2"
+    Sleep, 15000
+    GeraLog("Abriu o bluestacks no jogo")
+    ImageSearch, OutX, OutY, 0, 0, A_ScreenWidth, A_ScreenHeight, *90 %a_scriptdir%\max.png
+    if !ErrorLevel
+    {
+        GeraLog("Maximizou o bluestacks")
+        MouseClick, left, OutX, OutY
+    }
+    GeraLog("Esperando Carregar")
+    Sleep, 60000
+    GeraLog("Deve ter carregado")
+    Ativa()
+}
+
 JogoAberto()
 {
     ImageSearch, OutX, OutY, 1104, 849, 1157, 879, *90 %a_scriptdir%\baudireita.png
@@ -2560,7 +2654,7 @@ JogoAberto()
     }
     loop, 
     {
-        FechaAll()
+        FechaAllRapido()
         ImageSearch, OutX, OutY, 1104, 849, 1157, 879, *90 %a_scriptdir%\baudireita.png
         if !ErrorLevel
         {
@@ -2572,5 +2666,97 @@ JogoAberto()
             return false
         }
     }    
-    
+}
+FechaXzinRapido()
+{
+    ;Inicio := A_TickCount
+    PixelGetColor, OutputVar, 1114, 54
+    if (OutputVar = "0x4F5054")
+    {
+        ClicaRandom(1114+5, 54+3, 4)
+        ProcuraPixelAteNaoAchar(1114, 54, "0x4F5054", 2000)
+    }
+    ;GeraLog("FechaXzinRapido: " A_TickCount - Inicio)
+}
+FechaAllRapido()
+{
+    ;Inicio := A_TickCount
+    PixelGetColor, OutputVar, 730, 702
+    if (OutputVar != "0x335CFD")
+    {
+        ;GeraLog("Não achou o relic")
+        loop, 3
+        {
+            FechaColetaRapida()
+            FechaXgrande3()
+            FechaXgrande2()
+            FechaXgrande1()
+            FechaXzinRapido()
+            ;ImageSearch, OutX, OutY, 1088, 122, 1172, 196, *55 %a_scriptdir%\FechaAzul.png
+            ;if !ErrorLevel
+            ;{
+            ;    ClicaRandom(OutX, OutY, 4)
+            ;    ;MouseClick, left, OutX, OutY
+            ;    Sleep, 300
+            ;}
+        }
+    }
+    GuiControlGet, ChkAbsal
+    if (!ChkAbsal)
+    {
+        If (qntAchou > 450)
+        {
+            GeraLog("Estava com lag, fechou e abriu: " qntAchou)
+            ;FechaBluestacksEAbre()
+        }
+    }
+    ;if (A_TickCount - Inicio > 100)
+        ;GeraLog("FechaAll: " A_TickCount - Inicio)
+}
+
+FechaXgrande1()
+{
+    PixelGetColor, OutputVar, 1114, 210
+    if (OutputVar = "0x343436")
+    {
+        ClicaRandom(1114, 210+5, 1)
+        ProcuraPixelAteNaoAchar(1114, 210, "0x343436", 500)
+    }
+}
+
+FechaXgrande2()
+{
+    PixelGetColor, OutputVar, 1119, 105
+    if (OutputVar = "0x37383A" or OutputVar = "0x393A3B")
+    {
+        ClicaRandom(1119, 105, 1)
+        ProcuraPixelAteNaoAchar(1119, 105, "0x37383A", 500)
+    }
+}
+
+FechaXgrande3()
+{
+    PixelGetColor, OutputVar, 1108, 144
+    if (OutputVar = "0x37373A")
+    {
+        ClicaRandom(1108, 144+5, 1)
+        ProcuraPixelAteNaoAchar(1114, 210, "0x37373A", 500)
+    }
+}
+
+F11::
+CompraSkills()
+return
+
+
+SendSMS(txt)
+{
+    Body := """Body=" . txt . """"
+    RunWait, curl -X POST "https://api.twilio.com/2010-04-01/Accounts/AC913aa069bbfadb06c4b20a9b326c6f14/Messages.json" --data-urlencode %Body% --data-urlencode "From=+13613664986" --data-urlencode "To=+5511985245602" -u AC913aa069bbfadb06c4b20a9b326c6f14:7923dc5a2a33b1e6399061f97ac7e465, ,Hide
+    return
+}
+
+MinToMili(min)
+{
+    return min * 60000
 }
