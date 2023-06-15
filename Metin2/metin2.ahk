@@ -13,6 +13,7 @@ global Conta
 global Conta1,Conta2,Conta3
 global p := 1
 global AchouOutX, AchouOutY
+global tickVerVara := A_TickCount - 600000
 
 ;global Conta1 := "XXXXXXX,XXXXXXXXX"
 ;global Conta2 := "rlino001,08567315L123"
@@ -53,9 +54,11 @@ loop,
 	AbreInventario()
 	Manual()
 	JogaTintaFora()
+	UpaVaraPesca()
 	;UsaTodosOsPeixes()
 	ProcuraIsca()
 	EsperaFisgar()
+	Sleep, 1000
 }
 return
 
@@ -98,7 +101,8 @@ EsperaFisgar()
 		if !ErrorLevel
 		{
             Sleep, 30
-			ImageSearch, OutX, OutY, 744, 415, 879, 556, *20 %a_scriptdir%\peixe.png
+			;ImageSearch, OutX, OutY, 744, 415, 879, 556, *20 %a_scriptdir%\peixe.png
+			PixelSearch, OutX, OutY, 744, 422, 885, 553, 0x795C3B, 5, fast
             if !ErrorLevel
                 ClicaRandom(OutX, OutY, 3)
 		}
@@ -288,6 +292,11 @@ ClicaSkillPesca()
 AbreInventario()
 {
 	MouseMove, 809, 484
+	ImageSearch, OutX, OutY, 713, 603, 907, 648, *40 %a_scriptdir%\cancelar.png
+	if !ErrorLevel
+	{
+		ClicaRandom(OutX, OutY, 2)
+	}
 	ImageSearch, OutX, OutY, 1439, 521, 1602, 865, *40 %a_scriptdir%\inventario.png
 	if ErrorLevel
 	{
@@ -436,4 +445,57 @@ RetornaCorPixel(X, Y)
 {
     PixelGetColor, OutputVar, X, Y
     return OutputVar
+}
+
+F6::
+UpaVaraPesca()
+return
+
+F7::
+if (ProcuraAteAchar(697, 496, 937, 565, 60, "sim", 1000))
+{
+	;ClicaRandom(AchouOutX, AchouOutY, 1)
+	MouseMove, AchouOutX, AchouOutY
+	GeraLog("Achou")
+}
+return
+
+
+UpaVaraPesca()
+{
+	if ((A_TickCount - tickVerVara) > MinToMili(10))
+	{
+		MouseMove, 1464, 322
+		if (ProcuraAteAchar(1286, 329, 1594, 690, 60, "refinar", 1000))
+		{
+			ClicaRandomDIreito(1464, 322, 3)
+			if (ProcuraAteAchar(1439, 521, 1602, 865, 60, "vara", 10000)) 
+			{
+				MouseMove, AchouOutX, AchouOutY
+				Send {LButton down}
+				Sleep, 60
+				ImageSearch, OutX, OutY, 0, 0, A_ScreenWidth, A_ScreenHeight, *60 *TransBlack %a_scriptdir%\pescador.png
+				if !ErrorLevel
+				{
+					MouseMove, OutX, OutY
+					Sleep, 60
+					Send {LButton up}
+					Sleep, 60
+					if (ProcuraAteAchar(697, 496, 937, 565, 60, "sim", 1000))
+					{
+						ClicaRandom(AchouOutX, AchouOutY, 1)
+						GeraLog("Achou")
+						Sleep, 1000
+					}
+					Send, {ESC}
+					ProcuraAteAchar(1439, 521, 1602, 865, 40, "inventario", 1000)
+					AbreInventario()
+				}
+				ProcuraAteAchar(1439, 521, 1602, 865, 60, "vara", 10000)
+				ClicaRandomDIreito(AchouOutX, AchouOutY, 3)
+				return
+			}
+		}
+	}
+	tickVerVara := A_TickCount
 }
