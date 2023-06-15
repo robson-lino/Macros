@@ -6,22 +6,26 @@ SetKeyDelay, 1, 1
 
 #Include, ocr.ahk
 #Include edge.ahk
-global ChromeInst,ChromeProfile,PageInst
-FileCreateDir, ChromeProfile
-;ChromeInst := new Edge(A_ScriptDir "\EdgeProfile",, "--no-first-run")
 
-; --- Connect to the page ---
+if (false)
+{
+    global ChromeInst,ChromeProfile,PageInst
+    FileCreateDir, ChromeProfile
+    ChromeInst := new Edge(A_ScriptDir "\EdgeProfile",, "--no-first-run")
 
-if !(PageInst := ChromeInst.GetPage())
-{
-	;MsgBox, Could not retrieve page!
-	;ChromeInst.Kill()
-}
-else
-{
-    ;PageInst.Call("Page.navigate", {"url": "https://dontpad.com/robsonlino/taptitans.log"})
-	;PageInst.WaitForLoad()
-    ;Sleep, 15000
+    ; --- Connect to the page ---
+
+    if !(PageInst := ChromeInst.GetPage())
+    {
+        MsgBox, Could not retrieve page!
+        ChromeInst.Kill()
+    }
+    else
+    {
+        PageInst.Call("Page.navigate", {"url": "https://dontpad.com/robsonlino/taptitans.log"})
+        PageInst.WaitForLoad()
+        ;Sleep, 15000
+    }
 }
 
 DefaultDirs = a_scriptdir
@@ -582,7 +586,8 @@ AbreHeroi()
         {
             Ativa()
             FechaAllRapido()
-            JogoAberto()
+            if (!JogoAberto())
+                FechaBluestacksEAbre()
             AbreHeroi()
         }
         ProcuraPixelAteAchar(971, 206, "0x303030", 700)
@@ -1267,7 +1272,7 @@ FazPrestige()
     GuiControlGet, ChkAbsal
     GuiControlGet, ChkPrestige
     ;if ((StageProgess > 100 and stage > Edit1 and aumento_percentual >= 0 and aumento_percentual <= 0.2 and aumento_percentual_media < 0.5 and ChkPrestige) 
-    if ((StageProgess > 100 and stage > Edit1 and ChkPrestige)
+    if ((StageProgess >= 100 and stage > Edit1 and ChkPrestige)
     or (forcaprestige and ChkPrestige))
     {
         GeraLog("FazPrestige: " TempoPassado() " : " stage " - " stageanterior " - " Edit1)
@@ -1597,7 +1602,8 @@ AbreSkill()
         {
             Ativa()
             FechaAllRapido()
-            JogoAberto()
+            if (!JogoAberto())
+                FechaBluestacksEAbre()
             AbreSkill()
         }
         ;GeraLog("AbreSkill: " A_TickCount - Inicio)
@@ -1645,7 +1651,8 @@ AbreSkillDiretoProPresitigo()
         {
             Ativa()
             FechaAllRapido()
-            JogoAberto()
+            if (!JogoAberto())
+                FechaBluestacksEAbre()
             AbreSkillDiretoProPresitigo()
         }
         ;GeraLog("AbreSkill final: " A_TickCount - Inicio)
@@ -1899,8 +1906,8 @@ ClanRaid()
         {
             SoundBeep, 300, 300
         }
+        Random, randVerificaClan, MinToMili(1), MinToMili(5)
         GeraLog("Entrou no Raid", true)
-        Aviso := true
         MouseClick, left, OutX, OutY
         Sleep, 3000
         ImageSearch, OutX, OutY, 831, 680, 1038, 772, *60 %a_scriptdir%\fundoazul.png
@@ -1978,6 +1985,7 @@ ClanRaid()
     }
     else
     {
+        Aviso := true
         Random, randVerificaClan, MinToMili(30), MinToMili(60)
     }
 }

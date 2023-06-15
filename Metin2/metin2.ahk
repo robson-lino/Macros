@@ -12,6 +12,7 @@ global listaPeixes := "p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,p16,p1
 global Conta
 global Conta1,Conta2,Conta3
 global p := 1
+global AchouOutX, AchouOutY
 
 ;global Conta1 := "XXXXXXX,XXXXXXXXX"
 ;global Conta2 := "rlino001,08567315L123"
@@ -43,7 +44,6 @@ parsed := JSON.Load(json_str)
 for key, value in quelixodelinguagem 
     %key% := value.ID . "," . value.Senha
 
-Pause::Pause
 F8::Pause
 
 F9::
@@ -56,7 +56,6 @@ loop,
 	;UsaTodosOsPeixes()
 	ProcuraIsca()
 	EsperaFisgar()
-	Sleep, 1500
 }
 return
 
@@ -72,15 +71,15 @@ TaLogado()
 		ClicaRandom(876, 566, 5)
 		Loop, parse, Conta%Conta%, `,
 		{
-			Loop, 30
+			Loop, 60
 				Send, {BackSpace}
 			
-			Sleep, 30
+			Sleep, 60
 			Send, %A_LoopField%
-			Sleep, 30
+			Sleep, 60
 			Send, {Enter}
 		}
-		ProcuraAteAcharSemLogar(52, 263, 148, 325, 40, "flag", 30000)
+		ProcuraAteAcharSemLogar(52, 263, 148, 325, 40, "flag", MinToMili(3))
 		Send, {Enter}
 		SetKeyDelay, 25, 25
 	}
@@ -91,7 +90,7 @@ EsperaFisgar()
 {
 	AbreSkill()
 	ClicaSkillPesca()
-	ProcuraAteAchar(776, 357, 830, 375, 20, "pescaria", 500)
+	ProcuraAteAchar(776, 357, 830, 375, 20, "pescaria", 1000)
 	ImageSearch, OutX, OutY, 776, 357, 830, 375, *20 %a_scriptdir%\pescaria.png
 	while (!ErrorLevel)
 	{
@@ -105,6 +104,7 @@ EsperaFisgar()
 		}
 		else
 		{
+			MouseMove, 791, 209
 			ImageSearch, OutX, OutY, 1439, 521, 1602, 865, *30 %a_scriptdir%\p%p%.png
 			if !ErrorLevel
 			{
@@ -147,32 +147,32 @@ return
 
 
 F5::
-Manual()
+WinActivate AoM2
+WinGetPos, X, Y, W, H, AoM2
+loop
+{
+	if (ProcuraAteAchar(0, 0, W-300, H, 60, "boss", 60000))
+	{
+		MouseMove, AchouOutX, AchouOutY
+		GeraLog("Achou")
+	}
+	else
+	{
+		GeraLog("Não achou")
+	}
+}
 return
 
 
 CompraManual()
 {
-	ImageSearch, OutX, OutY, 0, 0, A_ScreenWidth, A_ScreenHeight, *60 *TransBlack %a_scriptdir%\pescador.png
-	if !ErrorLevel
-	{
-		ClicaRandom(OutX+20, OutY+20, 3)
-		Sleep, 300
-		ClicaRandom(809, 367, 3)
-		if (ProcuraAteAchar(1268, 53, 1332, 68, 20, "loja", 1000))
-		{
-			ClicaRandomDIreito(1303, 93, 3)
-			Sleep, 300
-			ClicaRandom(1374, 62, 3)
-		}
-		else
-		{
-			Send, {ESC}
-			return
-		}
-		
-	}
+	AbrePescador()
+	Sleep, 60
+	ClicaRandomDIreito(1303, 93, 3)
+	Sleep, 60
+	FechaJanelaCompra()
 }
+
 Manual()
 {
 	ImageSearch, OutX, OutY, 14, 40, 295, 61, *60 %a_scriptdir%\manual.png
@@ -193,17 +193,41 @@ Manual()
 
 CompraIsca()
 {
+	AbrePescador()
+	Sleep, 60
+	ClicaRandomDIreito(1301, 120, 3)
+	Sleep, 60
+	FechaJanelaCompra()
+}
+
+FechaJanelaCompra()
+{
+	if (ProcuraAteAchar(1268, 53, 1332, 68, 20, "loja", 1000))
+	{
+		ClicaRandom(1374, 62, 3)
+		return
+	}
+	else
+	{
+		loop, 10
+		{
+			Send, {ESC}
+		}
+		return
+	}
+}
+
+AbrePescador()
+{
 	ImageSearch, OutX, OutY, 0, 0, A_ScreenWidth, A_ScreenHeight, *60 *TransBlack %a_scriptdir%\pescador.png
 	if !ErrorLevel
 	{
 		ClicaRandom(OutX+20, OutY+20, 3)
-		Sleep, 300
+		Sleep, 600
 		ClicaRandom(809, 367, 3)
 		if (ProcuraAteAchar(1268, 53, 1332, 68, 20, "loja", 1000))
 		{
-			ClicaRandomDIreito(1301, 120, 3)
-			Sleep, 300
-			ClicaRandom(1374, 62, 3)
+			return
 		}
 		else
 		{
@@ -219,13 +243,13 @@ JogaTintaFora()
 	if !ErrorLevel
 	{
 		MouseMove, OutX, OutY
-		Sleep, 20
+		Sleep, 40
 		Send {LButton down}
 		MouseMove, 829, 357
 		Send {LButton up}
-		Sleep, 20
+		Sleep, 40
 		ClicaRandom(765, 492, 3)
-		Sleep, 20
+		Sleep, 40
 	}
 }
 
@@ -246,7 +270,7 @@ ClicaSkillPesca()
 	if !ErrorLevel
 	{
 		ClicaRandomDIreito(OutX+5, OutY+5, 3)
-		MouseMove, 804, 359
+		MouseMove, 791, 209
 	}
 	while (!ProcuraAteAchar(776, 357, 830, 375, 20, "pescaria", 100))
 	{
@@ -254,7 +278,7 @@ ClicaSkillPesca()
 		if !ErrorLevel
 		{
 			ClicaRandomDIreito(OutX+5, OutY+5, 3)
-			MouseMove, 804, 359
+			MouseMove, 791, 209
 		}
 		if (A_index > 5)
 			return
@@ -263,7 +287,7 @@ ClicaSkillPesca()
 
 AbreInventario()
 {
-	MouseMove, 804, 359
+	MouseMove, 791, 209
 	ImageSearch, OutX, OutY, 1439, 521, 1602, 865, *40 %a_scriptdir%\inventario.png
 	if ErrorLevel
 	{
@@ -275,7 +299,7 @@ AbreInventario()
 
 TiraItemNovo()
 {
-	MouseMove, 804, 359
+	MouseMove, 791, 209
 	ImageSearch, OutX, OutY, 1439, 521, 1602, 865, *40 %a_scriptdir%\itemnovo.png
 	if !ErrorLevel
 	{
@@ -307,7 +331,7 @@ ProcuraAteAchar(X, Y, H, W, var, img, mili)
     Comeco := A_TickCount
     while ((A_TickCount - Comeco) < mili)
     {
-        ImageSearch, OutX, OutY, X, Y, H, W, *%var% %a_scriptdir%\%img%.png
+        ImageSearch, OutX, OutY, X, Y, H, W, *%var% *TransBlack %a_scriptdir%\%img%.png
         if (!ErrorLevel)
         {
             AchouOutX := OutX
@@ -342,6 +366,19 @@ ProcuraAteNaoAchar(X, Y, H, W, var, img, mili)
     {
         ImageSearch, OutX, OutY, X, Y, H, W, *%var% %a_scriptdir%\%img%.png
         if (ErrorLevel)
+        {
+            return true
+        }
+    }
+    return false
+}
+
+ProcuraPixelAteNaoAchar(X, Y, color, mili)
+{   
+    Comeco := A_TickCount
+    while ((A_TickCount - Comeco) < mili)
+    {
+        if (RetornaCorPixel(X, Y) != color)
         {
             return true
         }
@@ -387,4 +424,16 @@ ClicaRandomDireito(X, Y, var)
     Random, rand, -var, var
     Random, rand2, -var, var
     MouseClick, right, X+rand, Y+rand2
+}
+
+
+MinToMili(min)
+{
+    return min * 60000
+}
+
+RetornaCorPixel(X, Y)
+{
+    PixelGetColor, OutputVar, X, Y
+    return OutputVar
 }
