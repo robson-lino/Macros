@@ -104,7 +104,7 @@ EsperaFisgar()
 		}
 		else
 		{
-			MouseMove, 791, 209
+			MouseMove, 809, 484
 			ImageSearch, OutX, OutY, 1439, 521, 1602, 865, *30 %a_scriptdir%\p%p%.png
 			if !ErrorLevel
 			{
@@ -270,7 +270,7 @@ ClicaSkillPesca()
 	if !ErrorLevel
 	{
 		ClicaRandomDIreito(OutX+5, OutY+5, 3)
-		MouseMove, 791, 209
+		MouseMove, 809, 484
 	}
 	while (!ProcuraAteAchar(776, 357, 830, 375, 20, "pescaria", 100))
 	{
@@ -278,7 +278,7 @@ ClicaSkillPesca()
 		if !ErrorLevel
 		{
 			ClicaRandomDIreito(OutX+5, OutY+5, 3)
-			MouseMove, 791, 209
+			MouseMove, 809, 484
 		}
 		if (A_index > 5)
 			return
@@ -287,7 +287,7 @@ ClicaSkillPesca()
 
 AbreInventario()
 {
-	MouseMove, 791, 209
+	MouseMove, 809, 484
 	ImageSearch, OutX, OutY, 1439, 521, 1602, 865, *40 %a_scriptdir%\inventario.png
 	if ErrorLevel
 	{
@@ -299,7 +299,7 @@ AbreInventario()
 
 TiraItemNovo()
 {
-	MouseMove, 791, 209
+	MouseMove, 809, 484
 	ImageSearch, OutX, OutY, 1439, 521, 1602, 865, *40 %a_scriptdir%\itemnovo.png
 	if !ErrorLevel
 	{
