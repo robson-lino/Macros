@@ -51,6 +51,7 @@ loop,
 {
 	TaLogado()
 	AbreInventario()
+	Manual()
 	JogaTintaFora()
 	;UsaTodosOsPeixes()
 	ProcuraIsca()
@@ -157,11 +158,19 @@ CompraManual()
 	{
 		ClicaRandom(OutX+20, OutY+20, 3)
 		Sleep, 300
-		ClicaRandom(805, 364, 3)
-		Sleep, 300
-		ClicaRandomDIreito(1303, 93, 3)
-		Sleep, 300
-		ClicaRandom(1374, 62, 3)
+		ClicaRandom(809, 367, 3)
+		if (ProcuraAteAchar(1268, 53, 1332, 68, 20, "loja", 1000))
+		{
+			ClicaRandomDIreito(1303, 93, 3)
+			Sleep, 300
+			ClicaRandom(1374, 62, 3)
+		}
+		else
+		{
+			Send, {ESC}
+			return
+		}
+		
 	}
 }
 Manual()
@@ -189,11 +198,18 @@ CompraIsca()
 	{
 		ClicaRandom(OutX+20, OutY+20, 3)
 		Sleep, 300
-		ClicaRandom(805, 364, 3)
-		Sleep, 300
-		ClicaRandomDIreito(1301, 120, 3)
-		Sleep, 300
-		ClicaRandom(1374, 62, 3)
+		ClicaRandom(809, 367, 3)
+		if (ProcuraAteAchar(1268, 53, 1332, 68, 20, "loja", 1000))
+		{
+			ClicaRandomDIreito(1301, 120, 3)
+			Sleep, 300
+			ClicaRandom(1374, 62, 3)
+		}
+		else
+		{
+			Send, {ESC}
+			return
+		}
 	}
 }
 
