@@ -465,9 +465,12 @@ UpaVaraPesca()
 {
 	if ((A_TickCount - tickVerVara) > MinToMili(10))
 	{
+		GeraLog("Verificou se precisa upar minha vara... haha")
+		tickVerVara := A_TickCount
 		MouseMove, 1464, 322
 		if (ProcuraAteAchar(1286, 329, 1594, 690, 60, "refinar", 1000))
 		{
+			GeraLog("Precisava, bora upar...")
 			ClicaRandomDIreito(1464, 322, 3)
 			if (ProcuraAteAchar(1439, 521, 1602, 865, 60, "vara", 10000)) 
 			{
@@ -497,5 +500,4 @@ UpaVaraPesca()
 			}
 		}
 	}
-	tickVerVara := A_TickCount
 }
