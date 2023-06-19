@@ -1,7 +1,7 @@
 ; 0.2.4
 #SingleInstance Force
 SetWorkingDir %A_ScriptDir%
-SetKeyDelay, 1, 1
+SetKeyDelay, 25, 25
 #MaxThreads 1
 
 #Include, ocr.ahk
@@ -104,6 +104,10 @@ global ultimaVerificadaClan := A_TickCount
 global randVerificaClan
 global Aviso := true
 global grand, grand2
+global EntradaX := 0
+global EntradaY := 0
+global EntradaW := 0
+global EntradaH := 0
 
 
 
@@ -166,7 +170,7 @@ Gui Add, Text, hWndhtxtTempoStage vtxtTempoStage x140 y8 w30 h23 +0x200, 0
 Gui Add, Text, x170 y8 w39 h23 +0x200, Med:
 Gui Add, Text, hWndhtxtMediana vtxtMediana x205 y8 w42 h23 +0x200, 0
 Gui Add, Progress, vPrgStage x176 y40 w120 h20 -Smooth, 10
-Gui Add, Edit, x48 y40 w120 h21 +Number vEdit1, 117150
+Gui Add, Edit, x48 y40 w120 h21 +Number vEdit1, 118000
 Gui Add, Text, x8 y40 w36 h23 +0x200, Target
 Gui Add, Progress, vPrgMana x8 y96 w120 h20 -Smooth, 100
 Gui Add, CheckBox, vChkMiR x8 y144 w63 h23, MiR
@@ -330,41 +334,41 @@ Clica()
         }
         else
         {
-            AttMana()
-            MouseMove, 940+rand, 218+rand2
-            Click, 2
-            Click, 2
-            Sleep, 30
-            MouseMove, 1146, 242
-            Click, 2
-            MouseClick, left, 1146, 242
-            Send {LButton down}
-            MouseMove, 925+rand, 254+rand2
-            MouseMove, 845+rand, 258+rand2
-            MouseMove, 875+rand, 281+rand2
-            MouseMove, 818+rand, 298+rand2
-            MouseMove, 845+rand, 317+rand2
-            MouseMove, 806+rand, 353+rand2
-            MouseMove, 842+rand, 374+rand2
-            MouseMove, 830+rand, 439+rand2
-            MouseMove, 879+rand, 421+rand2
-            MouseMove, 903+rand, 477+rand2
-            MouseMove, 958+rand, 456+rand2
-            MouseMove, 995+rand, 409+rand2
-            MouseMove, 1037+rand, 411+rand2
-            MouseMove, 1011+rand, 393+rand2
-            MouseMove, 1055+rand, 361+rand2
-            MouseMove, 1044+rand, 325+rand2
-            MouseMove, 1024+rand, 284+rand2
-            MouseMove, 1028+rand, 223+rand2
-            MouseMove, 945+rand, 251+rand2
-            MouseMove, 894+rand, 267+rand2
-            MouseMove, 757+rand, 220+rand2
-            MouseMove, 1135+rand, 239+rand2
-            Send {LButton up}
-            FechaColetaRapida()
-            AttMana()
-            AtualizaStageViaAba()
+            Send, k
+            ProcuraPixelAteAchar(1046, 17, "0x381E1B", 300)
+            ProcuraPixelAteNaoAcharSI(1046, 17, "0x381E1B", 5000)
+            ;Random, grand, -4, 4
+            ;Random, grand2, -4, 4
+            ;MouseMove, 940+grand, 218+grand2
+            ;MouseClick, left, 1146, 242
+            ;Send {LButton down}
+            ;Sleep, 20
+            ;Send {LButton down}
+            ;MouseMove, 925+grand, 254+grand2
+            ;MouseMove, 845+grand, 258+grand2
+            ;MouseMove, 875+grand, 281+grand2
+            ;MouseMove, 818+grand, 298+grand2
+            ;MouseMove, 845+grand, 317+grand2
+            ;MouseMove, 806+grand, 353+grand2
+            ;MouseMove, 842+grand, 374+grand2
+            ;MouseMove, 830+grand, 439+grand2
+            ;MouseMove, 879+grand, 421+grand2
+            ;MouseMove, 903+grand, 477+grand2
+            ;MouseMove, 958+grand, 456+grand2
+            ;MouseMove, 995+grand, 409+grand2
+            ;MouseMove, 1037+grand, 411+grand2
+            ;MouseMove, 1011+grand, 393+grand2
+            ;MouseMove, 1055+grand, 361+grand2
+            ;MouseMove, 1044+grand, 325+grand2
+            ;MouseMove, 1024+grand, 284+grand2
+            ;MouseMove, 1028+grand, 223+grand2
+            ;MouseMove, 945+grand, 251+grand2
+            ;MouseMove, 894+grand, 267+grand2
+            ;MouseMove, 757+grand, 220+grand2
+            ;MouseMove, 1135+grand, 239+grand2
+            ;Send {LButton up}
+            ;Sleep, 20
+            ;Send {LButton up}
         }
     }
     else
@@ -807,6 +811,19 @@ ProcuraPixelAteNaoAchar(X, Y, color, mili)
     return false
 }
 
+ProcuraPixelAteNaoAcharSI(X, Y, color, mili)
+{   
+    Comeco := A_TickCount
+    while ((A_TickCount - Comeco) < mili)
+    {
+        if (RetornaCorPixel(X, Y) != color)
+        {
+            return true
+        }
+    }
+    return false
+}
+
 
 IncrementaAchou()
 {
@@ -861,7 +878,8 @@ AtualizaStageViaAba()
             AttBarraStage()
             GeraLog("TempoAtt: " FormataMilisegundos(A_TickCount - iUltimaAtualizada) " - " stage " - %" StageProgess)
             FazPrestige()
-            If (StageProgess >= 99.98 and contrato)
+            GuiControlGet, ChkPrestige
+            If (StageProgess >= 99.98 and contrato and ChkPrestige)
                 prestmili := 5000
             else
                 prestmili := 1000
@@ -936,7 +954,7 @@ VerificaClanRaid()
     }
     else
     {
-        ;GeraLog(A_tickcount - ultimaVerificadaClan " > " randVerificaClan)
+        GeraLog(A_tickcount - ultimaVerificadaClan " > " randVerificaClan)
         if (randVerificaClan-((A_tickcount - ultimaVerificadaClan)) < MinToMili(10) and randVerificaClan > 120001 and Aviso)
         {
             ImageSearch, OutX, OutY, 745, 55, 801, 100, *60 %a_scriptdir%\raid.png
@@ -1232,31 +1250,31 @@ TempoDePrestigio()
     GuiControlGet, ChkAbsal
     if (!ChkAbsal)
     {
-        if (A_Tickcount - TickPrestigio > 900000)
+        if (A_Tickcount - TickPrestigio > MinToMili(7))
         {
             Gui, Submit, NoHide
             if (Push = 3)
             {
                 ;CheckMir := false
-                GeraLog("Estava mais de 15 minutos em um unico prestigio, desmarca o MiR, e força")
+                GeraLog("Estava mais de 7 minutos em um unico prestigio, desmarca o MiR, e força")
                 forcaprestige := true
             }
             Else
             {
                 ;CheckMir := false
-                GeraLog("Estava mais de 15 minutos em um unico prestigio, desmarca o MiR, e força")
+                GeraLog("Estava mais de 7 minutos em um unico prestigio, desmarca o MiR, e força")
                 forcaprestige := true
             }
         }
     }
     else
-    if (A_Tickcount - TickPrestigio > 900000)
+    if (A_Tickcount - TickPrestigio > MinToMili(10))
     {
         Gui, Submit, NoHide
         if (Push = 3 OR Push = 1)
         {
             ;CheckMir := false
-            GeraLog("Estava mais de 2 minutos em um unico prestigio, desmarca o MiR, e força")
+            GeraLog("Estava mais de 10 minutos em um unico prestigio, desmarca o MiR, e força")
             forcaprestige := true
         }
     }
@@ -1619,11 +1637,16 @@ AbreSkillDiretoProPresitigo()
     {
         ;GeraLog("AbreSkill já estava aberta: " A_TickCount - Inicio)
         ; Espera abrir o icone, e vai clicando
-        while (!ProcuraPixelAteAchar(755, 99,"0x00D2FF", 5))
+        while (!ProcuraPixelAteAchar(927, 322,"0xFFFFFF", 15))
         {
             Cima()
             FechaColetaRapida()
             ClicaRandom(1091, 284, 5)
+            if (A_Index > 30)
+            {
+                SobeUmaPagina()
+                return
+            }
         }
         return
     }
@@ -1735,7 +1758,7 @@ FechaAll()
     GuiControlGet, ChkAbsal
     if (!ChkAbsal)
     {
-        If (qntAchou > 300)
+        If (qntAchou > 350)
         {
             GeraLog("Estava com lag, fechou e abriu")
             FechaBluestacksEAbre()
@@ -2363,10 +2386,11 @@ AlvoEmQualParte(parte, tipo)
 {
     if (parte="cabeça")
     {
-        EntradaX = 920
-        EntradaY = 268
-        EntradaH = 945
-        EntradaW = 294
+        SetaVariaveisEntrada(920, 268, 945, 294)
+        ;EntradaX = 920
+        ;EntradaY = 268
+        ;EntradaH = 945
+        ;EntradaW = 294
     }
     if (parte="torso")
     {
@@ -2417,20 +2441,30 @@ AlvoEmQualParte(parte, tipo)
         EntradaH = 985
         EntradaW = 443
     }
-    ImageSearch, OutX, OutY, EntradaX, EntradaY, EntradaH, EntradaW, *40 %a_scriptdir%\%tipo%.png
-    if !ErrorLevel
+    loop, 3
     {
-        MouseMove, OutX, OutY
-        return true
+        ImageSearch, OutX, OutY, EntradaX, EntradaY, EntradaH, EntradaW, *40 %a_scriptdir%\%tipo%%A_Index%.png
+        if !ErrorLevel
+        {
+            MouseMove, OutX, OutY
+            return true
+        }
     }
-    ImageSearch, OutX, OutY, EntradaX, EntradaY, EntradaH, EntradaW, *40 %a_scriptdir%\%tipo%2.png
-    if !ErrorLevel
-    {
-        MouseMove, OutX, OutY
-        return true
-    }
+    ;ImageSearch, OutX, OutY, EntradaX, EntradaY, EntradaH, EntradaW, *40 %a_scriptdir%\%tipo%2.png
+    ;if !ErrorLevel
+    ;{
+    ;    MouseMove, OutX, OutY
+    ;    return true
+    ;}
 }
 
+SetaVariaveisEntrada(X, Y, H, W)
+{
+    EntradaX := X
+    EntradaY := Y
+    EntradaH := H
+    EntradaW := W
+}
 
 ParteTemVida(parte)
 {
@@ -2438,145 +2472,106 @@ ParteTemVida(parte)
     {
         if (parte="cabeça")
         {
-            ; Cabeça armor
-            ImageSearch, OutX, OutY, 884, 212, 974, 300, *10 %a_scriptdir%\armor.png
-            if !ErrorLevel
+            loop, 3
             {
-                ;MouseMove, OutX, OutY
-                return true
-            }
-            ; Cabeça vida
-            ImageSearch, OutX, OutY, 884, 212, 974, 300, *10 %a_scriptdir%\vida.png
-            if !ErrorLevel
-            {
-                ;MouseMove, OutX, OutY
-                return true
+                ; Cabeça armor
+                ImageSearch, OutX, OutY, 884, 212, 974, 300, *10 %a_scriptdir%\vida%A_index%.png
+                if !ErrorLevel
+                {
+                    ;MouseMove, OutX, OutY
+                    return true
+                }
             }
         }
         if (parte="ombro esquerdo")
         {
-            ; ombro esquerdo armor
-            ImageSearch, OutX, OutY, 803, 229, 891, 315, *10 %a_scriptdir%\armor.png
-            if !ErrorLevel
+            loop, 3
             {
-                ;MouseMove, OutX, OutY
-                return true
-            }
-
-            ; ombro esquerdo vida
-            ImageSearch, OutX, OutY, 803, 229, 891, 315, *10 %a_scriptdir%\vida.png
-            if !ErrorLevel
-            {
-                ;MouseMove, OutX, OutY
-                return true
+                ; ombro esquerdo armor
+                ImageSearch, OutX, OutY, 803, 229, 891, 315, *10 %a_scriptdir%\vida%A_index%.png
+                if !ErrorLevel
+                {
+                    ;MouseMove, OutX, OutY
+                    return true
+                }
             }
         }
         if (parte="ombro direito")
         {
-            ; ombro direito armor
-            ImageSearch, OutX, OutY, 969, 215, 1074, 316, *10 %a_scriptdir%\armor.png
-            if !ErrorLevel
+            loop, 3
             {
-                ;MouseMove, OutX, OutY
-                return true
-            }
-
-            ; ombro direito vida
-            ImageSearch, OutX, OutY, 969, 215, 1074, 316, *10 %a_scriptdir%\vida.png
-            if !ErrorLevel
-            {
-                ;MouseMove, OutX, OutY
-                return true
+                ; ombro direito armor
+                ImageSearch, OutX, OutY, 969, 215, 1074, 316, *10 %a_scriptdir%\vida%A_index%.png
+                if !ErrorLevel
+                {
+                    ;MouseMove, OutX, OutY
+                    return true
+                }
             }
         }
         if (parte="torso")
         {
-            ; torso armor
-            ImageSearch, OutX, OutY, 883, 303, 978, 370, *10 %a_scriptdir%\armor.png
-            if !ErrorLevel
+            loop, 3
             {
-                ;MouseMove, OutX, OutY
-                return true
-            }
-
-            ; torso vida
-            ImageSearch, OutX, OutY, 883, 303, 978, 370, *10 %a_scriptdir%\vida.png
-            if !ErrorLevel
-            {
-                ;MouseMove, OutX, OutY
-                return true
-            }
+                ; torso armor
+                ImageSearch, OutX, OutY, 883, 303, 978, 370, *10 %a_scriptdir%\vida%A_index%.png
+                if !ErrorLevel
+                {
+                    ;MouseMove, OutX, OutY
+                    return true
+                }
+                }
         }
         if (parte="mão esquerda")
         {
-            ; mão esquerda armor
-            ImageSearch, OutX, OutY, 792, 303, 888, 397, *10 %a_scriptdir%\armor.png
-            if !ErrorLevel
+            loop, 3
             {
-                ;MouseMove, OutX, OutY
-                return true
-            } 
-
-            ; mão esquerda vida
-            ImageSearch, OutX, OutY, 792, 303, 888, 397, *10 %a_scriptdir%\vida.png
-            if !ErrorLevel
-            {
-                ;MouseMove, OutX, OutY
-                return true
-            } 
+                ; mão esquerda armor
+                ImageSearch, OutX, OutY, 792, 303, 888, 397, *10 %a_scriptdir%\vida%A_index%.png
+                if !ErrorLevel
+                {
+                    ;MouseMove, OutX, OutY
+                    return true
+                } 
+            }
         }
         if (parte="mão direita")
         {
-            ; mão direita armor
-            ImageSearch, OutX, OutY, 977, 309, 1073, 405, *10 %a_scriptdir%\armor.png
-            if !ErrorLevel
+            loop, 3
             {
-                ;MouseMove, OutX, OutY
-                return true
-            }    
-
-            ; mão direita vida
-            ImageSearch, OutX, OutY, 977, 309, 1073, 405, *10 %a_scriptdir%\vida.png
-            if !ErrorLevel
-            {
-                ;MouseMove, OutX, OutY
-                return true
+                ; mão direita armor
+                ImageSearch, OutX, OutY, 977, 309, 1073, 405, *10 %a_scriptdir%\vida%A_index%.png
+                if !ErrorLevel
+                {
+                    ;MouseMove, OutX, OutY
+                    return true
+                }
             }
         }
         if (parte="perna esquerda")
         { 
-            ; perna esquerda armor
-            ImageSearch, OutX, OutY, 849, 393, 931, 453, *10 %a_scriptdir%\armor.png
-            if !ErrorLevel
+            loop, 3
             {
-                ;MouseMove, OutX, OutY
-                return true
-            }    
-
-            ; perna esquerda vida
-            ImageSearch, OutX, OutY, 849, 393, 931, 453, *10 %a_scriptdir%\vida.png
-            if !ErrorLevel
-            {
-                ;MouseMove, OutX, OutY
-                return true
+                ; perna esquerda armor
+                ImageSearch, OutX, OutY, 849, 393, 931, 453, *10 %a_scriptdir%\vida%A_index%.png
+                if !ErrorLevel
+                {
+                    ;MouseMove, OutX, OutY
+                    return true
+                }
             }
         }
         if (parte="perna direita")
         {
-            ; perna direita armor
-            ImageSearch, OutX, OutY, 927, 372, 1004, 463, *10 %a_scriptdir%\armor.png
-            if !ErrorLevel
+            loop, 3
             {
-                ;MouseMove, OutX, OutY
-                return true
-            }
-
-            ; perna direita vida
-            ImageSearch, OutX, OutY, 927, 372, 1004, 463, *10 %a_scriptdir%\vida.png
-            if !ErrorLevel
-            {
-                ;MouseMove, OutX, OutY
-                return true
+                ; perna direita armor
+                ImageSearch, OutX, OutY, 927, 372, 1004, 463, *10 %a_scriptdir%\vida%A_index%.png
+                if !ErrorLevel
+                {
+                    ;MouseMove, OutX, OutY
+                    return true
+                }
             }
         }
     }
@@ -2753,7 +2748,7 @@ FechaAllRapido()
     GuiControlGet, ChkAbsal
     if (!ChkAbsal)
     {
-        If (qntAchou > 350)
+        If (qntAchou > 360)
         {
             GeraLog("Estava com lag, fechou e abriu: " qntAchou)
             FechaBluestacksEAbre()
@@ -2861,4 +2856,12 @@ return
 
 F4::
 AtivaContratoViaBS()
+return
+
+F5::
+loop,
+{
+    VerificaClanRaid()
+    randVerificaClan := 1
+}
 return

@@ -227,8 +227,8 @@ AbrePescador()
 	if !ErrorLevel
 	{
 		ClicaRandom(OutX+20, OutY+20, 3)
-		Sleep, 600
-		ClicaRandom(809, 367, 3)
+		ProcuraAteAchar(699, 350, 916, 478, 20, "abrir", 2000)
+		ClicaRandom(AchouOutX, AchouOutY, 3)
 		if (ProcuraAteAchar(1268, 53, 1332, 68, 20, "loja", 1000))
 		{
 			return
