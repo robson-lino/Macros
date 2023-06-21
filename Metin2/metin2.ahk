@@ -303,7 +303,13 @@ AbreInventario()
 		Send, i
 	}
 	if (!ProcuraAteAchar(1439, 521, 1602, 865, 40, "inventario", 500))
+	{
+		loop, 5
+		{
+			Send, {ESC}
+		}
 		AbreInventario()
+	}
 }
 
 TiraItemNovo()
@@ -452,12 +458,7 @@ UpaVaraPesca()
 return
 
 F7::
-if (ProcuraAteAchar(697, 496, 937, 565, 60, "sim", 1000))
-{
-	;ClicaRandom(AchouOutX, AchouOutY, 1)
-	MouseMove, AchouOutX, AchouOutY
-	GeraLog("Achou")
-}
+TesteVM()
 return
 
 
@@ -480,7 +481,7 @@ UpaVaraPesca()
 				ImageSearch, OutX, OutY, 0, 0, A_ScreenWidth, A_ScreenHeight, *60 *TransBlack %a_scriptdir%\pescador.png
 				if !ErrorLevel
 				{
-					MouseMove, OutX, OutY
+					MouseMove, OutX, OutY0-
 					Sleep, 60
 					Send {LButton up}
 					Sleep, 60
