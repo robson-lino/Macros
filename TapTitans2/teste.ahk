@@ -29,7 +29,7 @@ GeraLog(msg)
 F10::
 MouseGetPos, OutputVarX, OutputVarY
 PixelGetColor, PixelColor, OutputVarX, OutputVarY
-GeraLog(OutputVarX ", " OutputVarY " - " PixelColor)
+GeraLog(OutputVarX ", " OutputVarY ", " """" PixelColor """")
 return
 
 +LButton::

@@ -1,5 +1,5 @@
 #SingleInstance Force
-SetKeyDelay 40, 50
+SetKeyDelay 25, 25
 
 ^F11::
 Run, tap.ahk
