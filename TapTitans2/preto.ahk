@@ -2,13 +2,13 @@
 
 #Persistent
 
-global X := 50
+global X := 104
 Gui +LastFound
 hWnd := WinExist()
 
 Gui, +hwndHwnd
-Gui, Color, Black
-Gui, Show, w43 h1 x1515 y181 NoActivate
+Gui, Color, Blue
+Gui, Show, w120 h1 x730 y60 NoActivate
 
 Gui, +E0x80000
 Gui, -Caption
@@ -21,15 +21,15 @@ WinSet, TransColor, Black
 WinSet, Transparent, %X%
 
 
-F7::
+^F7::
 X++
 Gui, Destroy
 Gui +LastFound
 hWnd := WinExist()
 
 Gui, +hwndHwnd
-Gui, Color, Black
-Gui, Show, w43 h1 x1515 y181 NoActivate
+Gui, Color, Blue
+Gui, Show, w120 h1 x730 y60 NoActivate
 
 Gui, +E0x80000
 Gui, -Caption
@@ -42,15 +42,15 @@ WinSet, TransColor, Black
 WinSet, Transparent, %X%
 return
 
-F8::
+^F8::
 X--
 Gui, Destroy
 Gui +LastFound
 hWnd := WinExist()
 
 Gui, +hwndHwnd
-Gui, Color, Black
-Gui, Show, w43 h1 x1515 y181 NoActivate
+Gui, Color, Blue
+Gui, Show, w120 h1 x730 y60 NoActivate
 
 Gui, +E0x80000
 Gui, -Caption

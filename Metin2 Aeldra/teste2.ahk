@@ -24,7 +24,7 @@ else
 {
     vezes := true
     MouseGetPos, X1, Y1
-    PixelGetColor, PixelColor1, X1, Y2
+    PixelGetColor, PixelColor1, X1, Y1
     GeraLog(X1 ", " Y1 " - " PixelColor1)
 }
 
