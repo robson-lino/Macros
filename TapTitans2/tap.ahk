@@ -143,7 +143,6 @@ global subiuPet := 0
 global fezreroll := false
 global passadaViaAba := 0
 
-
 GeraLog(msg, sms=false) {
     FormatTime, DataFormatada, D1 T0
     FileAppend, %DataFormatada% - %msg%`n, %a_scriptdir%\taptitans.log
@@ -268,16 +267,16 @@ Prestige:
 Return
 
 Iniciar:
-    WinActivate, taptitans.log
-    Sleep, 300
-    TickPrestigio := A_TickCount
-    Ativa()
-    Random, randVerificaClan, MinToMili(0), MinToMili(0)
-    Random, randVerificaNaoEssenciais, MinToMili(randNaoEssenciaisMin), MinToMili(randNaoEssenciaisMax)
-    if (!JogoAberto())
-        AbreBluestacks()
-    FechaAllRapido()
-    ClicaEAtualiza()
+WinActivate, taptitans.log
+Sleep, 300
+TickPrestigio := A_TickCount
+Ativa()
+Random, randVerificaClan, MinToMili(0), MinToMili(0)
+Random, randVerificaNaoEssenciais, MinToMili(randNaoEssenciaisMin), MinToMili(randNaoEssenciaisMax)
+if (!JogoAberto())
+    AbreBluestacks()
+FechaAllRapido()
+ClicaEAtualiza()
 Return
 
 ClicaEAtualiza() {
@@ -603,7 +602,7 @@ Fechaheroi() {
 CLicaCompraHeroi() {
     ;Inicio := A_TickCount
     PixelSearch, OutputVarX, OutputVarY, 944, 143, 948, 489, 0x0786EC, 20, fast
-    if !ErrorLevel 
+    if !ErrorLevel
     {
         ClicaRandom(937, 166, 4, 60)
         ClicaRandom(940, 249, 4, 60)
@@ -709,6 +708,7 @@ ProcuraAteAchar(X, Y, H, W, var, img, mili) {
     ;Ativa()
     ;GeraLog("Ativa(): " A_TickCount - Inicio)
     Comeco := A_TickCount
+    GeraLog(img)
     while ((A_TickCount - Comeco) < mili) {
         ImageSearch, OutX, OutY, X, Y, H, W, *%var% %a_scriptdir%\%img%.png
         if (!ErrorLevel) {
@@ -1842,9 +1842,9 @@ All() {
 }
 
 GuiSize:
-    If (A_EventInfo == 1) {
-        Return
-    }
+If (A_EventInfo == 1) {
+    Return
+}
 
 Return
 
@@ -2573,10 +2573,12 @@ FechaBluestacks() {
     }
     qntAchou := 0
     MouseClick, left, 1550, 12
-    if (ProcuraAteAchar(393, 244, 1403, 759, 70, "fecharbluestacks2", 3000))
-        ClicaRandom(AchouOutX+15, AchouOutY+5)
-    else if (ProcuraAteAchar(393, 244, 1403, 759, 70, "fecharbluestacks3", 3000))
-        ClicaRandom(AchouOutX+15, AchouOutY+5)
+    loop, 2 {
+        loop, 3 {
+        if (ProcuraAteAchar(0, 0, A_ScreenWidth, A_ScreenHeight, 70, "fecharbluestacks" A_index, 3000))
+            ClicaRandom(AchouOutX+15, AchouOutY+5)
+        }
+    }
     GeraLog("Fechou o bluestacks")
     Sleep, 300
     return
@@ -3175,79 +3177,79 @@ AbreLoja() {
 }
 
 F1::
-    ;parte := "nenhuma"
-    GeraLog("--------------COM ALVOS-------------------")
-    Loop, parse, listaPartes, `,
-    {
-        if (AlvoEmQualParte(A_LoopField, "alvo")) {
-            GeraLog("Alvo na " A_LoopField)
-            if (ParteTemVida(A_LoopField)) {
-                GeraLog("Com vida e alvo: " A_LoopField)
-                parte := A_LoopField
-                ;break
-            }
-        }
-    }
-    GeraLog("--------------COM ALVOS-------------------")
-    GeraLog("--------------SEM ALVOS-------------------")
-    Loop, parse, listaPartes, `,
-    {
+;parte := "nenhuma"
+GeraLog("--------------COM ALVOS-------------------")
+Loop, parse, listaPartes, `,
+{
+    if (AlvoEmQualParte(A_LoopField, "alvo")) {
+        GeraLog("Alvo na " A_LoopField)
         if (ParteTemVida(A_LoopField)) {
-            if (!AlvoEmQualParte(A_LoopField, "x")) {
-                GeraLog("Com vida, sem X: " A_LoopField)
-                parte := A_LoopField
-                ;break
-            }
-            else {
-                GeraLog("X na " A_LoopField)
-            }
+            GeraLog("Com vida e alvo: " A_LoopField)
+            parte := A_LoopField
+            ;break
         }
     }
-    GeraLog("--------------SEM ALVOS-------------------")
-    CaptureScreen("0, 0, " A_ScreenWidth ", " A_ScreenHeight,,"prints/raid/" A_now ".png")
+}
+GeraLog("--------------COM ALVOS-------------------")
+GeraLog("--------------SEM ALVOS-------------------")
+Loop, parse, listaPartes, `,
+{
+    if (ParteTemVida(A_LoopField)) {
+        if (!AlvoEmQualParte(A_LoopField, "x")) {
+            GeraLog("Com vida, sem X: " A_LoopField)
+            parte := A_LoopField
+            ;break
+        }
+        else {
+            GeraLog("X na " A_LoopField)
+        }
+    }
+}
+GeraLog("--------------SEM ALVOS-------------------")
+CaptureScreen("0, 0, " A_ScreenWidth ", " A_ScreenHeight,,"prints/raid/" A_now ".png")
 return
 
 F2::
-    forcaprestige := true
-    FazPrestige()
+forcaprestige := true
+FazPrestige()
 return
 
 F3::
-    loop, {
-        VerificaClanRaid()
-        randVerificaClan := 1
-    }
+loop, {
+    VerificaClanRaid()
+    randVerificaClan := 1
+}
 return
 
 F4::
-    SetTimer, NaoEssenciais, off
-    Random, randVerificaNaoEssenciais, MinToMili(0), MinToMili(0)
-    setTimer NaoEssenciais, %randVerificaNaoEssenciais%, ON, 3
+SetTimer, NaoEssenciais, off
+Random, randVerificaNaoEssenciais, MinToMili(0), MinToMili(0)
+setTimer NaoEssenciais, %randVerificaNaoEssenciais%, ON, 3
 return
 
 F11::
-    GeraLog(RetornaCorPixel(969, 92))
+GeraLog(RetornaCorPixel(969, 92))
 return
 
 F6::
-    CompraHeroiRapido()
+CompraHeroiRapido()
 return
 
 F7::
-    Loop,
-    {
-        ;stagetemp := RetornaText(720, 21, 123, 84)
-        stagetemp := RetornaText(720, 21, 123, 80)
-        stagetemp := RegExReplace(stagetemp, "\D", "")
-        if (stage = "")
-            stage := stagetemp
-        aumento_percentual := ((stagetemp - stage) / stage) * 100
-        if ((StrLen(stagetemp)=5 or StrLen(stagetemp)=6) and stagetemp is digit and stagetemp < 180000 and aumento_percentual >= 0 and aumento_percentual < 1) {
-            if (stageanterior != stagetemp)
-                GeraLog(stagetemp)
-            stageanterior := stagetemp
-        }
+Loop,
+{
+    ;stagetemp := RetornaText(720, 21, 123, 84)
+    stagetemp := RetornaText(720, 21, 123, 80)
+    stagetemp := RegExReplace(stagetemp, "\D", "")
+    if (stage = "")
+        stage := stagetemp
+    aumento_percentual := ((stagetemp - stage) / stage) * 100
+    if ((StrLen(stagetemp)=5 or StrLen(stagetemp)=6) and stagetemp is digit and stagetemp < 180000 and aumento_percentual >= 0 and aumento_percentual < 1) {
+        if (stageanterior != stagetemp)
+            GeraLog(stagetemp)
+        stageanterior := stagetemp
     }
+}
 return
 
 F8::
@@ -3256,13 +3258,11 @@ ClicaRandom(AchouOutX+15, AchouOutY+5)
 return
 
 F9::
-ImageSearch, OutX, OutY, 559, 634, 1020, 728, *60 %a_scriptdir%\continue.png
-if !ErrorLevel {
-    Sleep, 100
-    Send {LButton up}
-    ClicaRandom(OutX, OutY)
-    Sleep, 3000
-    return
+loop, 2 {
+    loop, 3 {
+    if (ProcuraAteAchar(0, 0, A_ScreenWidth, A_ScreenHeight, 70, "fecharbluestacks" A_index, 3000))
+        ClicaRandom(AchouOutX+15, AchouOutY+5)
+    }
 }
 return
 

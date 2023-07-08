@@ -24,8 +24,6 @@ for k, v in DeviceList {
 
 ClicaRandom(X, Y, var := 3, velo := 50)
 {
-    if (velo < 30)
-        velo := 30
     Random, rand, -var, var
     Random, rand2, -var, var
     ClicaViaSendMouse(X+rand, Y+rand2, 0, velo)
@@ -33,8 +31,6 @@ ClicaRandom(X, Y, var := 3, velo := 50)
 
 ClicaRandomDireito(X, Y, var := 3, velo := 30)
 {
-    if (velo < 30)
-        velo := 30
     Random, rand, -var, var
     Random, rand2, -var, var
     ClicaViaSendMouse(X+rand, Y+rand2, 1, velo)
@@ -116,6 +112,22 @@ ProcuraAteAchar(X, Y, H, W, var, img, mili) {
     return false
 }
 
+ProcuraAteAcharSemTrans(X, Y, H, W, var, img, mili) {
+    Comeco := A_TickCount
+    while ((A_TickCount - Comeco) < mili)
+    {
+        ImageSearch, OutX, OutY, X, Y, H, W, *%var% %a_scriptdir%\%img%.png
+        if (!ErrorLevel)
+        {
+            AchouOutX := OutX
+            AchouOutY := OutY
+            return true
+        }
+    }
+    return false
+}
+
+
 ProcuraAteAcharSemLogar(X, Y, H, W, var, img, mili) {   
     ;Inicio := A_TickCount
     ;Ativa()
@@ -193,4 +205,45 @@ MoveMouse(X, Y, velo := 40)
     EsperaRandom(velo)
     AHI.MoveCursor(X, Y, "Window", mouse2Id)
     EsperaRandom(velo)
+}
+
+FormataMilisegundos(millisec) {
+    totalSec := Floor(millisec / 1000)
+
+    ; Calcula o número de minutos
+    minutes := Floor(totalSec / 60)
+
+    ; Calcula o número de segundos restantes
+    seconds := Mod(totalSec, 60)
+
+    ; Retorna o resultado formatado como minutos:segundos
+    return minutes ":" Format("{:02d}", seconds)
+}
+
+; Função para calcular a distância euclidiana entre dois pontos
+EuclideanDistance(x1, y1, x2, y2) {
+	return Sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+}
+
+
+; Função para encontrar a coordenada mais próxima do centro (800, 450)
+EncontrarCoordenadaMaisProxima(coordenadas) {
+	centro_x := Wjanela//2
+	centro_y := Hjanela//2
+	menor_distancia := 9999999 ; Defina um valor grande para garantir que a primeira distância seja menor
+	coordenada_proxima := ""
+
+	;for i, coord in listaCordPedras
+	Loop, parse, coordenadas, `n, `r
+	{
+		coord := StrSplit(A_LoopField, ",")
+		x := coord[1]
+		y := coord[2]
+		distancia := EuclideanDistance(x, y, centro_x, centro_y)
+		if (distancia < menor_distancia) {
+			menor_distancia := distancia
+			coordenada_proxima := coord
+		}
+	}
+	return coordenada_proxima
 }

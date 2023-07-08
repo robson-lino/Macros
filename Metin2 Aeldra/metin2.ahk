@@ -1,4 +1,4 @@
-; 1.0.0
+; 1.0.1
 
 #SingleInstance Force
 #MaxThreads 2
@@ -11,10 +11,13 @@ SetKeyDelay, 50, 50
 #Include Lib\FindClick.ahk
 SendMode Input
 
+OnExit("ExitFunc")
+
 DefaultDirs = a_scriptdir
 
 CoordMode, Pixel, Window
 CoordMode, Mouse, Window
+global itensCaptcha := "pedra,escudo,peixe,colar,deus,elmo,armadura,arma,pulseira,orvalho,pocao,brincos,sapatos"
 global listaPeixes := "p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,p16,p17,p18,p19,p20,p21,p22,p23,p24,p25"
 global Conta
 global Conta1,Conta2,Conta3
@@ -26,6 +29,7 @@ global qntMetin := 0
 Global CanalAtual := 0
 Global Tempo := ""
 global InicioMacro
+global FimMacro := ""
 global PrimeiraPasadaImprime := true
 global BaronesaDeuErro := false
 global DragaoDeuErro := false
@@ -33,7 +37,9 @@ global TorreDeuErro := false
 global AbaInv := 0
 global ItemInvOutX, ItemInvOutY
 global listaCordPedras
+global tempoDeNaoEssenciais := MinToMili(10)
 global tempoDeVerificaDG := MinToMili(5)
+global ultimaVerificaNaoEssenciais := A_TickCount - MinToMili(9)
 global ultimaVerificaBossDG := A_TickCount - MinToMili(5)
 global Aviso := true
 global EstaFazendoDG := false
@@ -42,6 +48,10 @@ global qntTorre := 0
 global qntDragao := 0
 global qntTravado := 0
 global tempoMatarPedra := 0
+global tickInicioMacro := A_TickCount
+global informacoesAnteriores
+global captcharesolvido := 0
+global ClicaX, ClicaY
 FormatTime, InicioMacro, D1 T0
 
 ;variaveis de entrada
@@ -49,7 +59,7 @@ global optConta
 global optMetin
 global optDG
 InputBox, optConta, Qual conta?, 1 ou 2, , 256, 128
-InputBox, optMetin, Qual conta?, 1 pra retorno ou 2 pra 45, , 256, 128
+InputBox, optMetin, Qual conta?, 1:retorno 2:45 3:70, , 256, 128
 InputBox, optDG, Quais DGs?, 0 = nenhuma, , 256, 128
 
 ;global Conta1 := "XXXXXXX,XXXXXXXXX"
@@ -63,7 +73,10 @@ if (Xjanela = "") {
 }
 WinActivate, Aeldra.to
 Yjanela := Yjanela+30
-SetTimer PegaItens, 500, ON, 3
+SetTimer PegaItens, 700, ON, 3
+
+FileRead, informacoesAnteriores, metininfos%optConta%.log
+
 ;SetTimer Verifica(), 3000, ON, 3
 
 ; Função para ler o arquivo JSON
@@ -83,7 +96,23 @@ for key, value in quelixodelinguagem
 
 Pause::Pause
 
+ExitFunc() {
+	GeraLog("Encerrou")
+	FormatTime, FimMacro, D1 T0
+	ImprimeInfos()
+}
+
 TaDeslogado() {
+	Ativa()
+	if (RetornaCorPixel(1538, 446) = "0xB281AD") {
+		GeraLog("Estava no Aeldra, meu deus.")
+		ClicaRandom(756, 305)
+		EsperaRandom(300)
+		ClicaRandom(788, 453)
+		EsperaRandom(15000)
+		Ativa()
+		TaDeslogado()
+	}
 	if (RetornaCorPixel(861, 72) = "0x6482AC" or RetornaCorPixel(168, 608) = "0x3A9B00") {
 		GeraLog("Estava deslogado")
 		Tecla("F" . optConta)
@@ -92,10 +121,7 @@ TaDeslogado() {
 		Tecla("NumpadEnter")
 		ProcuraPixelAteAchar(1093, 844, "0x1F2224", 30000)
 		Sleep, 1000
-		if (optMetin = 1)
-			ArrumaMapaCamera0Zoom()
-		else if (optMetin = 2)
-			ArrumaMapaCamera2Zoom()
+		ZoomPraMatarPedra()
 	}
 }
 
@@ -109,13 +135,18 @@ GeraLog(msg) {
 
 ImprimeInfos() {
 	Msg := ""
-	file := FileOpen("metininfos" optConta ".log", "rw")
-	Msg := Msg . "Iniciado em: " . InicioMacro . "`n"
-	Msg := Msg . "Informações da Conta: " . optConta . "`n"
-	Msg := Msg . "Metins: " . qntMetin . "`n"
-	Msg := Msg . "Baronesa: " . qntBaronesa . "`n"
-	Msg := Msg . "Torre: " . qntTorre . "`n"
-	Msg := Msg . "Dragao: " . qntDragao . "`n"
+	file := FileOpen("metininfos" optConta ".log", "w")
+	Msg := Msg . "Iniciado em: " . InicioMacro . "`r`n"
+	Msg := Msg . "Informações da Conta: " . optConta . "`r`n"
+	Msg := Msg . "Metins: " . qntMetin . "`r`n"
+	Msg := Msg . "Metins por minuto: " . (qntMetin * 60000) / (A_TickCount - tickInicioMacro) . "`r`n"
+	Msg := Msg . "Baronesa: " . qntBaronesa . "`r`n"
+	Msg := Msg . "Torre: " . qntTorre . "`r`n"
+	Msg := Msg . "Dragao: " . qntDragao . "`r`n"
+	Msg := Msg . "Captcha resolvido: " . captcharesolvido . "`r`n"
+	Msg := Msg . "Encerrado em: " . FimMacro . "`r`n"
+	Msg := Msg . "-------------------------------------------`r`n"
+	Msg := Msg . informacoesAnteriores
 	file.Write(Msg)
 	file.Close()
 }
@@ -132,16 +163,24 @@ Player() {
 	}
 }
 
+ZoomPraMatarPedra() {
+	if (optMetin = 1)
+		ArrumaMapaCamera0Zoom()
+	else if (optMetin = 2)
+		ArrumaMapaCamera2Zoom()
+	else if (optMetin = 3)
+		ArrumaMapaCamera1Zoom()
+}
+
 ^F6::
 Inicio:
 WinActivate, Aeldra
 ;SetTimer PegaItens, off
 ClicaRandomDireito(824, 299)
 Verifica()
-if (optMetin = 1)
-	ArrumaMapaCamera0Zoom()
-else if (optMetin = 2)
-	ArrumaMapaCamera2Zoom()
+ZoomPraMatarPedra()
+tickInicioMacro := A_TickCount
+qntMetin := 0
 loop, {
 	Tempo := A_TickCount
 	Player()
@@ -160,9 +199,10 @@ loop, {
 	} else {
 		Verifica()
 		qntTravado++
-		GeraLog("Não achou nenhuma metin na tela, travado: " qntTravado)
+		if (qntTravado > 6)
+			GeraLog("Não achou nenhuma metin na tela, travado: " qntTravado)
 		;GeraLog("Girou")
-		GiraAteAchar()
+		GiraAteAcharMetin()
 		VaiAteMetin()
 	}
 }
@@ -173,6 +213,7 @@ EsperaMatar() {
 	SetTimer PegaItens, off
 	SeguraTecla("e")
 	if (ProcuraAteAchar(722, 363, 908, 477, 50, "metinpedra", 2000)) {
+		tempoMatarPedra := A_TickCount
 		Tecla("3")
 		Sleep, 50
 		SoltaTecla("e")
@@ -213,7 +254,7 @@ EsperaMatar() {
 		GeraLog("Não conseguiu chegar perto da metin, travado: " qntTravado)
 		SoltaTecla("e")
 		Verifica()
-		GiraAteAchar()
+		GiraAteAcharMetin()
 		VaiAteMetin()
 	}
 	SetTimer PegaItens, 500, ON, 3
@@ -229,14 +270,32 @@ Verifica() {
 	Biologo()
 	AtivaSkill()
 	ForaDoCavalo()
-	FechaX()
-	if (optConta=2)
+	if (optConta = 2)
 		AnelXP()
 	CaptchaMaldito()
+	VerificaNaoEssenciais()
 	if (!EstaFazendoDG and optDG != 0) {
 		VerificaBossDGs()
 	}
+	FechaX()
 	;GeraLog("Tempo: " A_TickCount - Inicio)
+}
+
+VerificaNaoEssenciais() {
+	;GeraLog(A_tickcount - ultimaVerificaBossDG " > " MinToMili(10))
+	if ((A_tickcount - ultimaVerificaNaoEssenciais) > tempoDeNaoEssenciais) {
+		GeraLog("Entrou não essenciais.")
+		AvisoNaoEssenciais := true
+		ultimaVerificaNaoEssenciais := A_tickcount
+		EquipaLuva()
+		if (optConta != 2)
+			EquipaAnel()
+	} else {
+		if (tempoDeNaoEssenciais-((A_tickcount - ultimaVerificaNaoEssenciais)) < MinToMili(2) and AvisoNaoEssenciais) {
+			GeraLog("Faltam menos de 3 minutos para fazer as DGs")
+			AvisoNaoEssenciais := false
+		}
+	}
 }
 
 VerificaBossDGs() {
@@ -244,10 +303,11 @@ VerificaBossDGs() {
 	if ((A_tickcount - ultimaVerificaBossDG) > tempoDeVerificaDG) {
 		GeraLog("Entrou no FazDG")
 		ultimaVerificaBossDG := A_tickcount
+		Aviso := true
 		FazDGs()
 	} else {
 		if (tempoDeVerificaDG-((A_tickcount - ultimaVerificaBossDG)) < MinToMili(2) and Aviso) {
-			GeraLog("Faltam menos de 3 minutos para fazer as DGs")
+			GeraLog("Faltam menos de 2 minutos para fazer as DGs")
 			Aviso := false
 		}
 	}
@@ -302,9 +362,18 @@ fX(x)
 	}
 }
 
-F9::
-TentaResolverCaptcha()
+F11::
+TestaResolverCaptcha()
+ClicaRandom(ClicaX, ClicaY+100, 25)
 return
+
+F12::
+CaptureScreen("0, 0, " A_ScreenWidth ", " A_ScreenHeight,,"prints/captchas/" A_now ".png")
+return
+
+F9::
+VoltaPraQuebrarMetin()
+Return
 
 VaiAteMetin() {
 	PegaItens()
@@ -325,7 +394,7 @@ VaiAteMetin() {
 	SoltaTecla("w")
 }
 
-GiraAteAchar() {
+GiraAteAcharMetin() {
 	ImageSearch, OutX, OutY, 1473, 40, 1608, 178, *40 *TransRed %a_scriptdir%\lendaria.png
 	if !ErrorLevel {
 		SeguraTecla("e")
@@ -365,7 +434,6 @@ GiraAteAchar() {
 					Verifica()
 					return
 				}
-
 			}
 		}
 	}
@@ -422,7 +490,7 @@ PegaItens() {
 				Tecla("z", randSleep(150))
 				Tecla("z", randSleep(150))
 				;GeraLog("Pegou com itempedra" A_index " e demorou " A_TickCount - Inicio)
-				GeraLog("Matou a metin em " )
+				GeraLog("Matou a metin em: " FormataMilisegundos(A_TickCount - tempoMatarPedra))
 				qntMetin++
 				ImprimeInfos()
 				return true
@@ -445,6 +513,7 @@ PegaItensDaMetin() {
 				Tecla("z", randSleep(150))
 				Tecla("z", randSleep(150))
 				;GeraLog("Pegou com itempedra" A_index " e demorou " A_TickCount - Inicio)
+				GeraLog("Matou a metin em " FormataMilisegundos(A_TickCount - tempoMatarPedra))
 				qntMetin++
 				ImprimeInfos()
 				qntTravado := 0
@@ -497,17 +566,21 @@ CaptchaMaldito() {
 	NaoSaiu := false
 	ImageSearch, OutX, OutY, Xjanela, Yjanela, Wjanela, Hjanela, *70 *TransRed %a_scriptdir%\bot.png
 	if !ErrorLevel{
+		ClicaX := OutX
+		ClicaY := OutY
 		GeraLog("Captcha maldito")
 		EsperaRandom(2000)
+		ClicaRandomDireito(1524, 174, 5, 1)
 		; Tenta resolver captcha.
 		; Pedra Espirita
 		if (TentaResolverCaptcha()) {
+			captcharesolvido++
 			GeraLog("Captcha resolvido caralhooo!")
+			; clica pra tentar resolver se não conseguiu...
+			ClicaRandom(ClicaX, ClicaY+100, 25)
 			return
 		} else {
 			SoltaTecla("Space")
-			GeraLog("Não resolveu o captcha, precisa fazer novo print.")
-			CaptureScreen("0, 0, " A_ScreenWidth ", " A_ScreenHeight,,"prints/captchas/" A_now ".png")
 			while (ProcuraAteAchar(Xjanela, Yjanela, Wjanela, Hjanela, 70, "bot", 500)) {
 				SoundBeep, 300, 1000
 				if (A_Index > 60) {
@@ -533,10 +606,7 @@ CaptchaMaldito() {
 				Tecla("NumpadEnter")
 				ProcuraPixelAteAchar(1093, 844, "0x1F2224", 30000)
 				Sleep, 1000
-				if (optMetin = 1)
-					ArrumaMapaCamera0Zoom()
-				else if (optMetin = 2)
-					ArrumaMapaCamera2Zoom()
+				ZoomPraMatarPedra()
 			}
 		}
 	}
@@ -544,42 +614,84 @@ CaptchaMaldito() {
 }
 
 TentaResolverCaptcha() {
-	itensCaptcha := "pedra,escudo,peixe,colar,deus,elmo,armadura,arma,pulseira,orvalho,pocao"
-	Loop, parse, itensCaptcha, `,
-	{
-		ImageSearch, OutX, OutY, Xjanela, Yjanela, Wjanela, Hjanela, *50 *TransRed %a_scriptdir%\captchas\%A_LoopField%.png
-		if !ErrorLevel {
-			GeraLog("Achou a palavra " A_LoopField)
-			MoveMouse(OutX, OutY)
-			loop, 20 {
-				ImageSearch, OutX, OutY, Xjanela, Yjanela, Wjanela, Hjanela, *50 *TransRed %a_scriptdir%\captchas\%A_LoopField%%A_Index%.png
+	ImageSearch, OutX, OutY, Xjanela, Yjanela, Wjanela, Hjanela, *70 *TransRed %a_scriptdir%\bot.png
+	if !ErrorLevel{
+		Random, qntVezes, 2, 7
+		loop, %qntVezes% {
+			Loop, parse, itensCaptcha, `,
+			{
+				ImageSearch, OutX, OutY, Xjanela, Yjanela, Wjanela, Hjanela, *50 *TransRed %a_scriptdir%\captchas\%A_LoopField%.png
 				if !ErrorLevel {
-					ClicaRandom(OutX, OutY)
-					GeraLog("Achou com o "A_LoopField A_Index)
-					return true
+					GeraLog("Achou a palavra " A_LoopField)
+					MoveMouse(OutX, OutY)
+					loop, 20 {
+						ImageSearch, OutX, OutY, Xjanela, Yjanela, Wjanela, Hjanela, *50 *TransRed %a_scriptdir%\captchas\%A_LoopField%%A_Index%.png
+						if !ErrorLevel {
+							ClicaRandom(OutX, OutY)
+							GeraLog("Achou com o "A_LoopField A_Index)
+							return true
+						}
+					}
 				}
 			}
+			GeraLog("Não resolveu o captcha, precisa fazer novo print.")
+			CaptureScreen("0, 0, " A_ScreenWidth ", " A_ScreenHeight,,"prints/captchas/" A_now ".png")
+			ClicaRandom(ClicaX, ClicaY+150, 25)
+			EsperaRandom(2000)
+			ClicaRandomDireito(1524, 174, 5, 1)
 		}
 	}
 	return false
 }
+
+TestaResolverCaptcha() {
+	SetTimer PegaItens, off
+	WinActivate, 2023
+	Xjanela := 14
+	Yjanela := 183
+	Wjanela := 1612
+	Hjanela := 1024
+	Random, qntVezes, 2, 7
+	loop, %qntVezes% {
+		Loop, parse, itensCaptcha, `,
+		{
+			ImageSearch, OutX, OutY, Xjanela, Yjanela, Wjanela, Hjanela, *50 *TransRed %a_scriptdir%\captchas\%A_LoopField%.png
+			if !ErrorLevel {
+				ClicaX := OutX
+				ClicaY := OutY
+				GeraLog("Achou a palavra " A_LoopField)
+				MoveMouse(OutX, OutY)
+				loop, 20 {
+					ImageSearch, OutX, OutY, Xjanela, Yjanela, Wjanela, Hjanela, *50 *TransRed %a_scriptdir%\captchas\%A_LoopField%%A_Index%.png
+					if !ErrorLevel {
+						ClicaRandom(OutX, OutY)
+						GeraLog("Achou com o "A_LoopField A_Index)
+						return true
+					}
+				}
+			}
+		}
+		ClicaRandom(ClicaX, ClicaY+70, 25)
+	}
+	return false
+}
+
 ArrumaMapaCamera1Zoom()
 {
 	Loop, 5 {
 		Tecla("NumpadAdd")
-		EsperaRandom(100)
+		EsperaRandom(200)
 	}
 	Tecla("NumpadSub")
-	EsperaRandom(100)
+	EsperaRandom(200)
 	SeguraTecla("f")
-	EsperaRandom(100)
 	EsperaRandom(1500)
 	SoltaTecla("f")
-	EsperaRandom(100)
+	EsperaRandom(200)
 	SeguraTecla("g")
 	EsperaRandom(1500)
 	SoltaTecla("g")
-	EsperaRandom(100)
+	EsperaRandom(200)
 	GeraLog("ArrumaMapaCamera1Zoom")
 }
 
@@ -587,18 +699,19 @@ ArrumaMapaCamera2Zoom()
 {
 	Loop, 5 {
 		Tecla("NumpadAdd")
-		EsperaRandom(100)
+		EsperaRandom(200)
 	}
 	Tecla("NumpadSub")
-	EsperaRandom(100)
+	EsperaRandom(200)
 	Tecla("NumpadSub")
+	EsperaRandom(200)
 	SeguraTecla("f")
 	EsperaRandom(1500)
 	SoltaTecla("f")
 	SeguraTecla("g")
 	EsperaRandom(1500)
 	SoltaTecla("g")
-	EsperaRandom(100)
+	EsperaRandom(200)
 	GeraLog("ArrumaMapaCamera2Zoom")
 }
 
@@ -606,16 +719,16 @@ ArrumaMapaCamera0Zoom()
 {
 	Loop, 5 {
 		Tecla("NumpadAdd")
-		EsperaRandom(100)
+		EsperaRandom(200)
 	}
-	EsperaRandom(100)
+	EsperaRandom(200)
 	SeguraTecla("f")
 	EsperaRandom(1500)
 	SoltaTecla("f")
 	SeguraTecla("g")
 	EsperaRandom(1500)
 	SoltaTecla("g")
-	EsperaRandom(100)
+	EsperaRandom(200)
 	GeraLog("ArrumaMapaCamera0Zoom")
 }
 
@@ -623,9 +736,9 @@ ArrumaMapa0Zoom()
 {
 	Loop, 5 {
 		Tecla("NumpadAdd")
-		EsperaRandom(100)
+		EsperaRandom(200)
 	}
-	EsperaRandom(100)
+	EsperaRandom(200)
 	GeraLog("ArrumaMapa0Zoom")
 }
 
@@ -633,10 +746,10 @@ ArrumaMapa1Zoom()
 {
 	Loop, 5 {
 		Tecla("NumpadAdd")
-		EsperaRandom(100)
+		EsperaRandom(200)
 	}
 	Tecla("NumpadSub")
-	EsperaRandom(100)
+	EsperaRandom(200)
 	GeraLog("ArrumaMapa1Zoom")
 }
 
@@ -644,12 +757,12 @@ ArrumaMapa2Zoom()
 {
 	Loop, 5 {
 		Tecla("NumpadAdd")
-		EsperaRandom(100)
+		EsperaRandom(200)
 	}
 	Tecla("NumpadSub")
-	EsperaRandom(100)
+	EsperaRandom(200)
 	Tecla("NumpadSub")
-	EsperaRandom(100)
+	EsperaRandom(200)
 	GeraLog("ArrumaMapa2Zoom")
 }
 
@@ -657,14 +770,14 @@ ArrumaMapa3Zoom()
 {
 	Loop, 5 {
 		Tecla("NumpadAdd")
-		EsperaRandom(100)
+		EsperaRandom(200)
 	}
 	Tecla("NumpadSub")
-	EsperaRandom(100)
+	EsperaRandom(200)
 	Tecla("NumpadSub")
-	EsperaRandom(100)
+	EsperaRandom(200)
 	Tecla("NumpadSub")
-	EsperaRandom(100)
+	EsperaRandom(200)
 	GeraLog("ArrumaMapa3Zoom")
 }
 
@@ -713,17 +826,22 @@ Morto()
 
 Ativa() {
 	WinActivate, Aeldra
-	ClicaRandomDireito(1524, 174)
+	;ClicaRandomDireito(1524, 174, 5, 1)
 }
 
 ForaDoCavalo() {
 	;Inicio := A_TickCount
 	ImageSearch, OutX, OutY, Xjanela, Yjanela, Wjanela, Hjanela, *30 *TransRed %a_scriptdir%\boris.png
 	if !ErrorLevel {
+		GeraLog("Fora do cavalo.")
+		SaiEntraCavalo()
+	}
+	ImageSearch, OutX, OutY, Xjanela, Yjanela, Wjanela, Hjanela, *30 *TransRed %a_scriptdir%\mount.png
+	if !ErrorLevel {
+		GeraLog("Fora do cavalo.")
 		SaiEntraCavalo()
 	}
 	;GeraLog("Fora do Cavalo: " A_TickCount - Inicio)
-
 }
 
 FechaX() {
@@ -858,12 +976,27 @@ VoltaPraQuebrarMetin() {
 			VaiPraCidadeRed()
 			VoltaPraQuebrarMetin()
 		}
+	} else if (optMetin = 3) {
+		Tecla("4")
+		EsperaRandom(1000)
+		ClicaRandom(940, 469)
+		EsperaRandom(1000)
+		ClicaRandom(798, 525)
+		EsperaRandom(1000)
+		ClicaRandom(800, 498)
+		if (ProcuraPixelAteAchar(877, 443, "0x1D252F", 15000)) {
+			GeraLog("Achou o loading")
+			EsperaRandom(10000)
+			GeraLog("Voltou pra quebrar metin")
+		} else {
+			VaiPraCidadeRed()
+			VoltaPraQuebrarMetin()
+		}
 	}
 
 }
 
 FazDGs() {
-	Aviso := true
 	EstaFazendoDG := true
 	FezAlgum := 0
 	if optDG contains 1
@@ -875,6 +1008,8 @@ FazDGs() {
 	if (FezAlgum > 0) {
 		VaiPraCidadeRed()
 		VoltaPraQuebrarMetin()
+	} else {
+		FechaX()
 	}
 	EstaFazendoDG := false
 	return
@@ -888,8 +1023,16 @@ Dragao() {
 	Ativa()
 	if (EntraDragao()) {
 		GeraLog("---------------- Dragao ---------------")
-		SoundBeep, 500, 1000
-		EsperaRandom(3000)
+		SoundBeep, 500, 500
+		EsperaRandom(1000)
+		if (EntraDragao()) {
+			SoundBeep, 500, 1500
+			GeraLog("Não estava dentro da DG.")
+			return 1
+		} else {
+			FechaX()
+		}
+		InicioDragao := A_TickCount
 		ArrumaMapaCamera1Zoom()
 		DragaoStage1AndaMeio()
 		if (DragaoDeuErro)
@@ -912,19 +1055,34 @@ Dragao() {
 		DragaoStageBoss()
 		if (DragaoDeuErro)
 			return 1
-		if (optMetin = 1)
-			ArrumaMapaCamera0Zoom()
-		else if (optMetin = 2)
-			ArrumaMapaCamera2Zoom()
-		GeraLog("---------------- Dragao ---------------")
+		ZoomPraMatarPedra()
+		GeraLog("---------------- Dragao " FormataMilisegundos(A_TickCount - InicioDragao) " ---------------")
 		return 1
 	}
 	return 0
 }
 
+AbreF6() {
+	if (RetornaCorPixel(911, 246) != "0x0B225F") {
+		Tecla("F6")
+		if (!ProcuraPixelAteAchar(911, 246, "0x0B225F", 1000)) {
+			GeraLog("Não abriu o F6, tenta de novo.")
+			Verifica()
+			return false
+		} else {
+			return true
+			GeraLog("Abriu o F6")
+		}
+	} else {
+			return true
+			GeraLog("F6 já estava aberto.")
+	}
+
+}
+
 EntraDragao() {
-	Tecla("F6")
-	EsperaRandom(1500)
+	if (!AbreF6())
+		return false
 	ClicaRandom(736, 458)
 	EsperaRandom(300)
 	if (RetornaCorPixel(736, 458) = "0x444E49") {
@@ -948,7 +1106,6 @@ EntraDragao() {
 		return true
 	} else {
 		GeraLog("Não pode fazer Dragao")
-		FechaX()
 		return false
 	}
 }
@@ -971,6 +1128,7 @@ DragaoStage1AndaMeio() {
 				break 2
 			}
 		}
+		Verifica()
 		SeguraTecla("e")
 		EsperaRandom(150)
 		SoltaTecla("e")
@@ -986,6 +1144,7 @@ DragaoStage1AndaMeio() {
 		}
 	}
 	Sleep, 1500
+	ArrumaMapa1Zoom()
 	while (true) {
 		ImageSearch, OutX, OutY, 1473, 40, 1608, 178, *40 %a_scriptdir%\dragaomeio.png
 		if !ErrorLevel {
@@ -1026,7 +1185,8 @@ DragaoStage1Metin() {
 			ClicaRandom(x+fX(x), y+fY(y), 0)
 			EsperaMatar()
 		} else {
-			GiraAteAchar()
+			Verifica()
+			GiraAteAcharMetin()
 			VaiAteMetin()
 			;()
 		}
@@ -1048,6 +1208,7 @@ DragaoStage2MataTudo() {
 		Tecla("3")
 		EsperaRandom(10000)
 		SoltaTecla("Space")
+		Verifica()
 		if (A_index > 40) {
 			DragaoDeuErro := true
 			return
@@ -1076,6 +1237,7 @@ DragaoStage3MataTudo() {
 		Tecla("3")
 		EsperaRandom(10000)
 		SoltaTecla("Space")
+		Verifica()
 		if (A_index > 40) {
 			DragaoDeuErro := true
 			return
@@ -1108,7 +1270,8 @@ DragaoStage4Metin() {
 			ClicaRandom(x+fX(x), y+fY(y), 0)
 			EsperaMatar()
 		} else {
-			GiraAteAchar()
+			Verifica()
+			GiraAteAcharMetin()
 			VaiAteMetin()
 			;()
 		}
@@ -1134,6 +1297,7 @@ DragaoStage5MataTudoEUsa() {
 			ClicaRandomDireito(ItemInvOutX+15, ItemInvOutY+7)
 			GeraLog("Usou o simbolo.")
 		}
+		Verifica()
 		if (A_index > 40) {
 			DragaoDeuErro := true
 			return
@@ -1180,8 +1344,16 @@ Torre() {
 	Ativa()
 	if (EntraTorre()) {
 		GeraLog("---------------- Torre ---------------")
-		SoundBeep, 500, 1000
-		EsperaRandom(3000)
+		SoundBeep, 500, 500
+		EsperaRandom(1000)
+		if (EntraTorre()) {
+			SoundBeep, 500, 1500
+			GeraLog("Não estava dentro da DG.")
+			return 1
+		} else {
+			FechaX()
+		}
+		InicioTorre := A_TickCount
 		ArrumaMapaCamera1Zoom()
 		TorrePiso1Metin()
 		if (TorreDeuErro)
@@ -1207,15 +1379,15 @@ Torre() {
 		TorrePiso8Boss()
 		if (TorreDeuErro)
 			return 1
-		GeraLog("---------------- Torre ---------------")
+		GeraLog("---------------- Torre " FormataMilisegundos(A_TickCount - InicioTorre) " ---------------")
 		return 1
 	}
 	return 0
 }
 
 EntraTorre() {
-	Tecla("F6")
-	EsperaRandom(1500)
+	if (!AbreF6())
+		return false
 	ClicaRandom(731, 345)
 	EsperaRandom(300)
 	if (RetornaCorPixel(731, 345) = "0x444E49") {
@@ -1239,7 +1411,6 @@ EntraTorre() {
 		return true
 	} else {
 		GeraLog("Não pode fazer Torre")
-		FechaX()
 		return false
 	}
 }
@@ -1258,9 +1429,11 @@ TorrePiso1Metin() {
 			y := CoordMaisProxima[2]
 			PegaItens()
 			ClicaRandom(x+fX(x), y+fY(y), 0)
+			Verifica()
 			EsperaMatar()
 		} else {
-			GiraAteAchar()
+			Verifica()
+			GiraAteAcharMetin()
 			VaiAteMetin()
 			;()
 		}
@@ -1334,6 +1507,7 @@ TorrePiso2MataTudo() {
 		SoltaTecla("w")
 		SoltaTecla("e")
 		SoltaTecla("Space")
+		Verifica()
 		if (A_index > 40) {
 			DragaoDeuErro := true
 			return
@@ -1368,6 +1542,7 @@ TorrePiso3MataTudo() {
 		SoltaTecla("w")
 		SoltaTecla("e")
 		SoltaTecla("Space")
+		Verifica()
 		if (A_index > 40) {
 			DragaoDeuErro := true
 			return
@@ -1387,7 +1562,7 @@ TorrePiso3MataTudo() {
 
 TorrePiso4Metin() {
 	GeraLog("Piso4")
-	ArrumaMapa2Zoom()
+	ArrumaMapa1Zoom()
 	Sleep, 1500
 	while (ProcuraAteAchar(494, 135, 1135, 164, 50, "torrepiso4", 1500)) {
 		GeraLog("Matando metins...")
@@ -1407,7 +1582,8 @@ TorrePiso4Metin() {
 				GeraLog("Usou o simbolo.")
 			}
 		} else {
-			GiraAteAchar()
+			Verifica()
+			GiraAteAcharMetin()
 			VaiAteMetin()
 			if (ProcuraItemInventario("torresimbolo")) {
 				ClicaRandomDireito(ItemInvOutX+15, ItemInvOutY+7)
@@ -1463,7 +1639,8 @@ TorrePiso5Metin() {
 			ClicaRandom(x+fX(x), y+fY(y), 0)
 			EsperaMatar()
 		} else {
-			GiraAteAchar()
+			Verifica()
+			GiraAteAcharMetin()
 			VaiAteMetin()
 			;()
 		}
@@ -1489,7 +1666,8 @@ TorrePiso6Metin() {
 			ClicaRandom(x+fX(x), y+fY(y), 0)
 			EsperaMatar()
 		} else {
-			GiraAteAchar()
+			Verifica()
+			GiraAteAcharMetin()
 			VaiAteMetin()
 			;()
 		}
@@ -1528,6 +1706,7 @@ TorrePiso7MataTudo() {
 		SoltaTecla("w")
 		SoltaTecla("e")
 		SoltaTecla("Space")
+		Verifica()
 		if (A_index > 40) {
 			DragaoDeuErro := true
 			return
@@ -1564,6 +1743,7 @@ TorrePiso8Boss() {
 		SoltaTecla("Space")
 		Verifica()
 		TorrePiso7AndaMeio()
+		Verifica()
 	}
 	qntTorre++
 	GeraLog("Matou o Death Reaper!!")
@@ -1577,8 +1757,16 @@ Baronesa() {
 	Ativa()
 	if (EntraBaronesa()) {
 		GeraLog("---------------- Baronesa ---------------")
-		SoundBeep, 500, 1000
-		EsperaRandom(3000)
+		SoundBeep, 500, 500
+		EsperaRandom(1000)
+		if (EntraBaronesa()) {
+			SoundBeep, 500, 1500
+			GeraLog("Não estava dentro da DG.")
+			return 1
+		} else {
+			FechaX()
+		}
+		InicioBaronesa := A_TickCount
 		ArrumaMapaCamera1Zoom()
 		BaronesaPiso1AndaMeio()
 		if (BaronesaDeuErro)
@@ -1597,19 +1785,16 @@ Baronesa() {
 		if (BaronesaDeuErro)
 			return 1
 		BaronesaPisoBoss()
-		if (optMetin = 1)
-			ArrumaMapaCamera0Zoom()
-		else if (optMetin = 2)
-			ArrumaMapaCamera2Zoom()
-		GeraLog("---------------- Baronesa ---------------")
+		ZoomPraMatarPedra()
+		GeraLog("---------------- Baronesa " FormataMilisegundos(A_TickCount - InicioBaronesa) " ---------------")
 		return 1
 	}
 	return 0
 }
 
 EntraBaronesa() {
-	Tecla("F6")
-	EsperaRandom(1500)
+	if (!AbreF6())
+		return false
 	ClicaRandom(640, 293)
 	EsperaRandom(500)
 	if (RetornaCorPixel(792, 307) = "0x444D48") {
@@ -1634,7 +1819,6 @@ EntraBaronesa() {
 		return true
 	} else {
 		GeraLog("Não pode fazer Baronesa")
-		FechaX()
 		return false
 	}
 }
@@ -1674,6 +1858,7 @@ BaronesaPiso1AndaMeio()
 		}
 	}
 	Sleep, 1500
+	ArrumaMapa1Zoom()
 	while (true) {
 		ImageSearch, OutX, OutY, 1473, 40, 1608, 178, *40 %a_scriptdir%\baronesameio.png
 		if !ErrorLevel {
@@ -1709,6 +1894,7 @@ BaronesaPiso1MataTudo() {
 		Tecla("3")
 		EsperaRandom(10000)
 		SoltaTecla("Space")
+		Verifica()
 		if (A_index > 40) {
 			BaronesaDeuErro := true
 			return
@@ -1731,6 +1917,7 @@ BaronesaPiso1MataTudo() {
 BaronesaPiso2Ovos() {
 	GeraLog("Piso2")
 	Sleep, 1500
+	ArrumaMapa2Zoom()
 	while (ProcuraAteAchar(494, 135, 1135, 164, 50, "baronesapiso2ovo", 1500)) {
 		GeraLog("Matando metins...")
 		Options = r oTransRed,29 e1 n
@@ -1744,11 +1931,13 @@ BaronesaPiso2Ovos() {
 			ClicaRandom(x+fX(x), y+fY(y), 0)
 			BaronesaEsperaMatarOvo()
 		} else {
+			Verifica()
 			GiraAteAcharBaronesa()
 			VaiAteMetinBaronesa()
 			;BaronesaPiso1AndaMeio()
 		}
 	}
+	ArrumaMapa1Zoom()
 	GeraLog("Matou todas.")
 	return true
 }
@@ -1837,6 +2026,7 @@ BaronesaPiso3() {
 	SeguraTecla("Space")
 	while (ProcuraAteAchar(494, 135, 1135, 164, 50, "baronesapiso3", 1500)) {
 		GeraLog("Matando a aranha...")
+		Verifica()
 		Tecla("3")
 		EsperaRandom(1500)
 		ImageSearch, OutX, OutY, 494, 135, 1135, 164, *50 *TransRed %a_scriptdir%\baronesapiso3usaapito.png
@@ -1864,6 +2054,7 @@ BaronesaPisoBoss() {
 	SeguraTecla("Space")
 	while (ProcuraAteAchar(494, 135, 1135, 164, 50, "baronesapisoboss", 1500)) {
 		GeraLog("Matando a baronesa...")
+		Verifica()
 		Tecla("3")
 		EsperaRandom(1500)
 	}
@@ -1887,24 +2078,24 @@ FechaInventario() {
 	ImageSearch, OutX, OutY, 1477, 257, 1579, 280, *40 %a_scriptdir%\inventario.png
 	if !ErrorLevel {
 		Tecla("i")
-		MoveMouse(798, 223)
 	}
 }
 
 ProximaPaginaInv() {
 	AbreInventario()
 	AbaInv++
+	EsperaRandom(100)
 	if (AbaInv = 1) {
 		ClicaRandom(1461, 483)
-		MoveMouse(798, 223)
+		MoveMouse(1393, 483)
 		return true
 	} else if (AbaInv = 2) {
-		ClicaRandom(1487, 485)
-		MoveMouse(798, 223)
+		ClicaRandom(1481, 483)
+		MoveMouse(1393, 483)
 		return true
 	} else if (AbaInv = 3) {
 		ClicaRandom(1519, 483)
-		MoveMouse(798, 223)
+		MoveMouse(1393, 483)
 		return true
 	} else {
 		AbaInv := 0
@@ -1943,43 +2134,55 @@ VaiPraCidadeRed() {
 
 }
 
-; Função para calcular a distância euclidiana entre dois pontos
-EuclideanDistance(x1, y1, x2, y2) {
-	return Sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
-}
-
-; Função para encontrar a coordenada mais próxima do centro (800, 450)
-EncontrarCoordenadaMaisProxima(coordenadas) {
-	centro_x := Wjanela//2
-	centro_y := Hjanela//2
-	menor_distancia := 9999999 ; Defina um valor grande para garantir que a primeira distância seja menor
-	coordenada_proxima := ""
-
-	;for i, coord in listaCordPedras
-	Loop, parse, coordenadas, `n, `r
-	{
-		coord := StrSplit(A_LoopField, ",")
-		x := coord[1]
-		y := coord[2]
-		distancia := EuclideanDistance(x, y, centro_x, centro_y)
-		if (distancia < menor_distancia) {
-			menor_distancia := distancia
-			coordenada_proxima := coord
-		}
-	}
-	return coordenada_proxima
-}
-
-; Exemplo de uso
-TesteCoord() {
-	Options = r oTransRed,29 e1 n
-	listaCordPedras := FindClick("\metinpedra.png", Options)
-	CoordMaisProxima := EncontrarCoordenadaMaisProxima(listaCordPedras)
-	;lista_coordenadas := ["346, 215", "605, 230", "112, 419", "557, 373", "98, 524", "599, 527", "384, 545"]
-	;coordenada_mais_proxima := EncontrarCoordenadaMaisProxima(lista_coordenadas)
-	;MsgBox % "Coordenada mais próxima: (" coordenada_mais_proxima[1] ", " coordenada_mais_proxima[2] ")"
-}
-
 ^F11::
 Run, metin2.ahk
 return
+
+EquipaLuva() {
+	AbreInventario()
+	EsperaRandom(150)
+	if (RetornaCorPixel(1460, 448) != "0x606C7D") {
+		GeraLog("Estava sem luva.")
+		if (ProcuraItemInventario("luva")) {
+			GeraLog("Achou a luva pra equipar.")
+			ClicaRandomDireito(ItemInvOutX, ItemInvOutY)
+			EsperaRandom(250)
+			ImageSearch, OutX, OutY, Xjanela, Yjanela, Wjanela, Hjanela, *30 *TransRed %a_scriptdir%\sim.png
+			if !ErrorLevel {
+				ClicaRandom(OutX+5, OutY+5)
+			}
+		} else {
+			GeraLog("Não tinha luva.")
+		}
+	}
+	FechaInventario()
+}
+
+EquipaAnel() {
+	AbreInventario()
+	EsperaRandom(150)
+	if (RetornaCorPixel(1528, 443) != "0xCDBEC3") {
+		GeraLog("Estava sem anel.")
+		if (ProcuraItemInventario("anelxp")) {
+			GeraLog("Achou o anel pra equipar.")
+			ClicaRandomDireito(ItemInvOutX, ItemInvOutY)
+			EsperaRandom(250)
+			ImageSearch, OutX, OutY, Xjanela, Yjanela, Wjanela, Hjanela, *30 *TransRed %a_scriptdir%\sim.png
+			if !ErrorLevel {
+				ClicaRandom(OutX+5, OutY+5)
+			}
+		} else {
+			GeraLog("Não tinha anel pra equipar.")
+		}
+	}
+	FechaInventario()
+}
+
+GiraAteAchar(tipo) {
+	Inicio := A_TickCount
+	ImageSearch, OutX, OutY, 1473, 40, 1608, 178, *2 %a_scriptdir%\%tipo%1.png
+	if !ErrorLevel {
+		GeraLog("Já estava mirando.")
+		return true
+	}
+}
