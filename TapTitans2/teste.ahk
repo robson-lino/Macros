@@ -13,9 +13,6 @@ Gui, -Caption +ToolWindow +LastFound +AlwaysOnTop
 Gui, Color, %BC%
 Return
 
-Esc::
-ExitApp
-
 GeraLog(msg)
 {
     FormatTime, DataFormatada, D1 T0

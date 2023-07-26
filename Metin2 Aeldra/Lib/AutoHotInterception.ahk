@@ -102,7 +102,7 @@ class AutoHotInterception {
 			MouseGetPos, cx, cy
 			dx := this.GetDirection(cx, x)
 			dy := this.GetDirection(cy, y)
-			if (dx == 0 && dy == 0)
+			if (dx == 0 && dy == 0 or A_index > 30000)
 				break
 			this.SendMouseMove(mouseId, dx, dy)
 		}

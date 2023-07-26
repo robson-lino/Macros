@@ -9,6 +9,10 @@ SetKeyDelay, 50, 50
 SendMode Input
 
 global AHI := new AutoHotInterception()
+global ultimoXmeu
+global ultimoYmeu
+global ultimoX
+global ultimoY
 DeviceList := AHI.GetDeviceList()
 for k, v in DeviceList {
     if (v.IsMouse and mouse2Id = "") {
@@ -26,6 +30,12 @@ ClicaRandom(X, Y, var := 3, velo := 50)
 {
     Random, rand, -var, var
     Random, rand2, -var, var
+    XCalculado := X+rand
+    YCalculado := Y+rand2
+    if (XCalculado < Xjanela or XCalculado > Wjanela or X = "" or YCalculado < Yjanela or YCalculado > Hjanela or Y = "") {
+        GeraLog("Erro evitado.")
+        return
+    }
     ClicaViaSendMouse(X+rand, Y+rand2, 0, velo)
 }
 
@@ -36,11 +46,16 @@ ClicaRandomDireito(X, Y, var := 3, velo := 30)
     ClicaViaSendMouse(X+rand, Y+rand2, 1, velo)
 }
 
-ClicaViaSendMouse(X, Y, code, velo)
+ClicaViaSendMouse(Xmeu, Ymeu, code, velo)
 {
+    ultimoX := X
+    ultimoY := Y
+    ultimoXmeu := Xmeu
+    ultimoYmeu := Ymeu
     EsperaRandom(velo)
-    AHI.MoveCursor(X, Y, "Window", mouse2Id)
-    EsperaRandom(velo)
+    ;AHI.MoveCursor(Xmeu, Ymeu, "Window", mouse2Id)
+    MouseMove, Xmeu, Ymeu, 15   
+    EsperaRandom(velo+100)
     AHI.SendMouseButtonEvent(mouse2Id, code, 1)
     EsperaRandom(velo)
     AHI.SendMouseButtonEvent(mouse2Id, code, 0)
@@ -203,7 +218,8 @@ GetDeviceList() {
 MoveMouse(X, Y, velo := 40)
 {
     EsperaRandom(velo)
-    AHI.MoveCursor(X, Y, "Window", mouse2Id)
+    ;AHI.MoveCursor(X, Y, "Window", mouse2Id)
+    Mousemove, X, Y, 15
     EsperaRandom(velo)
 }
 
@@ -232,10 +248,10 @@ EncontrarCoordenadaMaisProxima(coordenadas) {
 	centro_y := Hjanela//2
 	menor_distancia := 9999999 ; Defina um valor grande para garantir que a primeira distância seja menor
 	coordenada_proxima := ""
-
 	;for i, coord in listaCordPedras
 	Loop, parse, coordenadas, `n, `r
 	{
+        ;GeraLog(A_LoopField)
 		coord := StrSplit(A_LoopField, ",")
 		x := coord[1]
 		y := coord[2]

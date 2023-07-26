@@ -31,10 +31,10 @@ else
 GeraLog(msg)
 {
     FormatTime, DataFormatada, D1 T0
-	FileAppend, %DataFormatada% - %msg%`n, %a_scriptdir%\metin2.log
+	FileAppend, %DataFormatada% - %msg%`n, %a_scriptdir%\metinlog.log
 	if ErrorLevel
 	{
-		FileAppend, %DataFormatada% - %msg%`n, %a_scriptdir%\metin2.log
+		FileAppend, %DataFormatada% - %msg%`n, %a_scriptdir%\metinlog.log
 	}
 }
 return
