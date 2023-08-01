@@ -2234,10 +2234,6 @@ AtacarParte(parte) {
                     Sleep, 3000
                     return
                 }
-                if (!JogoAberto()){
-                    AbreBlueStacks()
-                    return
-                }
             }
         }
     }
@@ -2252,10 +2248,6 @@ AtacarParte(parte) {
                     Send {LButton up}
                     MouseClick, left, OutX, OutY
                     Sleep, 3000
-                    return
-                }
-                if (!JogoAberto()){
-                    AbreBlueStacks()
                     return
                 }
             }
@@ -2274,10 +2266,6 @@ AtacarParte(parte) {
                     Sleep, 3000
                     return
                 }
-                if (!JogoAberto()){
-                    AbreBlueStacks()
-                    return
-                }
             }
         }
     }
@@ -2292,10 +2280,6 @@ AtacarParte(parte) {
                     Send {LButton up}
                     MouseClick, left, OutX, OutY
                     Sleep, 3000
-                    return
-                }
-                if (!JogoAberto()){
-                    AbreBlueStacks()
                     return
                 }
             }
@@ -2314,10 +2298,6 @@ AtacarParte(parte) {
                     Sleep, 3000
                     return
                 }
-                if (!JogoAberto()){
-                    AbreBlueStacks()
-                    return
-                }
             }
         }
     }
@@ -2332,10 +2312,6 @@ AtacarParte(parte) {
                     Send {LButton up}
                     MouseClick, left, OutX, OutY
                     Sleep, 3000
-                    return
-                }
-                if (!JogoAberto()){
-                    AbreBlueStacks()
                     return
                 }
             }
@@ -2354,10 +2330,6 @@ AtacarParte(parte) {
                     Sleep, 3000
                     return
                 }
-                if (!JogoAberto()){
-                    AbreBlueStacks()
-                    return
-                }
             }
         }
     }
@@ -2372,10 +2344,6 @@ AtacarParte(parte) {
                     Send {LButton up}
                     MouseClick, left, OutX, OutY
                     Sleep, 3000
-                    return
-                }
-                if (!JogoAberto()){
-                    AbreBlueStacks()
                     return
                 }
             }

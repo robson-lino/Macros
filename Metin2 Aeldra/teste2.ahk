@@ -27,14 +27,19 @@ else
     PixelGetColor, PixelColor1, X1, Y1
     GeraLog(X1 ", " Y1 " - " PixelColor1)
 }
+return
 
-GeraLog(msg)
-{
-    FormatTime, DataFormatada, D1 T0
-	FileAppend, %DataFormatada% - %msg%`n, %a_scriptdir%\metinlog.log
-	if ErrorLevel
-	{
-		FileAppend, %DataFormatada% - %msg%`n, %a_scriptdir%\metinlog.log
+GeraLog(msg) {
+	FormatTime, DataFormatada, D1 T0
+	FileRead,FileContents, %a_scriptdir%\metinlog%optConta%.log
+	FileDelete %a_scriptdir%\metinlog%optConta%.log
+	FileAppend,%DataFormatada% - %msg%`n%FileContents%,%a_scriptdir%\metinlog%optConta%.log
+	FileAppend, %DataFormatada% - %msg%`n, %a_scriptdir%\metinlog%optConta%.log
+	if ErrorLevel{
+		FileAppend, %DataFormatada% - %msg%`n, %a_scriptdir%\metinlog%optConta%.log
 	}
 }
+
+F11::
+Run, metin2.ahk
 return

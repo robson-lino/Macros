@@ -39,7 +39,7 @@ ClicaRandom(X, Y, var := 3, velo := 50)
     ClicaViaSendMouse(X+rand, Y+rand2, 0, velo)
 }
 
-ClicaRandomDireito(X, Y, var := 3, velo := 30)
+ClicaRandomDireito(X, Y, var := 3, velo := 50)
 {
     Random, rand, -var, var
     Random, rand2, -var, var
@@ -61,7 +61,7 @@ ClicaViaSendMouse(Xmeu, Ymeu, code, velo)
     AHI.SendMouseButtonEvent(mouse2Id, code, 0)
 }
 
-Tecla(key, velo := 40)
+Tecla(key, velo := 50)
 {
     EsperaRandom(velo)
     AHI.SendKeyEvent(Keyboard1Id, GetKeySC(key), 1)
@@ -70,7 +70,7 @@ Tecla(key, velo := 40)
     ;GeraLog("Aperto : " key)
 }
 
-SeguraTecla(key, velo := 40)
+SeguraTecla(key, velo := 50)
 {
     EsperaRandom(velo+50)
     AHI.SendKeyEvent(Keyboard1Id, GetKeySC(key), 1)
@@ -78,7 +78,7 @@ SeguraTecla(key, velo := 40)
     ;GeraLog("Segurou : " key)
 }
 
-SoltaTecla(key, velo := 40)
+SoltaTecla(key, velo := 50)
 {
     EsperaRandom(velo)
     AHI.SendKeyEvent(Keyboard1Id, GetKeySC(key), 0)

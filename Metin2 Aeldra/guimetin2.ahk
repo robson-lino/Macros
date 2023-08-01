@@ -4,13 +4,35 @@
 SetWorkingDir %A_ScriptDir%
 SetBatchLines -1
 
-Gui +AlwaysOnTop
-Gui Add, Text, x9 y13 w120 h23 +0x200, Contas:
-Gui Add, Radio, hWndradConta vConta x10 y46 w50 h23 +Checked, Conta1
-Gui Add, Radio, hWndradConta x64 y46 w50 h23, Conta2
-Gui Add, Radio, hWndradConta x117 y47 w50 h23, Conta3
+global optConta
+global radMetin
+global ChkUpar
+global ChkBaronesa
+global ChkTorre
+global ChkDragao
+global ChkNemere
+global ChkRazador
+global ChkAkzadur
 
-Gui Show, x1603 y72 w249 h418, Window
+Gui Add, Radio, voptConta x24 y8 w70 h23, Conta1
+Gui Add, Radio, x152 y8 w70 h23, Conta2
+Gui Add, CheckBox, vChkUpar x250 y8 w65 h23, Upar
+Gui Add, Button, gInicio x23 y142 w80 h23, Start
+Gui Add, Radio, vradMetin x24 y40 w36 h23, 65
+Gui Add, Radio, x71 y40 w36 h23, 70
+Gui Add, Radio, x119 y40 w36 h23, 90
+Gui Add, Radio, x167 y40 w36 h23, 105
+Gui Add, CheckBox, vChkBaronesa x24 y80 w65 h23, Baronesa
+Gui Add, CheckBox, vChkTorre x96 y80 w65 h23, Torre
+Gui Add, CheckBox, vChkDragao x168 y80 w65 h23, Dragao
+Gui Add, CheckBox, vChkNemere x240 y80 w65 h23, Nemere
+Gui Add, CheckBox, vChkRazador x24 y112 w65 h23, Razador
+Gui Add, CheckBox, vChkAkzadur x96 y112 w65 h23, Akzadur
+
+Gui Show, w329 h181, Window
+Return
+
+Inicio:
 Return
 
 GuiEscape:
