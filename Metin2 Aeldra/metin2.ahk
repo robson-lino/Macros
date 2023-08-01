@@ -1,4 +1,4 @@
-; 2.0.0
+; 2.0.1
 
 #SingleInstance Force
 #MaxThreads 2
@@ -49,7 +49,7 @@ global listaCordPedras
 global tempoDeNaoEssenciais := MinToMili(15)
 global tempoDeVerificaDG := MinToMili(5)
 global ultimaVerificaNaoEssenciais := A_TickCount - MinToMili(13)
-global ultimaVerificaBossDG := A_TickCount - MinToMili(11)
+global ultimaVerificaBossDG := A_TickCount - MinToMili(3)
 global Aviso := true
 global EstaFazendoDG := false
 global qntBaronesa := 0
@@ -398,12 +398,15 @@ Verifica() {
 }
 
 VerificaNaoEssenciais() {
-	;GeraLog(A_tickcount - ultimaVerificaBossDG " > " MinToMili(10))
 	if ((A_tickcount - ultimaVerificaNaoEssenciais) > tempoDeNaoEssenciais) {
 		GeraLog("Entrou não essenciais.")
 		AvisoNaoEssenciais := true
 		ultimaVerificaNaoEssenciais := A_tickcount
 		EquipaLuva()
+		Tecla("2")
+		EsperaRandom(500)
+		Tecla("2")
+		ForaDoCavalo()
 		ClicaRandom(1481, 131)
 		EsperaRandom(500)
 		MoveMouse(1393, 483)
@@ -419,6 +422,7 @@ VerificaNaoEssenciais() {
 }
 
 VerificaBossDGs() {
+	;GeraLog("Entrando no VerificaBossDGs")
 	;GeraLog(A_tickcount - ultimaVerificaBossDG " > " MinToMili(10))
 	if ((A_tickcount - ultimaVerificaBossDG) > tempoDeVerificaDG) {
 		GeraLog("Entrou no FazDG")
@@ -426,8 +430,9 @@ VerificaBossDGs() {
 		Aviso := true
 		FazDGs()
 	} else {
+		GeraLog("Não deu o tempo do verifica DG.")
 		if (tempoDeVerificaDG-((A_tickcount - ultimaVerificaBossDG)) < MinToMili(2) and Aviso) {
-			GeraLog("Faltam menos de 2 minutos para fazer as DGs")
+			;GeraLog("Faltam menos de 2 minutos para fazer as DGs")
 			Aviso := false
 		}
 	}
@@ -489,28 +494,9 @@ PegaControles()
 ;TestaMira()
 ;CimaMetin(optNV)
 ;Upar()
-EstaFazendoDG := true
+;EstaFazendoDG := true
 TipoTransmog := ""
-NemerePiso1()
-
-NemerePiso2()
-
-NemerePiso3()
-
-NemerePiso4()
-
-NemerePiso5()
-
-NemerePiso6()
-
-NemerePiso7()
-
-NemerePiso8()
-
-NemerePiso9()
-
-NemerePisoBoss()
-
+SaiDaTransmog()
 ;RazadorAmheh()
 Return
 
@@ -1030,11 +1016,13 @@ ForaDoCavalo() {
 			if !ErrorLevel {
 				GeraLog("Fora do cavalo.")
 				SaiEntraCavalo()
+				return true
 			}
 			ImageSearch, OutX, OutY, Xjanela, Yjanela, Wjanela, Hjanela, *30 *TransRed %a_scriptdir%\mount.png
 			if !ErrorLevel {
 				GeraLog("Fora do cavalo.")
 				SaiEntraCavalo()
+				return true
 			}
 		}
 	}
@@ -1043,13 +1031,16 @@ ForaDoCavalo() {
 	if !ErrorLevel {
 		GeraLog("Fora do cavalo.")
 		SaiEntraCavalo()
+		return true
 	}
 	ImageSearch, OutX, OutY, Xjanela, Yjanela, Wjanela, Hjanela, *30 *TransRed %a_scriptdir%\mount.png
 	if !ErrorLevel {
 		GeraLog("Fora do cavalo.")
 		SaiEntraCavalo()
+		return true
 	}
 	;GeraLog("Fora do Cavalo: " A_TickCount - Inicio)
+	return false
 }
 
 FechaX() {
@@ -1218,6 +1209,7 @@ FazDGs() {
 	EstaFazendoDG := true
 	FezAlgum := 0
 	deslogou := false
+	log := true
 	if (ChkBaronesa)
 		FezAlgum += Baronesa()
 	if (ChkTorre)
@@ -1228,15 +1220,17 @@ FazDGs() {
 		FezAlgum += Nemere()
 	if (ChkRazador)
 		FezAlgum += Razador()
-	if (ChkErebus)
+	if (ChkErebus) {
 		FezAlgum += Erebus()
+	}
+	EstaFazendoDG := false
+	log := false
 	if (FezAlgum > 0) {
 		VaiPraCidadeRed()
 		VoltaPraQuebrarMetin()
 	} else {
 		FechaX()
 	}
-	EstaFazendoDG := false
 	return
 }
 ; COMEÇO EREBUS
@@ -1289,7 +1283,6 @@ Erebus() {
 		return 1
 	}
 	return 0
-
 }
 
 ErebusPiso1() {
@@ -1299,26 +1292,22 @@ ErebusPiso1() {
 		Verifica()
 		Tecla("3")
 		SeguraTecla("Space")
+		SeguraTecla("w")
+		SeguraTecla("e")
 		EsperaRandom(1000)
 		Tecla("3")
 		EsperaRandom(1000)
 		Tecla("3")
 		EsperaRandom(10000)
-		SoltaTecla("Space")
+		
 		if (A_index > 40) {
 			ErebusDeuErro := true
 			return
 		}
-		if (A_index > 2) {
-			PegaItens()
-			SeguraTecla("w")
-			EsperaRandom(3000)
-			SoltaTecla("w")
-			SeguraTecla("e")
-			EsperaRandom(500)
-			SoltaTecla("e")
-		}
 	}
+	SoltaTecla("Space")
+	SoltaTecla("w")
+	SoltaTecla("e")
 	GeraLog("Matou todos.")
 }
 
@@ -1332,7 +1321,7 @@ ErebusPiso2() {
 			GiraAteAcharMetin()
 			VaiAteMetin()
 		}
-		if (A_index > 40) {
+		if (A_index > 100) {
 			ErebusDeuErro := true
 			GeraLog("Deu ruim ao matar metin.")
 			return
@@ -1383,9 +1372,13 @@ ErebusPiso4() {
 				ClicaRandomDireito(ItemInvOutX+15, ItemInvOutY+7)
 				ClicaRandomDireito(ItemInvOutX+15, ItemInvOutY+7)
 				GeraLog("Usou o curativo.")
+				if (!ProcuraAteAchar(494, 135, 1135, 164, 50, "erebuspiso4", 1500))
+					break
 			}
 		} else {
 			Verifica()
+			if (!ProcuraAteAchar(494, 135, 1135, 164, 50, "erebuspiso4", 1500))
+				break
 			GiraAteAcharMetin()
 			VaiAteMetin()
 			if (ProcuraItemInventario("erebuscurativo")) {
@@ -3595,7 +3588,6 @@ PodeEntrarDG(pos) {
 	if (!AbreF6())
 		return false
 	MoveMouse(933, 555, 1)
-	GeraLog(RetornaCorPixel(647, (281-53)+(pos*53)))
 	if (RetornaCorPixel(647, (281-53)+(pos*53)) = "0x29332D" or RetornaCorPixel(647, (281-53)+(pos*53)) = "0x3E4742") {
 		GeraLog("Pode fazer DG " pos)
 		return true
@@ -3762,9 +3754,12 @@ SaiDaTransmog() {
 		if (ProcuraAteAchar(Xjanela, Yjanela, Wjanela, Hjanela, 60, "sim", 1000)) {
 			ClicaRandom(AchouOutX+5, AchouOutY+5)
 			GeraLog("Tirou a transfiguração.")
-			Tecla("2")
-			EsperaRandom(1000)
-			ForaDoCavalo()
+			while (!ForaDoCavalo()) {
+				Tecla("2")
+				EsperaRandom(1000)
+				Tecla("2")
+				EsperaRandom(500)
+			}
 		}
 	}
 }
