@@ -1,4 +1,4 @@
-; 0.5
+; 1.0
 #SingleInstance Force
 #NoEnv
 DefaultDirs = a_scriptdir
@@ -222,7 +222,7 @@ Gui Add, Text, x8 y40 w36 h23 +0x200, Target
 Gui Add, Progress, vPrgMana x8 y96 w120 h20 -Smooth, 100
 Gui Add, CheckBox, vChkMiR x8 y144 w63 h23, MiR
 Gui Add, CheckBox, vChkPrestige x8 y168 w63 h23 +Checked, Prestige
-Gui Add, CheckBox, vChkFairy x8 y192 w63 h23 +Checked, Fairy
+Gui Add, CheckBox, vChkClanRaid x8 y192 w63 h23 +Checked, ClanRaid
 Gui Add, Button, vPrestige gFazPrestige x96 y272 w80 h23, Prestige
 Gui Add, Button, vBtnIniciar gIniciar x8 y272 w80 h23, Iniciar
 
@@ -259,7 +259,7 @@ Gui Add, Edit, x115 y385 w40 h21 +Number vQntPrestigioDiaConfig, 100
 
 Gui Show, x35 y35 w303 h420, TapMacro
 global TxtStage, txtPrimeira, txtSegunda, txtTerceira, txtQuarta, txtQuinta, txtSexta
-global txtTempoStage, txtMediana, PrgStage, Edit1, PrgMana, ChkMiR, ChkPrestige, ChkFairy
+global txtTempoStage, txtMediana, PrgStage, Edit1, PrgMana, ChkMiR, ChkPrestige, ChkClanRaid
 global Prestige, BtnIniciar, Qual, txtPode, Push, ChkAbsal, txtMana, BtnAtualizar, BtnCalibrar
 global txtMediaStage, txtQntPres, Estilo, QntPrestigioDiaConfig
 
@@ -479,7 +479,7 @@ PegaControles() {
     GuiControlGet, PrgMana
     GuiControlGet, ChkMiR
     GuiControlGet, ChkPrestige
-    GuiControlGet, ChkFairy
+    GuiControlGet, ChkClanRaid
     GuiControlGet, Prestige
     GuiControlGet, BtnIniciar
     GuiControlGet, Qual
@@ -600,20 +600,27 @@ Fechaheroi() {
     }
 }
 
-
 CLicaCompraHeroi() {
     ;Inicio := A_TickCount
-    PixelSearch, OutputVarX, OutputVarY, 944, 143, 948, 489, 0x0786EC, 20, fast
-    if !ErrorLevel
-    {
-        ClicaRandom(937, 166, 4, 60)
-        ClicaRandom(940, 249, 4, 60)
-        ClicaRandom(950, 319, 4, 60)
-        ClicaRandom(933, 387, 4, 60)
+    PixelSearch, OutputVarX, OutputVarY, 944, 143, 948, 790, 0x0786EC, 20, fast
+    while (!ErrorLevel) {
+        ClicaRandom(OutputVarX, OutputVarY, 0, 60)
+        PixelSearch, OutputVarX, OutputVarY, 944, 143, 948, 790, 0x0786EC, 20, fast
     }
+    ;if !ErrorLevel
+    ;{
+    ;    ClicaRandom(937, 166, 4, 60)
+    ;    ClicaRandom(940, 249, 4, 60)
+    ;    ClicaRandom(950, 319, 4, 60)
+    ;    ClicaRandom(933, 387, 4, 60)
+    ;    ClicaRandom(938, 457, 4, 60)
+    ;    ClicaRandom(947, 535, 4, 60)
+    ;    ClicaRandom(940, 601, 4, 60)
+    ;    ClicaRandom(939, 683, 4, 60)
+    ;    ClicaRandom(941, 746, 4, 60)
+    ;}
     ;GeraLog("ClicaCompraHeroi: " A_TickCount - Inicio)
 }
-
 
 CompraHeroiRapido() {
     Inicio := A_TickCount
@@ -1400,29 +1407,31 @@ AtualizaTarget() {
     Gui, Submit, NoHide
     PegaControles()
     if (Push = 1) {
-        if (ChkAbsal) {
-            Mais10 := stage+1000
-            if (stage - Edit1 > 200) {
-                Mais10 := Mais10+500
-                GeraLog("Novo Target: " Mais10)
-                GuiControl, , Edit1, %Mais10%
+        if (stage > Edit1) {
+            if (ChkAbsal) {
+                Mais10 := stage+1000
+                if (stage - Edit1 > 200) {
+                    Mais10 := Mais10+500
+                    GeraLog("Novo Target: " Mais10)
+                    GuiControl, , Edit1, %Mais10%
+                }
+                else {
+                    GeraLog("Novo Target: " Mais10)
+                    GuiControl, , Edit1, %Mais10%
+                }
             }
             else {
-                GeraLog("Novo Target: " Mais10)
-                GuiControl, , Edit1, %Mais10%
-            }
-        }
-        else {
-            Mais10 := stage+50
-            if (stage - Edit1 > 50) {
-                Mais10 := Mais10+50
-                GeraLog("Novo Target: " Mais10)
-                GuiControl, , Edit1, %Mais10%
-                return
-            }
-            else {
-                GeraLog("Novo Target: " Mais10)
-                GuiControl, , Edit1, %Mais10%
+                Mais10 := stage+50
+                if (stage - Edit1 > 50) {
+                    Mais10 := Mais10+50
+                    GeraLog("Novo Target: " Mais10)
+                    GuiControl, , Edit1, %Mais10%
+                    return
+                }
+                else {
+                    GeraLog("Novo Target: " Mais10)
+                    GuiControl, , Edit1, %Mais10%
+                }
             }
         }
     }
@@ -1707,7 +1716,7 @@ AbreSkillDiretoProPresitigo() {
         while (!ProcuraPixelAteAchar(777, 304,"0xFFFFFF", 3)) {
             Cima()
             ;Protecao pra não ficar aqui muito tempo, 6.0.
-            if (RetornaCorPixel(943, 252) = "0x494949")  
+            if (RetornaCorPixel(943, 252) = "0x494949")
                 return
             ClicaRandom(945, 260, 5)
             if (A_Index > 30) {
@@ -1725,7 +1734,7 @@ AbreSkillDiretoProPresitigo() {
             ; Espera abrir o icone, e vai clicando
             while (!ProcuraPixelAteAchar(777, 304,"0xFFFFFF", 15)) {
                 ;Protecao pra não ficar aqui muito tempo, 6.0.
-                if (RetornaCorPixel(943, 252) = "0x494949")  
+                if (RetornaCorPixel(943, 252) = "0x494949")
                     return
                 Cima()
                 FechaColetaRapida()
@@ -1950,93 +1959,105 @@ FormataMilisegundos(millisec) {
 ;ok
 ClanRaid() {
     ;ImageSearch, OutX, OutY, 600, 38, 648, 79, *60 %a_scriptdir%\raid.png
-    if (RetornaCorPixel(625, 54) != "0x2A4BC5") {
-        Random, randVerificaClan, MinToMili(1), MinToMili(1)
-        GeraLog("Entrou no Raid")
-        MouseClick, left, 621, 53
-        loop, 5 {
-            SoundBeep, 300, 300
-        }
-        if (!ProcuraPixelAteAchar(893, 86, "0x76787F", 3000)) {
-            GeraLog("Nao conseguiu abrir o raid, sai fora")
-            FechaAllRapido()
-            return
-        }
-        ImageSearch, OutX, OutY, 576, 91, 993, 503, *60 %a_scriptdir%\fundoazul.png
-        if (ErrorLevel = 0) {
-            MouseClick, left, OutX, OutY
-            Sleep, 1500
-        }
-        ImageSearch, OutX, OutY, 553, 86, 699, 180, *60 %a_scriptdir%\abaraid.png
-        if ErrorLevel {
-            GeraLog("Não estava na aba raid, clicou pra ir")
-            MouseClick, left, 631, 120
+    PegaControles()
+    if (ChkClanRaid) {
+        if (RetornaCorPixel(625, 54) != "0x2A4BC5") {
+            Random, randVerificaClan, MinToMili(1), MinToMili(1)
+            GeraLog("Entrou no Raid")
+            MouseClick, left, 621, 53
+            loop, 5 {
+                SoundBeep, 300, 300
+            }
+            if (!ProcuraPixelAteAchar(893, 86, "0x76787F", 3000)) {
+                GeraLog("Nao conseguiu abrir o raid, sai fora")
+                FechaAllRapido()
+                return
+            }
+            ImageSearch, OutX, OutY, 576, 91, 993, 503, *60 %a_scriptdir%\fundoazul.png
+            if (ErrorLevel = 0) {
+                MouseClick, left, OutX, OutY
+                Sleep, 1500
+            }
+            ImageSearch, OutX, OutY, 553, 86, 699, 180, *60 %a_scriptdir%\abaraid.png
+            if ErrorLevel {
+                GeraLog("Não estava na aba raid, clicou pra ir")
+                MouseClick, left, 631, 120
+                if (!ProcuraPixelAteAchar(948, 396, "0xAC9220", 10000)) {
+                    GeraLog("Nao conseguiu abrir a aba raid, sai fora")
+                    FechaAllRapido()
+                    return
+                }
+            }
             if (!ProcuraPixelAteAchar(948, 396, "0xAC9220", 10000)) {
                 GeraLog("Nao conseguiu abrir a aba raid, sai fora")
                 FechaAllRapido()
                 return
             }
-        }
-        if (!ProcuraPixelAteAchar(948, 396, "0xAC9220", 10000)) {
-            GeraLog("Nao conseguiu abrir a aba raid, sai fora")
-            FechaAllRapido()
-            return
-        }
-        GeraLog("Procurando qual parte precisa atacar")
-        parte := "nenhuma"
-        Loop, parse, listaPartes, `,
-        {
-            if (AlvoEmQualParte(A_LoopField, "alvo")) {
-                if (ParteTemVida(A_LoopField)) {
-                    parte := A_LoopField
-                    break
-                }
-            }
-        }
-        if (parte = "nenhuma") {
+            GeraLog("Procurando qual parte precisa atacar")
+            parte := "nenhuma"
             Loop, parse, listaPartes, `,
             {
-                if (ParteTemVida(A_LoopField)) {
-                    if (!AlvoEmQualParte(A_LoopField, "x"))
-                    {
+                if (AlvoEmQualParte(A_LoopField, "alvo")) {
+                    if (ParteTemVida(A_LoopField)) {
                         parte := A_LoopField
                         break
                     }
                 }
             }
-        }
-        GeraLog("Vai atacar a parte : " parte)
-        CaptureScreen("0, 0, " A_ScreenWidth ", " A_ScreenHeight,,"prints/raid/" parte "-" A_now ".png")
-        if (parte = "nenhuma") {
-            GeraLog("Aborta!!! Nao achou nenhuma parte", true)
-            loop, 2
-            {
-                FechaAllRapido()
-            }
-            return
-        }
-        ImageSearch, OutX, OutY, 821, 758, 935, 805, *60 %a_scriptdir%\fig.png
-        if !ErrorLevel {
-            MouseClick, left, OutX, OutY
-            Sleep, 1500
-            while (TrocaAba()) {
-                Sleep, 500
-                ImageSearch, OutX, OutY, 819, 575, 913, 612, *60 %a_scriptdir%\fig2.png
-                if (ErrorLevel = 0) {
-                    MouseClick, left, OutX, OutY
-                    Sleep, 300
-                    AtacarParte(parte)
-                    break
+            if (parte = "nenhuma") {
+                Loop, parse, listaPartes, `,
+                {
+                    if (ParteTemVida(A_LoopField)) {
+                        if (!AlvoEmQualParte(A_LoopField, "x"))
+                        {
+                            parte := A_LoopField
+                            break
+                        }
+                    }
                 }
             }
+            GeraLog("Vai atacar a parte : " parte)
+            CaptureScreen("0, 0, " A_ScreenWidth ", " A_ScreenHeight,,"prints/raid/" parte "-" A_now ".png")
+            if (parte = "nenhuma") {
+                GeraLog("Aborta!!! Nao achou nenhuma parte", true)
+                loop, 2
+                {
+                    FechaAllRapido()
+                }
+                return
+            }
+            ImageSearch, OutX, OutY, 821, 758, 935, 805, *60 %a_scriptdir%\fig.png
+            if !ErrorLevel {
+                MouseClick, left, OutX, OutY
+                Sleep, 1500
+                while (TrocaAba()) {
+                    ImageSearch, OutX, OutY, 573, 57, 998, 834, *60 %a_scriptdir%\deck.png
+                    if ErrorLevel {
+                        GeraLog("Deu ruim, não estava no deck.")
+                        break
+                    }
+                    if (RetornaCorPixel(978, 835) = "0x3F4423" or RetornaCorPixel(631, 111) = "0x000000") {
+                        GeraLog("Deu ruim, não estava no clan raid.")
+                        break
+                    }
+                    Sleep, 500
+                    ImageSearch, OutX, OutY, 819, 575, 913, 612, *60 %a_scriptdir%\fig2.png
+                    if (ErrorLevel = 0) {
+                        MouseClick, left, OutX, OutY
+                        Sleep, 300
+                        AtacarParte(parte)
+                        break
+                    }
+                }
+            }
+            loop, 2 {
+                FechaAllRapido()
+            }
+        } else {
+            Aviso := true
+            GeraLog("Não precisava entrar na raid.")
+            Random, randVerificaClan, MinToMili(randClanMin), MinToMili(randClanMax)
         }
-        loop, 2 {
-            FechaAllRapido()
-        }
-    } else {
-        Aviso := true
-        GeraLog("Não precisava entrar na raid.")
-        Random, randVerificaClan, MinToMili(randClanMin), MinToMili(randClanMax)
     }
 }
 
@@ -2094,6 +2115,10 @@ TrocaPagina() {
 }
 
 TrocaAba() {
+    ImageSearch, OutX, OutY, 656, 286, 906, 345, *60 %a_scriptdir%\deck.png
+    if ErrorLevel {
+        return false
+    }
     AttPagina()
     ImageSearch, OutX, OutY, 729, 125, 833, 164, *60 %a_scriptdir%\abaraid.png
     if (ErrorLevel = 0) {
@@ -2592,8 +2617,8 @@ FechaBluestacks() {
     MouseClick, left, 1550, 12
     loop, 2 {
         loop, 3 {
-        if (ProcuraAteAchar(0, 0, A_ScreenWidth, A_ScreenHeight, 70, "fecharbluestacks" A_index, 3000))
-            ClicaRandom(AchouOutX+15, AchouOutY+5)
+            if (ProcuraAteAchar(0, 0, A_ScreenWidth, A_ScreenHeight, 70, "fecharbluestacks" A_index, 3000))
+                ClicaRandom(AchouOutX+15, AchouOutY+5)
         }
     }
     GeraLog("Fechou o bluestacks")
@@ -2797,7 +2822,7 @@ AtivaAAv2() {
     Inicio := A_TickCount
     FechaSeta()
     ;FindClick()
-    loop, 1
+    loop, 10
     {
         ;GeraLog(1280-A_ScreenWidth " " 302-A_ScreenHeight)
         Options = a549,196,142,283 o29 e0 t-1 Stay1
@@ -3047,6 +3072,9 @@ DailyRaid() {
                 ClicaRandom(889, 697)
                 if (ProcuraPixelAteAchar(907, 340, "0x76787F", 3000)) {
                     While (TrocaAbaDaily()) {
+                        if (RetornaCorPixel(978, 835) = "0x3F4423" or RetornaCorPixel(631, 111) = "0x000000") {
+                            return
+                        }
                         Sleep, 500
                         ImageSearch, OutX, OutY,707, 554, 866, 618, *30 %a_scriptdir%\startdaily.png
                         if (ErrorLevel = 0) {
@@ -3292,10 +3320,8 @@ F8::
 FechaBluestacks()
 return
 
-
-
 F9::
-JogoAberto()
+CLicaCompraHeroi()
 return
 
 ;---------------------------------------------------------------------------
@@ -3370,15 +3396,15 @@ ExecutarComando(cmd) {
     ; Cria um objeto de fluxo para capturar a saída do comando
     stdout := "", stderr := ""
     Run, %ComSpec% /C %cmd% > %A_ScriptDir%\output.txt,, UseErrorLevel, pid
-    
+
     ; Aguarda até que o comando termine
     Sleep 10000
     ; Lê a saída do comando a partir do objeto de fluxo
     FileRead, stdout, %A_ScriptDir%\output.txt
-    
+
     ; Apaga o arquivo de saída
     FileDelete, %A_ScriptDir%\output.txt
-    
+
     ; Retorna a saída do comando
     return stdout
 }
