@@ -143,6 +143,7 @@ global subiuPet := 0
 global fezreroll := false
 global passadaViaAba := 0
 global PID := ""
+global dentroTorneio := false
 
 GeraLog(msg, sms=false) {
     FormatTime, DataFormatada, D1 T0
@@ -1033,14 +1034,14 @@ AtivaSkillsCS() {
         }
         else
             TerceiraFull := true
-        if (RetornaCorPixel(963, 791) != "0x73767F" and SegundaFull and QuintaFull) {
-            Loop, 1 {
-                ClicaSextaSkill()
-                SextaFull := false
-            }
-        }
-        else
-            SextaFull := true
+        ;if (RetornaCorPixel(963, 791) != "0x73767F" and SegundaFull and QuintaFull) {
+        ;    Loop, 1 {
+        ;        ClicaSextaSkill()
+        ;        SextaFull := false
+        ;    }
+        ;}
+        ;else
+        SextaFull := false
         ;if (RetornaCorPixel(574, 791) != "0x0059E1" and SegundaFull and QuintaFull)
         ;{
         ;    Loop, 4
@@ -1295,25 +1296,25 @@ Travado() {
 TempoDePrestigio() {
     PegaControles()
     if (!ChkAbsal) {
-        if (A_Tickcount - TickPrestigio > MinToMili(20)) {
+        if (A_Tickcount - TickPrestigio > MinToMili(7)) {
             Gui, Submit, NoHide
             if (Push = 3) {
                 ;ChkMiR := false
-                GeraLog("Estava mais de 20 minutos em um unico prestigio, desmarca o MiR, e forca")
+                GeraLog("Estava mais de 7 minutos em um unico prestigio, desmarca o MiR, e forca")
                 forcaprestige := true
             }
             Else {
                 ;ChkMiR := false
-                GeraLog("Estava mais de 20 minutos em um unico prestigio, desmarca o MiR, e forca")
+                GeraLog("Estava mais de 7 minutos em um unico prestigio, desmarca o MiR, e forca")
                 forcaprestige := true
             }
         }
     } else
-        if (A_Tickcount - TickPrestigio > MinToMili(20)) {
+        if (A_Tickcount - TickPrestigio > MinToMili(7)) {
             Gui, Submit, NoHide
             if (Push = 3 OR Push = 1) {
                 ;ChkMiR := false
-                GeraLog("Estava mais de 20 minutos em um unico prestigio, desmarca o MiR, e forca")
+                GeraLog("Estava mais de 7 minutos em um unico prestigio, desmarca o MiR, e forca")
                 forcaprestige := true
             }
         }
@@ -1641,7 +1642,7 @@ EquipaMelhorItem() {
     Loop, parse, TipoHeroi, `,
     {
         FechaColetaRapida()
-        ImageSearch, OutX, OutY, 647, 171, 959, 188, *140 *Transblack %a_scriptdir%\%A_LoopField%.png
+        ImageSearch, OutX, OutY, 647, 171, 959, 188, *145 *Transblack %a_scriptdir%\%A_LoopField%.png
         if !ErrorLevel {
             ;GeraLog("Achou o : " A_LoopField)
             ;if (ItemEquipado != A_LoopField) {
@@ -1672,7 +1673,7 @@ EquipaMelhorItem() {
             break
         }
         else {
-            ;GeraLog("Não achou o : "A_LoopField)
+            GeraLog("Não achou o : " A_LoopField)
         }
     }
     ;GeraLog("EquipaMelhorItem: " A_TickCount - Inicio)
@@ -2036,7 +2037,7 @@ ClanRaid() {
                         GeraLog("Deu ruim, não estava no deck.")
                         break
                     }
-                    if (RetornaCorPixel(978, 835) = "0x3F4423" or RetornaCorPixel(631, 111) = "0x000000") {
+                    if (RetornaCorPixel(978, 835) = "0x3F4323" or RetornaCorPixel(631, 111) = "0x000000") {
                         GeraLog("Deu ruim, não estava no clan raid.")
                         break
                     }
@@ -2062,15 +2063,15 @@ ClanRaid() {
 }
 
 AttPagina() {
-    ImageSearch, OutX, OutY, 898, 402, 976, 435, *60 %a_scriptdir%\aba1.png
+    ImageSearch, OutX, OutY, 750, 379, 816, 415, *60 %a_scriptdir%\aba1.png
     if (ErrorLevel = 0) {
         Pagina := 1
     }
-    ImageSearch, OutX, OutY, 898, 402, 976, 435, *60 %a_scriptdir%\aba2.png
+    ImageSearch, OutX, OutY, 750, 379, 816, 415, *60 %a_scriptdir%\aba2.png
     if (ErrorLevel = 0) {
         Pagina := 2
     }
-    ImageSearch, OutX, OutY, 898, 402, 976, 435, *60 %a_scriptdir%\aba3.png
+    ImageSearch, OutX, OutY, 750, 379, 816, 415, *60 %a_scriptdir%\aba3.png
     if (ErrorLevel = 0) {
         Pagina := 3
     }
@@ -2079,36 +2080,36 @@ AttPagina() {
 TrocaPagina() {
 
     if (Pagina = 3) {
-        MouseMove, 798, 389
+        MouseMove, 615, 370
         Sleep, 20
         Send {LButton down}
-        MouseMove, 1078, 391, 25
+        MouseMove, 950, 375, 25
         Sleep, 200
         Send {LButton up}
         indo := false
     }
     if (Pagina = 1) {
-        MouseMove, 1078, 391
+        MouseMove, 950, 375
         Sleep, 20
         Send {LButton down}
-        MouseMove, 798, 389, 25
+        MouseMove, 615, 370, 25
         Sleep, 200
         Send {LButton up}
         indo := true
     }
     if (Pagina = 2 and indo) {
-        MouseMove, 1078, 391
+        MouseMove, 950, 375
         Sleep, 20
         Send {LButton down}
-        MouseMove, 798, 389, 25
+        MouseMove, 615, 370, 25
         Sleep, 200
         Send {LButton up}
     }
     if (Pagina = 2 and !indo) {
-        MouseMove, 798, 389
+        MouseMove, 615, 370
         Sleep, 20
         Send {LButton down}
-        MouseMove, 1078, 391, 25
+        MouseMove, 950, 375, 25
         Sleep, 200
         Send {LButton up}
     }
@@ -2145,7 +2146,7 @@ TrocaAba() {
         MouseClick, left, 945, 370
     Else {
         Aba := 0
-        ;TrocaPagina()
+        TrocaPagina()
         Sleep, 200
         TrocaAba()
     }
@@ -2647,7 +2648,7 @@ AbreBluestacks() {
     GeraLog("Esperando Carregar")
     Comeco := A_TickCount
     while ((A_TickCount - Comeco) < MinToMili(3)) {
-        if(ProcuraPixelAteAchar(978, 835, "0x3F4423", 300)) {
+        if(ProcuraPixelAteAchar(978, 835, "0x3F4323", 300)) {
             Ativa()
             GeraLog("Carregou tudo...")
             Sleep, 1000
@@ -2689,14 +2690,14 @@ AbreBluestacks() {
 JogoAberto() {
     ; Procura Bau, ultimo icone da direita
     ;ImageSearch, OutX, OutY, 1104, 849, 1157, 879, *90 %a_scriptdir%\baudireita.png
-    if (RetornaCorPixel(978, 835) = "0x3F4423" or RetornaCorPixel(631, 111) = "0x000000") {
+    if (RetornaCorPixel(978, 835) = "0x3F4323" or RetornaCorPixel(631, 111) = "0x000000") {
         ;GeraLog("Jogo Estava aberto")
         return true
     }
     loop,
     {
         FechaAllRapido()
-        if (RetornaCorPixel(978, 835) = "0x3F4423" or RetornaCorPixel(631, 111) = "0x000000") {
+        if (RetornaCorPixel(978, 835) = "0x3F4323" or RetornaCorPixel(631, 111) = "0x000000") {
             return true
         }
         ClicaRandom(783, 59, 5)
@@ -2975,8 +2976,47 @@ AbrePet() {
 }
 
 EntraTorneio() {
-
+    if (!dentroTorneio) {
+        if (RetornaCorPixel(569, 110) = "0x77560C") {
+            GeraLog("Encontrou o torneio.")
+            ClicaRandom(569, 110)
+            if (ProcuraPixelAteAchar(783, 703, "0xCEA43D", 2000)) {
+                GeraLog("Clicou e achou o entra torneio.")
+                ClicaRandom(784, 703)
+                if (ProcuraPixelAteAchar(783, 746, "0xCEA43D", 2000)) {
+                    GeraLog("Clicou no entra torneio e achou pra fazer o prestige.")
+                    ClicaRandom(783, 746)
+                    Sleep, 10000
+                    dentroTorneio := true
+                    AtualizaInfosPrest()
+                    CompraSkills()
+                    GeraLog("Faltam " FormataMilisegundos(randVerificaClan - (A_tickcount - ultimaVerificadaClan)) " para verificar novamente.")
+                    PegaControles()
+                    GeraLog("Media : " txtMediaStage " - quantidade : " txtQntPres " - faltam : " QntPrestigioDiaConfig - QntPrestigioDia)
+                    FechaAllRapido()
+                    AtualizaStatusSkillAtiva()
+                    Sleep, 300
+                    AtualizaStatusSkillAtiva()
+                    CompraReliquia()
+                    GeraLog("Terminou de fazer o prestige, dentro do torneio agora.")
+                }
+                else
+                    GeraLog("Não achou pra fazer o prestige.")
+            }
+            else 
+                GeraLog("Não achou o entra torneio.")
+        }
+    }
 }
+
+SaiTorneio() {
+    if (!dentroTorneio) {
+        if (RetornaCorPixel(569, 110) != "0x77560C") {
+
+        }
+    }
+}
+
 ;OK
 ClanEmail() {
     Ativa()
@@ -3072,7 +3112,7 @@ DailyRaid() {
                 ClicaRandom(889, 697)
                 if (ProcuraPixelAteAchar(907, 340, "0x76787F", 3000)) {
                     While (TrocaAbaDaily()) {
-                        if (RetornaCorPixel(978, 835) = "0x3F4423" or RetornaCorPixel(631, 111) = "0x000000") {
+                        if (RetornaCorPixel(978, 835) = "0x3F4323" or RetornaCorPixel(631, 111) = "0x000000") {
                             return
                         }
                         Sleep, 500
@@ -3164,6 +3204,10 @@ DailyQuest() {
             if !ErrorLevel {
                 ClicaRandom(OutX, OutY)
                 Sleep, 300
+                if (ProcuraAteAcharTransBlack(894, 760, 1019, 837, 70, "skip", 1500)) {
+                    Sleep, 1000
+                    ClicaRandom(AchouOutX, AchouOutY)
+                }
                 GeraLog("Pegou recomepnsa diaria")
             }
         }
@@ -3321,7 +3365,7 @@ FechaBluestacks()
 return
 
 F9::
-CLicaCompraHeroi()
+JogoAberto()
 return
 
 ;---------------------------------------------------------------------------
