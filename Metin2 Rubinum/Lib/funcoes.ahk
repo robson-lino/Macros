@@ -26,7 +26,7 @@ for k, v in DeviceList {
 ;global mouse2Id := AHI.GetMouseId(0x09DA, 0x718C)
 
 
-ClicaRandom(X, Y, var := 3, velo := 50)
+ClicaRandom(X, Y, var := 3, velo := 50, lado=0)
 {
     Random, rand, -var, var
     Random, rand2, -var, var
@@ -36,7 +36,7 @@ ClicaRandom(X, Y, var := 3, velo := 50)
         GeraLog("Erro evitado.")
         return
     }
-    ClicaViaSendMouse(X+rand, Y+rand2, 0, velo)
+    ClicaViaSendMouse(X+rand, Y+rand2, lado, velo)
 }
 
 ClicaRandomDireito(X, Y, var := 3, velo := 50)
@@ -262,4 +262,55 @@ EncontrarCoordenadaMaisProxima(coordenadas) {
 		}
 	}
 	return coordenada_proxima
+}
+
+EncontrarCoordenadaOrdenada(coordenadas) {
+    centro_x := Wjanela // 2
+    centro_y := Hjanela // 2
+    lista_coordenadas := []
+
+    ; Loop através de cada coordenada na lista fornecida
+    Loop, parse, coordenadas, `n, `r
+    {
+        if (A_Index > 3)
+            break
+        ; Divida a coordenada em x e y
+        coord := StrSplit(A_LoopField, ",")
+        x := coord[1]
+        y := coord[2]
+        
+        ; Adiciona a coordenada à lista
+        lista_coordenadas.Push({x: x, y: y})
+    }
+
+    ; Ordene a lista de coordenadas
+    lista_ordenada := SortCoords(lista_coordenadas, centro_x, centro_y)
+
+    ; Retorna a lista de coordenadas ordenadas
+    return RTrim(lista_ordenada, "`n") ; Remove a última nova linha
+}
+
+; Função de comparação para ordenar as coordenadas
+SortCoords(coords, centro_x, centro_y) {
+    ; Crie uma nova lista para armazenar as distâncias e as coordenadas
+    dict := Object()
+    
+    ; Calcule as distâncias e armazene na lista
+    Loop, % coords.MaxIndex() {
+        coord := coords[A_Index]
+        distance := EuclideanDistance(coord.x, coord.y, centro_x, centro_y)
+        if (distance > 80)
+            dict[distance] := coord.x . "," . coord.y
+    }
+    
+    ; Ordene a lista de distâncias
+    Sort, dict, N A
+
+    ; Cria uma nova lista de coordenadas ordenadas
+    lista_ordenada := ""
+    for index, item in dict {
+        lista_ordenada .= item . "`n`r"
+    }
+    
+    return lista_ordenada
 }

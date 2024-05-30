@@ -2,6 +2,10 @@
 SendMode Event
 SetKeyDelay 40, 50
 
-^F11::
-Run, metin2.ahk
+^s::
+Hotkey, ^s, off 
+Send, ^s
+Hotkey, ^s, on
+Sleep, 200
+Run, Metin2.ahk
 return
