@@ -91,8 +91,7 @@ TaLogado()
 
 EsperaFisgar()
 {
-	AbreSkill()
-	ClicaSkillPesca()
+	Tecla("space")
 	ProcuraAteAchar(776, 357, 830, 375, 20, "pescaria", 1000)
 	ImageSearch, OutX, OutY, 776, 357, 830, 375, *20 %a_scriptdir%\pescaria.png
 	while (!ErrorLevel)
@@ -105,22 +104,6 @@ EsperaFisgar()
 			PixelSearch, OutX, OutY, 744, 422, 885, 553, 0x795C3B, 5, fast
             if !ErrorLevel
                 ClicaRandom(OutX, OutY, 3)
-		}
-		else
-		{
-			MouseMove, 809, 484
-			ImageSearch, OutX, OutY, 1439, 521, 1602, 865, *30 %a_scriptdir%\p%p%.png
-			if !ErrorLevel
-			{
-				ClicaRandomDIreito(OutX, OutY, 3)
-				p++
-			}
-			else
-			{
-				p++
-			}
-			if (p = 26)
-				p := 1
 		}
 		ImageSearch, OutX, OutY, 776, 357, 830, 375, *20 %a_scriptdir%\pescaria.png
 	}

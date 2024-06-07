@@ -34,7 +34,7 @@ ClicaRandom(X, Y, var := 3, velo := 50, lado=0)
     YCalculado := Y+rand2
     if (XCalculado < Xjanela or XCalculado > Wjanela or X = "" or YCalculado < Yjanela or YCalculado > Hjanela or Y = "") {
         GeraLog("Erro evitado.")
-        return
+        ;return
     }
     ClicaViaSendMouse(X+rand, Y+rand2, lado, velo)
 }
@@ -272,8 +272,6 @@ EncontrarCoordenadaOrdenada(coordenadas) {
     ; Loop através de cada coordenada na lista fornecida
     Loop, parse, coordenadas, `n, `r
     {
-        if (A_Index > 3)
-            break
         ; Divida a coordenada em x e y
         coord := StrSplit(A_LoopField, ",")
         x := coord[1]
@@ -299,7 +297,7 @@ SortCoords(coords, centro_x, centro_y) {
     Loop, % coords.MaxIndex() {
         coord := coords[A_Index]
         distance := EuclideanDistance(coord.x, coord.y, centro_x, centro_y)
-        if (distance > 80)
+        if ((distance > 40 and distance < 78) or distance > 80)
             dict[distance] := coord.x . "," . coord.y
     }
     
