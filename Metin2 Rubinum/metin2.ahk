@@ -80,6 +80,8 @@ global log := false
 global EstaTransfigurado
 global TipoTransmog := ""
 global temFila := false
+global step1
+global step2
 FormatTime, InicioMacro, D1 T0
 
 ;variaveis de entrada
@@ -157,9 +159,9 @@ PegaControles() {
 		ErebusPOS := 99
 		AkzadurPOS := 99
 	} else if (optConta = 2) {
-		BaronesaPOS := 1
+		TorrePOS := 1
+		BaronesaPOS := 2
 		DragaoPOS := 3
-		TorrePOS := 2
 		DevilPOS := 4
 		LeroPOS := 5
 		NemerePOS := 6
@@ -405,7 +407,10 @@ EsperaMatar(ClicaProximaMetin = false) {
 		GeraLog("Não conseguiu chegar perto da metin, travado: " qntTravado)
 		SoltaTecla("e")
 		Verifica()
-		Tecla("d", 500)
+		if (Mod(qntTravado,2) = 0)
+			Tecla("d", 500)
+		else 
+			Tecla("a", 500)
 		Tecla("s", 300)
 		GiraAteAcharMetin()
 		VaiAteMetin()
@@ -520,7 +525,6 @@ fX(x)
 0::
 log := true
 PegaControles()
-optConta := 1
 JogoAberto()
 Verifica()
 While (true) {
@@ -554,11 +558,13 @@ EsperaFisgar()
 ; TESTE
 log := true
 PegaControles()
-optConta := 1
 JogoAberto()
 ;Verifica()
-if (ProcuraAteAchar(518, 194, 1090, 701, 60, sim, 10000)) 
-	GeraLog("Achou")
+Devil1Metin()
+PisoPadraoBossNome("2.1","hell")
+PisoPadraoBoss("2.2")
+Devil3Spawn()
+DevilFinal()
 Return
 
 
@@ -588,7 +594,6 @@ GiraAteAcharMetin() {
 	if ErrorLevel {
 		SeguraTecla("e")
 		if (ProcuraAteAchar(1473, 40, 1608, 178, 70, "mapametin2", 4000)) {
-			GeraLog("Achou")
 			MoveMouse(AchouOutX, AchouOutY)
 			ImageSearch, OutX, OutY, Xjanela, Yjanela-60, Wjanela-80, Hjanela, 40 *TransRed %a_scriptdir%\metinpedra.png
 			if !ErrorLevel
@@ -712,6 +717,7 @@ MatandoMetins() {
 					if !ErrorLevel {
 						CaptureScreen("0, 0, " A_ScreenWidth ", " A_ScreenHeight,,"prints/vidacheia/" A_now ".png")
 						GeraLog("Saiu pela a vida cheia")
+						ClicaRandom(808, 447, 1)
 						Verifica()
 						Achou := false
 						break
@@ -737,8 +743,14 @@ MatandoMetins() {
 			qntTravadoTotal++
 			if (qntTravado > 1) {
 				GeraLog("Não conseguiu chegar perto da metin, travado: " qntTravado)
-				Tecla("d", 500)
+				if (Mod(qntTravado,2) = 0)
+					Tecla("d", 500)
+				else 
+					Tecla("a", 500)
 				Tecla("s", 300)
+				Tecla("s", 300)
+				if (qntTravado > 10)
+					VoltaPraQuebrarMetin()
 				GiraAteAcharMetin()
 				VaiAteMetin()
 			} else {
@@ -2542,6 +2554,8 @@ Devil() {
 			return 1
 		if !PisoPadraoBossNome("2.1","hell")
 			return 1
+		if !PisoPadraoBoss("2.2")
+			return 1
 		Devil3Spawn()
 		if (DevilDeuErro)
 			return 1
@@ -2621,6 +2635,7 @@ Devil2Boss() {
 }
 
 Devil3Spawn() {
+	GeraLog("Comecou o stage 3 de spawn")
 	while (ProcuraImgBanner("devil3")) {
 		achoumetin := false
 		ImageSearch, OutX, OutY, Xjanela, Yjanela-60, Wjanela-80, Hjanela, *30 *TransRed %a_scriptdir%\metinpedra.png
@@ -2752,7 +2767,6 @@ Lero() {
 
 PisoPadraoMetin(piso) {
 	GeraLog("Inicio do Piso " piso)
-	ArrumaMapa1Zoom()
 	while (ProcuraImgBanner(piso)) {
 		GeraLog("Matando metins...")
 		EsperaRandom(500)
@@ -2888,7 +2902,13 @@ ProcuraItemInventario(item) {
 }
 
 VaiPraCidadeRed() {
-	While (!TeleportaAnel([2,1], false)) {
+	Random, step1aux, 1,3
+	Random, step2aux, 1,4
+	while (step1aux = step1)
+		Random, step1aux, 1,3
+	step1 := step1aux
+	step2 := step2aux
+	While (!TeleportaAnel([step1,step2], false)) {
 		if (A_Index > 5)
 			return
 	}
@@ -2944,7 +2964,7 @@ GiraAteAchar(tipo) {
 }
 
 CimaMetin(nv) {
-	if (nv != "90")
+	if (nv != "DESATIVADO")
 		return false
 	;GeraLog("Cima Metin")
 	Inicio := A_TickCount
@@ -2983,7 +3003,7 @@ JogoAberto() {
 	else {
 		FechaJogo()
 		try
-			Run, % A_ScriptDir "\RubinumClient\RubinumLauncher.exe"
+			Run, % A_ScriptDir "\RubinumClient" optConta "\RubinumLauncher.exe"
 		catch {
 			Run, "D:\Desktop\Rubinum\Rubinum-Patcher.exe"
 			return false
@@ -3230,8 +3250,12 @@ ErroRuntime() {
 TeleportaAnel(lista, city = true) {
 	; Sempre vai pra city pra mostrar que deu TP.
 	if (city) {
-		Random, step1, 1,3
-		Random, step2, 1,4
+		Random, step1aux, 1,3
+		Random, step2aux, 1,4
+		while (step1aux = step1)
+			Random, step1aux, 1,3
+		step1 := step1aux
+		step2 := step2aux
 		GeraLog("Indo para cidade primeiro.")
 		if (!TeleportaAnel([step1,step2], false)) {
 			return false
@@ -3250,11 +3274,11 @@ TeleportaAnel(lista, city = true) {
 		if ProcuraPixelAteAchar(874, 280, "0x092559", 1000) {
 			GeraLog("Iniciando teleporte")
 			loop, 10 {
-				Tecla("Q")
+				Tecla("Q", 100)
 			}
 			for index, item in lista {
-				Tecla(item)
-				EsperaRandom(100)
+				Tecla(item, 100)
+				EsperaRandom(300)
 			}
 			if (TrocouMapa()) {
 				GeraLog("Conseguiu trocar de mapa.")
@@ -3317,5 +3341,5 @@ FechaJogo() {
 }
 
 ProcuraImgBanner(img) {
-	return ProcuraAteAchar(8, 119, 1598, 179, 45, img, 1500)
+	return ProcuraAteAchar(8, 119, 1598, 179, 45, img, 3000)
 }
