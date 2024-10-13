@@ -1,8 +1,5 @@
-import ctypes
-import cv2
 from screencapture import ScreenCaptureAgent
 from gui import Gui
-import win32gui
 from funcoes import *
 
 def main():

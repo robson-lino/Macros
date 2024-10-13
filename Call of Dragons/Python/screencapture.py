@@ -76,6 +76,6 @@ class ScreenCaptureAgent:
                     fps_report_time = time.time()
                     n_frames = 1
                 n_frames += 1
-                cv.waitKey(100 if processada else 1)
+                cv.waitKey(500 if processada else 100)
                 #cv.waitKey(1)
 

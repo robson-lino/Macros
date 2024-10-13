@@ -11,30 +11,48 @@ class TipoRss(Enum):
 class Herois:
     def __init__(self):
         # Criando heróis com suas prioridades para diferentes recursos
+
+        self.skills = [
+            "greenfinger"
+        ]
+
+        self.herois_em_uso = {
+            "kella": None,
+            "pan": None,
+            "chak": None,
+            "ordo": None,
+            "tarra": None,
+            "naernin": None,
+            }
+
         self.Gold = [
             "kella",
+            "naernin",
             "pan",
             "chak",
-            "ordo",
             "tarra",
+            "ordo",
         ]
         self.Wood = [
             "pan",
+            "naernin",
             "chak",
             "kella",
-            "ordo",
             "tarra",
+            "ordo",
         ]
         self.Rock = [
             "chak",
-            "pan",
-            "kella",
-            "ordo",
+            "naernin",
             "tarra",
+            "kella",
+            "pan",
+            "ordo",
         ]
         self.Mana = [
             "tarra",
             "ordo",
+            "naernin",
             "pan",
             "chak",
             "kella",
@@ -43,6 +61,7 @@ class Herois:
             "pan",
             "chak",
             "kella",
-            "ordo",
             "tarra",
+            "ordo",
+            "naernin",
         ]
