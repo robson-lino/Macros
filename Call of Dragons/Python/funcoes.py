@@ -56,16 +56,20 @@ class Funcoes:
             # Indica que a classe foi inicializada
             self.initialized = True
 
-    def gera_log(self, conta, mensagem):
-        if conta is None:
-            raise Exception("Ta sem conta no log")
+    def gera_log(self, mensagem):
         if getattr(sys, 'frozen', False):
             # O programa está rodando em modo empacotado
             diretorio_atual = os.path.dirname(sys.executable)
         else:
             # O programa está rodando a partir do código fonte
             diretorio_atual = os.path.dirname(os.path.abspath(__file__))
-        nomearquivo = f"codlogvm{conta}.log" if ("F" in diretorio_atual) or ("Z" in diretorio_atual) else f"codlog.log"
+        
+        if ("F" in diretorio_atual):
+            nomearquivo = f"codlogvm1.log"
+        elif ("Z" in diretorio_atual):
+            nomearquivo = f"codlogvm2.log"
+        else:
+            nomearquivo = f"codlog.log"
         caminho_log = f'{diretorio_atual}\\{nomearquivo}'
         try:
             with open(caminho_log, 'r') as file:

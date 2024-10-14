@@ -73,12 +73,13 @@ class Gui:
 
             # Variáveis compartilhadas
             self.optConta = tk.IntVar(value=1)  # Inicializando com Conta1 selecionada
-            self.chkExplorar = tk.BooleanVar(value=False)
+            self.chkTrocar = tk.BooleanVar(value=True)
             self.chkVisaoPC = tk.BooleanVar(value=False)
             self.chkEsperar = tk.BooleanVar(value=False)
             self.chkUpar = tk.BooleanVar(value=False)
             self.chkMaxRss = tk.BooleanVar(value=False)
             self.chkDonate = tk.BooleanVar(value=True)
+            self.chkExplorar = tk.BooleanVar(value=False)
 
             self.chkInf = tk.BooleanVar(value=True)
             self.chkMag = tk.BooleanVar(value=True)
@@ -112,6 +113,7 @@ class Gui:
             self._create_widgets()
 
             self.load_settings()
+            self.opt_valor_anterior = self.optConta.get()
             # Interceptar o fechamento da janela (clicar no X)
             self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
 
@@ -120,11 +122,12 @@ class Gui:
 
     def _create_widgets(self):
         # Radio buttons
-        tk.Radiobutton(self.root, text="Conta1", variable=self.optConta, value=1).grid(row=0, column=0, padx=self.padx, pady=self.pady, sticky="ew")
-        tk.Radiobutton(self.root, text="Conta2", variable=self.optConta, value=2).grid(row=0, column=1, padx=self.padx, pady=self.pady, sticky="ew")
-
+        tk.Radiobutton(self.root, text="Conta1", variable=self.optConta, value=1, command=self.on_radio_change).grid(row=0, column=0, padx=self.padx, pady=self.pady, sticky="ew")
+        tk.Radiobutton(self.root, text="Conta2", variable=self.optConta, value=2, command=self.on_radio_change).grid(row=0, column=1, padx=self.padx, pady=self.pady, sticky="ew")
+        tk.Button(self.root, text="Save", command=self.save_settings).grid(row=0, column=2, padx=self.padx, pady=self.pady, sticky="ew")
+        tk.Button(self.root, text="Load", command=self.load_settings).grid(row=0, column=3, padx=self.padx, pady=self.pady, sticky="ew")
+        tk.Checkbutton(self.root, text="Trocar", variable=self.chkTrocar).grid(row=0, column=4, padx=self.padx, pady=self.pady, sticky="ew")
         # Checkboxes and Dropdowns
-        tk.Checkbutton(self.root, text="Explorar", variable=self.chkExplorar).grid(row=0, column=2, padx=self.padx, pady=self.pady, sticky="ew")
 
         self.create_checkbox_with_combobox("Inf", self.chkInf, self.tInf, 1, 0)
         self.create_checkbox_with_combobox("Mag", self.chkMag, self.tMag, 1, 1)
@@ -150,11 +153,12 @@ class Gui:
         self.lbRodando.grid(row=6, column=3, padx=self.padx, pady=self.pady, sticky="ew")
 
         # Additional Checkbuttons
-        tk.Checkbutton(self.root, text='Visao', variable=self.chkVisaoPC).grid(row=7, column=0, padx=self.padx, pady=self.pady, sticky="e")
-        tk.Checkbutton(self.root, text='Espera', variable=self.chkEsperar).grid(row=7, column=1, padx=self.padx, pady=self.pady, sticky="e")
-        tk.Checkbutton(self.root, text='Builds', variable=self.chkUpar).grid(row=7, column=2, padx=self.padx, pady=self.pady, sticky="e")
-        tk.Checkbutton(self.root, text='M. rss', variable=self.chkMaxRss).grid(row=7, column=3, padx=self.padx, pady=self.pady, sticky="e")
-        tk.Checkbutton(self.root, text='Donate', variable=self.chkDonate).grid(row=7, column=4, padx=self.padx, pady=self.pady, sticky="e")
+        tk.Checkbutton(self.root, text='Visao', variable=self.chkVisaoPC).grid(row=7, column=0, padx=self.padx, pady=self.pady, sticky="w")
+        tk.Checkbutton(self.root, text='Espera', variable=self.chkEsperar).grid(row=7, column=1, padx=self.padx, pady=self.pady, sticky="w")
+        tk.Checkbutton(self.root, text='Builds', variable=self.chkUpar).grid(row=7, column=2, padx=self.padx, pady=self.pady, sticky="w")
+        tk.Checkbutton(self.root, text='M. rss', variable=self.chkMaxRss).grid(row=7, column=3, padx=self.padx, pady=self.pady, sticky="w")
+        tk.Checkbutton(self.root, text='Donate', variable=self.chkDonate).grid(row=7, column=4, padx=self.padx, pady=self.pady, sticky="w")
+        tk.Checkbutton(self.root, text="Explorar", variable=self.chkExplorar).grid(row=8, column=0, padx=self.padx, pady=self.pady, sticky="w")
 
     def create_checkbox_with_combobox(self, text, variable, tvariable, row, column):
         tk.Checkbutton(self.root, text=text, variable=variable).grid(row=row, column=column, padx=self.padx, pady=self.pady, sticky="ew")
@@ -166,20 +170,32 @@ class Gui:
             with open(self.nome_arquivo_config(), "r") as f:
                 data = json.load(f)
                 for key, value in data.items():
-                    if hasattr(self, key):
+                    if hasattr(self, key) and key != "chkTrocar":
                         var = getattr(self, key)
                         if isinstance(var, (tk.IntVar, tk.BooleanVar, tk.StringVar)):
                             var.set(value)
+        self.gera_log(f"Configuração carregada do {self.nome_arquivo_config()}")
 
     def save_settings(self):
         # Salvar os valores atuais no arquivo JSON
         data = {}
         for key, var in vars(self).items():
-            if isinstance(var, (tk.IntVar, tk.BooleanVar, tk.StringVar)):
+            if isinstance(var, (tk.IntVar, tk.BooleanVar, tk.StringVar)) and key != "chkTrocar":
                 data[key] = var.get()
         with open(self.nome_arquivo_config(), "w") as f:
             json.dump(data, f)
+        self.gera_log(f"Configuração salva em {self.nome_arquivo_config()}")
 
+    def on_radio_change(self):
+        # Gambiarra monstra pra salvar ao mudar.
+        if self.optConta.get() != self.opt_valor_anterior:
+            aux = self.optConta.get()
+            self.optConta.set(self.opt_valor_anterior)
+            self.save_settings()
+            self.optConta.set(aux)
+            self.opt_valor_anterior = self.optConta.get()
+        # Função chamada ao mudar o valor do Radiobutton
+        self.load_settings()
 
     def show(self):
         self.root.update()
@@ -273,8 +289,9 @@ class Gui:
                 if self.thread_run.stopped():
                     self.gera_log("Vai encerrar a thread.")
                     break
-                
-                
+            if bool(self.chkTrocar.get()):
+                if not self.troca_personagem():
+                    self.gera_log("Não deu certo, pra trocar o personagem.")
 
     def teste(self):
         # while True:
@@ -284,7 +301,7 @@ class Gui:
         self.f.espera_random()
         start_time = time.time()
 
-        self.procura_gema()
+        self.troca_personagem()
 
         print(f"Teste: {time.time() - start_time} segundos") 
 
@@ -312,7 +329,7 @@ class Gui:
 
 
     def gera_log(self, mensagem):
-        self.f.gera_log(self.optConta.get(), mensagem)
+        self.f.gera_log(f"{self.optConta.get()} - {mensagem}")
 
     def last_screen(self, timeout=5000):
         screen = None
@@ -975,10 +992,10 @@ class Gui:
 
     def nome_arquivo_config(self):
         if "Z:" in self.diretorio_atual:
-            return "config1.json"
+            return f"config1-{self.optConta.get()}.json"
         if "F:" in self.diretorio_atual:
-            return "config2.json"
-        return "config.json"
+            return f"config2-{self.optConta.get()}.json"
+        return f"config-{self.optConta.get()}.json"
         
     def area_to_str(self):
         # Configurar o caminho para o executável do Tesseract no Windows
@@ -1008,3 +1025,52 @@ class Gui:
             print("A palavra 'Reserves' não foi encontrada.")
 
 
+    def troca_personagem(self):
+        self.gera_log("Inicia troca de personagem")
+        if str(self.optConta.get()) == "1":
+            self.optConta.set(2)
+        else:
+            self.optConta.set(1)
+        self.load_settings()
+        self.gera_log("Mudou as configurações")
+        cords = self.procura_img("settings")
+        while cords is None:
+            self.f.ativa()
+            self.f.tecla("esc")
+            cords = self.procura_ate_achar("settings")
+        self.f.clica_random(cords)
+        cords = self.procura_ate_achar("account")
+        if cords is not None:
+            self.f.clica_random(cords)
+            self.f.espera_random(2000)
+            start_time1 = time.time()
+            while ((time.time() - start_time1) * 1000) < 60000:
+                cords = None
+                if str(self.optConta.get()) == "1":
+                    self.f.clica_random((390, 383), janela=True)
+                else:
+                    self.f.clica_random((948, 387), janela=True)
+                interval = 0.1
+                start_time = time.time()
+                while ((time.time() - start_time) * 1000) < 3000:
+                    time.sleep(interval)
+                    cords = self.procura_img("confirm")
+                    if cords is not None:
+                        break
+                if cords is not None:
+                    break
+            self.f.clica_random(cords)
+            self.f.espera_random(5000)
+            cords = self.procura_ate_achar("mapa", timeout=120000)
+            if cords is not None:
+                self.gera_log("Conseguiu trocar personagem com sucesso.")
+                return True
+            
+        self.gera_log("Não conseguiu trocar de personagem")
+        if str(self.optConta.get()) == "1":
+            self.optConta.set(2)
+        else:
+            self.optConta.set(1)
+        self.load_settings()
+        self.gera_log("Voltou as configurações")
+        return False
