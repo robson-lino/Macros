@@ -22,4 +22,4 @@ class StoppableThread(threading.Thread):
             if self._target:
                 self._target(*self._args, **self._kwargs)
         finally:
-            self.f.gera_log(self.optConta, f"{self.name} encerrou.")
+            self.f.gera_log(f"{self.name} encerrou.")

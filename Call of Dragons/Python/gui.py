@@ -35,6 +35,8 @@ class Gui:
             # Intervalo de tempos
             self.ultimos_tempos = {}
             self.tempos = {"donate": 3600,
+                           "rss_alianca": 3600,
+                           "teste": 60,
                                     }
             
             self.herois = Herois()
@@ -65,21 +67,26 @@ class Gui:
             self.root.title("Minha GUI")
 
             # Configurando o redimensionamento do grid
-            for i in range(8):  # Número de linhas
+            for i in range(9):  # Número de linhas
                 self.root.grid_rowconfigure(i, weight=1)  # Permite que as linhas se expandam
             for i in range(5):  # Número de colunas
                 self.root.grid_columnconfigure(i, weight=1)  # Permite que as colunas se expandam
 
+            # self.root.grid_rowconfigure(0, weight=0) 
+            # self.root.grid_columnconfigure(0, weight=0
+
 
             # Variáveis compartilhadas
             self.optConta = tk.IntVar(value=1)  # Inicializando com Conta1 selecionada
-            self.chkTrocar = tk.BooleanVar(value=True)
+            self.chkTrocar = tk.BooleanVar(value=False)
             self.chkVisaoPC = tk.BooleanVar(value=False)
             self.chkEsperar = tk.BooleanVar(value=False)
             self.chkUpar = tk.BooleanVar(value=False)
             self.chkMaxRss = tk.BooleanVar(value=False)
             self.chkDonate = tk.BooleanVar(value=True)
             self.chkExplorar = tk.BooleanVar(value=False)
+            self.chkGlobin = tk.BooleanVar(value=True)
+            self.chkGDescer = tk.BooleanVar(value=True)
 
             self.chkInf = tk.BooleanVar(value=True)
             self.chkMag = tk.BooleanVar(value=True)
@@ -122,43 +129,47 @@ class Gui:
 
     def _create_widgets(self):
         # Radio buttons
-        tk.Radiobutton(self.root, text="Conta1", variable=self.optConta, value=1, command=self.on_radio_change).grid(row=0, column=0, padx=self.padx, pady=self.pady, sticky="ew")
-        tk.Radiobutton(self.root, text="Conta2", variable=self.optConta, value=2, command=self.on_radio_change).grid(row=0, column=1, padx=self.padx, pady=self.pady, sticky="ew")
-        tk.Button(self.root, text="Save", command=self.save_settings).grid(row=0, column=2, padx=self.padx, pady=self.pady, sticky="ew")
-        tk.Button(self.root, text="Load", command=self.load_settings).grid(row=0, column=3, padx=self.padx, pady=self.pady, sticky="ew")
-        tk.Checkbutton(self.root, text="Trocar", variable=self.chkTrocar).grid(row=0, column=4, padx=self.padx, pady=self.pady, sticky="ew")
+        tk.Radiobutton(self.root, text="Conta1", variable=self.optConta, value=1, command=self.on_radio_change).grid(row=1, column=0, padx=self.padx, pady=self.pady, sticky="ew")
+        tk.Radiobutton(self.root, text="Conta2", variable=self.optConta, value=2, command=self.on_radio_change).grid(row=1, column=1, padx=self.padx, pady=self.pady, sticky="ew")
+        tk.Button(self.root, text="Save", command=self.save_settings).grid(row=1, column=2, padx=self.padx, pady=self.pady, sticky="ew")
+        tk.Button(self.root, text="Load", command=self.load_settings).grid(row=1, column=3, padx=self.padx, pady=self.pady, sticky="ew")
+        tk.Checkbutton(self.root, text="Trocar", variable=self.chkTrocar).grid(row=1, column=4, padx=self.padx, pady=self.pady, sticky="ew")
+        
         # Checkboxes and Dropdowns
+        self.create_checkbox_with_combobox("Inf", self.chkInf, self.tInf, 2, 0)
+        self.create_checkbox_with_combobox("Mag", self.chkMag, self.tMag, 2, 1)
+        self.create_checkbox_with_combobox("Cav", self.chkCav, self.tCav, 2, 2)
+        self.create_checkbox_with_combobox("Cel", self.chkCel, self.tCel, 2, 3)
+        self.create_checkbox_with_combobox("Arq", self.chkArq, self.tArq, 2, 4)
 
-        self.create_checkbox_with_combobox("Inf", self.chkInf, self.tInf, 1, 0)
-        self.create_checkbox_with_combobox("Mag", self.chkMag, self.tMag, 1, 1)
-        self.create_checkbox_with_combobox("Cav", self.chkCav, self.tCav, 1, 2)
-        self.create_checkbox_with_combobox("Cel", self.chkCel, self.tCel, 1, 3)
-        self.create_checkbox_with_combobox("Arq", self.chkArq, self.tArq, 1, 4)
-
-        self.create_checkbox_with_combobox("Wood", self.chkWood, self.tWood, 3, 0)
-        self.create_checkbox_with_combobox("Rock", self.chkRock, self.tRock, 3, 1)
-        self.create_checkbox_with_combobox("Gold", self.chkGold, self.tGold, 3, 2)
-        self.create_checkbox_with_combobox("Mana", self.chkMana, self.tMana, 3, 3)
-        self.create_checkbox_with_combobox("Gema", self.chkGema, self.tGema, 3, 4)
+        self.create_checkbox_with_combobox("Wood", self.chkWood, self.tWood, 4, 0)
+        self.create_checkbox_with_combobox("Rock", self.chkRock, self.tRock, 4, 1)
+        self.create_checkbox_with_combobox("Gold", self.chkGold, self.tGold, 4, 2)
+        self.create_checkbox_with_combobox("Mana", self.chkMana, self.tMana, 4, 3)
+        self.create_checkbox_with_combobox("Gema", self.chkGema, self.tGema, 4, 4)
 
         # Buttons
-        tk.Button(self.root, text="Screen", command=self.show_screen_action).grid(row=5, column=0, padx=self.padx, pady=self.pady, sticky="ew")
-        tk.Button(self.root, text="Restart", command=self.restart_action).grid(row=5, column=1, padx=self.padx, pady=self.pady, sticky="ew")
-        tk.Button(self.root, text="Start", command=self.start_action).grid(row=6, column=0, padx=self.padx, pady=self.pady, sticky="ew")
-        tk.Button(self.root, text="Stop", command=self.stop_action).grid(row=6, column=1, padx=self.padx, pady=self.pady, sticky="ew")
-        tk.Button(self.root, text="Teste", command=self.teste_action).grid(row=6, column=2, padx=self.padx, pady=self.pady, sticky="ew")
+        tk.Button(self.root, text="Screen", command=self.show_screen_action).grid(row=6, column=0, padx=self.padx, pady=self.pady, sticky="ew")
+        tk.Button(self.root, text="Restart", command=self.restart_action).grid(row=6, column=1, padx=self.padx, pady=self.pady, sticky="ew")
+        tk.Button(self.root, text="Start", command=self.start_action).grid(row=7, column=0, padx=self.padx, pady=self.pady, sticky="ew")
+        tk.Button(self.root, text="Stop", command=self.stop_action).grid(row=7, column=1, padx=self.padx, pady=self.pady, sticky="ew")
+        tk.Button(self.root, text="Teste", command=self.teste_action).grid(row=7, column=2, padx=self.padx, pady=self.pady, sticky="ew")
         
         # Textbox
         self.lbRodando = tk.Label(self.root, text="")
-        self.lbRodando.grid(row=6, column=3, padx=self.padx, pady=self.pady, sticky="ew")
+        # Aqui você pode usar `columnspan` para fazer o label ocupar mais de uma coluna
+        self.lbRodando.grid(row=0, column=0, columnspan=10, padx=self.padx, pady=self.pady, sticky="w")
+
 
         # Additional Checkbuttons
-        tk.Checkbutton(self.root, text='Visao', variable=self.chkVisaoPC).grid(row=7, column=0, padx=self.padx, pady=self.pady, sticky="w")
-        tk.Checkbutton(self.root, text='Espera', variable=self.chkEsperar).grid(row=7, column=1, padx=self.padx, pady=self.pady, sticky="w")
-        tk.Checkbutton(self.root, text='Builds', variable=self.chkUpar).grid(row=7, column=2, padx=self.padx, pady=self.pady, sticky="w")
-        tk.Checkbutton(self.root, text='M. rss', variable=self.chkMaxRss).grid(row=7, column=3, padx=self.padx, pady=self.pady, sticky="w")
-        tk.Checkbutton(self.root, text='Donate', variable=self.chkDonate).grid(row=7, column=4, padx=self.padx, pady=self.pady, sticky="w")
-        tk.Checkbutton(self.root, text="Explorar", variable=self.chkExplorar).grid(row=8, column=0, padx=self.padx, pady=self.pady, sticky="w")
+        tk.Checkbutton(self.root, text='Visao', variable=self.chkVisaoPC).grid(row=8, column=0, padx=self.padx, pady=self.pady, sticky="w")
+        tk.Checkbutton(self.root, text='Espera', variable=self.chkEsperar).grid(row=8, column=1, padx=self.padx, pady=self.pady, sticky="w")
+        tk.Checkbutton(self.root, text='Builds', variable=self.chkUpar).grid(row=8, column=2, padx=self.padx, pady=self.pady, sticky="w")
+        tk.Checkbutton(self.root, text='M. rss', variable=self.chkMaxRss).grid(row=8, column=3, padx=self.padx, pady=self.pady, sticky="w")
+        tk.Checkbutton(self.root, text='Donate', variable=self.chkDonate).grid(row=8, column=4, padx=self.padx, pady=self.pady, sticky="w")
+        tk.Checkbutton(self.root, text="Explorar", variable=self.chkExplorar).grid(row=9, column=0, padx=self.padx, pady=self.pady, sticky="w")
+        tk.Checkbutton(self.root, text="Globin", variable=self.chkGlobin).grid(row=9, column=1, padx=self.padx, pady=self.pady, sticky="w")
+        tk.Checkbutton(self.root, text="GDescer", variable=self.chkGDescer).grid(row=9, column=2, padx=self.padx, pady=self.pady, sticky="w")
 
     def create_checkbox_with_combobox(self, text, variable, tvariable, row, column):
         tk.Checkbutton(self.root, text=text, variable=variable).grid(row=row, column=column, padx=self.padx, pady=self.pady, sticky="ew")
@@ -288,7 +299,7 @@ class Gui:
                 self.lbRodando.config(text=f"Foi {count} sec.")
                 if self.thread_run.stopped():
                     self.gera_log("Vai encerrar a thread.")
-                    break
+                    return
             if bool(self.chkTrocar.get()):
                 if not self.troca_personagem():
                     self.gera_log("Não deu certo, pra trocar o personagem.")
@@ -298,11 +309,12 @@ class Gui:
         #     if self.thread_teste.stopped():
         #         return
         self.f.ativa()
-        self.f.espera_random()
+        self.f.espera_random(1500)
+        self.f.ativa()
         start_time = time.time()
 
-        self.troca_personagem()
-
+        self.procura_gema()
+     
         print(f"Teste: {time.time() - start_time} segundos") 
 
 
@@ -329,6 +341,7 @@ class Gui:
 
 
     def gera_log(self, mensagem):
+        self.lbRodando.config(text=f"{self.optConta.get()} - {mensagem}")
         self.f.gera_log(f"{self.optConta.get()} - {mensagem}")
 
     def last_screen(self, timeout=5000):
@@ -352,9 +365,26 @@ class Gui:
         
         return file_img
             
-    def match_imgs(self, img, nomeimg, precision, ret, ignora_cords):       
+    def match_imgs(self, img, nomeimg, precision, ret, ignora_cords, roi):       
         
         tela = self.last_screen()
+
+        # Variáveis para calcular o offset da ROI
+        offset_x, offset_y = 0, 0
+
+        if roi is not None:
+            # Definindo a ROI com [(X, Y), (X2, Y2)]
+
+            (x1, y1), (x2, y2) = roi
+
+            (x1, y1) = self.f.convert_cords_janela(roi[0])
+            (x2, y2) = self.f.convert_cords_janela(roi[1])
+
+            # Calculando o deslocamento da ROI
+            offset_x, offset_y = x1, y1
+
+            tela = tela[y1:y2, x1:x2]
+
 
         deslocamento_y_inferior = 100
         deslocamento_y_superior = 30
@@ -382,6 +412,12 @@ class Gui:
         top_left = max_loc
         bottom_right = (top_left[0] + 30, top_left[1] + 30)
 
+        # self.gera_log(f"{max_val},{nomeimg}")
+
+        # Ajustando as coordenadas para a tela original
+        top_left = (top_left[0] + offset_x, top_left[1] + offset_y)
+        bottom_right = (bottom_right[0] + offset_x, bottom_right[1] + offset_y)
+
         if self.chkVisaoPC.get():
             data_atual = datetime.now()
             data_formatada = data_atual.strftime('%H%M%S.%f')
@@ -389,15 +425,7 @@ class Gui:
             telabkp = tela
             tela = match
             if self.screen_agent.enable_cv_preview.value:
-                cv.putText(
-                tela, 
-                f"{nomeimg}: {"{:.2f}".format(max_val)}", 
-                (top_left[0]-15, top_left[1]-20), 
-                cv.FONT_HERSHEY_DUPLEX,
-                1,
-                (255, 0, 255),
-                1,
-                cv.LINE_AA)
+                cv.putText(tela, f"{nomeimg}: {"{:.2f}".format(max_val)}", (top_left[0]-15, top_left[1]-20), cv.FONT_HERSHEY_DUPLEX, 1, (255, 0, 255), 1, cv.LINE_AA)
                 # cv.rectangle(tela, (top_left[0]-15, top_left[1]-15), bottom_right, (255, 0, 0), 2)
                 # self.screen_agent.queueProcess.put(tela)
                 cv.rectangle(match, (top_left[0]-15, top_left[1]-15), bottom_right, (255, 0, 0), 2)
@@ -412,15 +440,7 @@ class Gui:
             # cv.rectangle(tela, (top_left[0]-15, top_left[1]-15), bottom_right, (255, 0, 0), 2)
             # cv.imwrite(f'{self.diretorio_atual}\\imgs\\matchs\\{data_formatada} {nomeimg} {max_val}.png', tela)
             if self.screen_agent.enable_cv_preview.value:
-                cv.putText(
-                tela, 
-                f"P: {"{:.2f}".format(max_val)}", 
-                (top_left[0]-15, top_left[1]-20), 
-                cv.FONT_HERSHEY_DUPLEX,
-                1,
-                (255, 0, 255),
-                1,
-                cv.LINE_AA)
+                cv.putText(tela, f"{nomeimg}: {"{:.2f}".format(max_val)}", (top_left[0]-15, top_left[1]-20), cv.FONT_HERSHEY_DUPLEX, 1, (255, 0, 255), 1, cv.LINE_AA)
                 cv.rectangle(tela, (top_left[0]-15, top_left[1]-15), bottom_right, (255, 0, 0), 2)
                 self.screen_agent.queueProcess.put(tela)
             h2, w2 = img.shape[:2]
@@ -440,21 +460,26 @@ class Gui:
                         interval=300,
                         precision = 0.90,
                         ret = None,
-                        ignora_cords = []):
-        img = self.read_img_file(nomeimg)
-
-        if img is None:
-            return None
-        
+                        ignora_cords = [],
+                        var = 1,
+                        roi = None):
+        cords = None
         interval = interval / 1000
         start_time = time.time()
         while ((time.time() - start_time) * 1000) < timeout:
             self.verificaoEssencialLoop()
+            for i in range(var):
+                # Recupera a imagem de acordo com a variação, se 0 não colocar nada.
+                img = self.read_img_file(nomeimg if i == 0 else f"{nomeimg}{i}")
 
-            cords = self.match_imgs(img, nomeimg, precision, ret, ignora_cords)
+                if img is None:
+                    continue
+                cords = self.match_imgs(img, nomeimg if i == 0 else f"{nomeimg}{i}", precision, ret, ignora_cords, roi)
+                if cords:
+                    return cords
             time.sleep(interval)
-            if cords:
-                return cords
+        return cords
+        
     
     def procura_ate_nao_achar(
                         self,
@@ -463,20 +488,23 @@ class Gui:
                         interval=300,
                         precision = 0.90,
                         ret = None,
-                        ignora_cords = []):
-        self.f.ativa()
-
-        img = self.read_img_file(nomeimg)
-        if img is None:
-            return None
+                        ignora_cords = [],
+                        var = 1,
+                        roi = None):
         
         interval = interval / 1000
         start_time = time.time()
         while ((time.time() - start_time) * 1000) < timeout:
             self.verificaoEssencialLoop()
-            cords = self.match_imgs(img, nomeimg, precision, ret, ignora_cords)
-            if not cords:
-                return None
+            for i in range(var):
+                # Recupera a imagem de acordo com a variação, se 0 não colocar nada.
+                img = self.read_img_file(nomeimg if i == 0 else f"{nomeimg}{i}")
+                
+                if img is None:
+                    continue
+                cords = self.match_imgs(img, nomeimg if i == 0 else f"{nomeimg}{i}", precision, ret, ignora_cords, roi)
+                if not cords:
+                    return None
             
             time.sleep(interval)
         return cords
@@ -486,10 +514,19 @@ class Gui:
                     nomeimg,
                     precision = 0.90,
                     ret = None,
-                    ignora_cords = []):
-        
-        img = self.read_img_file(nomeimg)
-        cords = self.match_imgs(img, nomeimg, precision, ret, ignora_cords)
+                    ignora_cords = [],
+                    var = 1,
+                    roi = None):
+        cords = None
+        for i in range(var):
+            # Recupera a imagem de acordo com a variação, se 0 não colocar nada.
+            img = self.read_img_file(nomeimg if i == 0 else f"{nomeimg}{i}")
+
+            if img is None:
+                continue
+            cords = self.match_imgs(img, nomeimg if i == 0 else f"{nomeimg}{i}", precision, ret, ignora_cords, roi)
+            if cords:
+                return cords
         return cords
 
     def place_holder(self):
@@ -557,7 +594,7 @@ class Gui:
             tipo2 = "mapa"
 
         if tipo in ("cidade","mapa"):
-            cords = self.procura_ate_achar(tipo1, timeout=500, interval=100)
+            cords = self.procura_ate_achar(tipo1, timeout=500, interval=60)
             if cords is not None:
                 return True
                 self.gera_log(f"Estava no {tipo2}.")
@@ -599,7 +636,7 @@ class Gui:
                     self.f.espera_random()
                     self.f.clica_random(cords)
                     self.gera_log(f"Colocou o Scout pra explorar!")
-                    self.f.espera_random(1000)
+                    self.f.espera_random(3000)
             cords = self.procura_ate_achar("scout", precision=0.80)
         self.muda_view("cidade")
 
@@ -674,6 +711,8 @@ class Gui:
         self.up_build()
         self.donate()
         self.skills()
+        self.globin_shop()
+        self.rss_alianca()
         
 
         
@@ -859,28 +898,25 @@ class Gui:
         if cords is not None:
             self.f.clica_random(cords)
             cordsbkp = None
-            for vez in range(2):
+            for vez in range(4):
                 for step in range(7):
                     lista_cords = []
-                    for gem in range(1, 3):
-                        cordsbkp = self.procura_ate_achar(f"gemmap{gem}", timeout=600, precision=0.70, ignora_cords=lista_cords)
-                        if cordsbkp is not None:
-                            ocupado = False
-                            for i in range(1, 5):
-                                self.gera_log(f"vai procurar no ocup{i}")
-                                cords = self.procura_ate_achar(f"ocup{i}", timeout=1000, precision=0.70, ret=cordsbkp)
-                                if cords is not None:
-                                    self.gera_log(f"Ocupado {i}")
-                                    ocupado = True
-                                    break
-                            if ocupado:
-                                lista_cords.append(cordsbkp)
-                                cordsbkp = None
-                                self.gera_log(f"Estava ocupado mesmo.")
+                    cordsbkp = self.procura_ate_achar(f"gemmap", timeout=600, precision=0.70, ignora_cords=lista_cords, var=3)
+                    if cordsbkp is not None:
+                        ocupado = False
+                        for i in range(1, 5):
+                            self.gera_log(f"vai procurar no ocup{i}")
+                            cords = self.procura_ate_achar(f"ocup{i}", timeout=1000, precision=0.70, ret=cordsbkp)
+                            if cords is not None:
+                                self.gera_log(f"Ocupado {i}")
+                                ocupado = True
                                 break
-                            else:
-                                self.gera_log("Gema desocupada.")
-                                break
+                        if ocupado:
+                            lista_cords.append(cordsbkp)
+                            cordsbkp = None
+                            self.gera_log(f"Estava ocupado mesmo.")
+                        else:
+                            self.gera_log("Gema desocupada.")
                     if cordsbkp is not None:
                         self.gera_log(f"Achou gema no {cordsbkp}")                
                         self.f.clica_random(cordsbkp)
@@ -905,8 +941,11 @@ class Gui:
         self.confirm()
 
     def donate(self):
-        if not self.esta_no_tempo("donate"):
+        if not self.esta_no_tempo(f"donate"):
             return
+        if not self.chkDonate.get():
+            return
+        self.gera_log("Estava no momento de doar para a aliança.")
         self.f.clica_random((1093, 803), janela=True, velo=70)
         cords = self.procura_ate_achar("research", precision=0.8)
         if cords is not None:
@@ -915,16 +954,17 @@ class Gui:
             if cords is not None:
                 for _ in range(11):
                     self.f.clica_random(cords)
+            self.gera_log("Doou para a aliança.")
             self.volta()
 
     def esta_no_tempo(self, func_name):
         agora = time.time()
-        if func_name not in self.ultimos_tempos:
-            self.ultimos_tempos[func_name] = agora
+        if f"{func_name}{self.optConta.get()}" not in self.ultimos_tempos:
+            self.ultimos_tempos[f"{func_name}{self.optConta.get()}"] = agora
             return True
 
-        if agora - self.ultimos_tempos[func_name] >= self.tempos[func_name]:
-            self.ultimos_tempos[func_name] = agora
+        if agora - self.ultimos_tempos[f"{func_name}{self.optConta.get()}"] >= self.tempos[func_name]:
+            self.ultimos_tempos[f"{func_name}{self.optConta.get()}"] = agora
             return True
         return False
     
@@ -959,7 +999,7 @@ class Gui:
 
     def skills(self):
         for skill in self.herois.skills:
-            cords = self.procura_img(skill, precision=0.75)
+            cords = self.procura_img(skill, precision=0.65)
             if cords is not None:
                 self.f.clica_random(cords)
 
@@ -1026,12 +1066,16 @@ class Gui:
 
 
     def troca_personagem(self):
+        self.f.ativa()
         self.gera_log("Inicia troca de personagem")
+        self.save_settings()
+        self.f.espera_random(1000)
         if str(self.optConta.get()) == "1":
             self.optConta.set(2)
         else:
             self.optConta.set(1)
         self.load_settings()
+        self.f.espera_random(1000)
         self.gera_log("Mudou as configurações")
         cords = self.procura_img("settings")
         while cords is None:
@@ -1064,6 +1108,14 @@ class Gui:
             cords = self.procura_ate_achar("mapa", timeout=120000)
             if cords is not None:
                 self.gera_log("Conseguiu trocar personagem com sucesso.")
+                self.herois.herois_em_uso = {
+                "kella": None,
+                "pan": None,
+                "chak": None,
+                "ordo": None,
+                "tarra": None,
+                "naernin": None,
+                }
                 return True
             
         self.gera_log("Não conseguiu trocar de personagem")
@@ -1074,3 +1126,50 @@ class Gui:
         self.load_settings()
         self.gera_log("Voltou as configurações")
         return False
+    
+    def globin_shop(self):
+        if not self.chkGlobin.get():
+            return
+        cords = self.procura_ate_achar("globin", precision=0.8)
+        if cords is not None:
+            self.gera_log("Tem o globin na cidade.")
+            self.f.clica_random((cords[0],cords[1]+5))
+            free = self.procura_ate_achar("free", precision=0.8)
+            if free is not None:
+                for i in range(2):
+                    self.f.move_mouse((647, 464), janela=True)
+                    self.f.scroll("up", 5)
+                    start_time = time.time()
+                    for _ in range(2):
+                        for tipo in ("miniGold", "miniRock", "miniWood"):
+                            while True:
+                                tipocords = self.procura_ate_achar(tipo, precision=0.7, timeout=1000, interval=50, var=10, roi=[(410, 302), (922, 578)])
+                                if tipocords is not None:
+                                    self.gera_log(f"Comprou algo com {tipo}")
+
+                                    self.f.clica_random(tipocords)
+                                    
+                                else:
+                                    break
+                                if ((time.time() - start_time) * 1000) > 5000:
+                                    break
+                                self.f.espera_random(500)
+                        if self.chkGDescer.get():
+                            self.f.move_mouse((647, 464), janela=True)
+                            self.f.scroll("down", 5)
+                    if i == 0:
+                        self.f.clica_random(free)
+            self.volta()
+
+
+    def rss_alianca(self):
+        if not self.esta_no_tempo(f"rss_alianca"):
+            return
+        self.f.clica_random((1093, 803), janela=True, velo=70)
+        cords = self.procura_ate_achar("rss_alianca", precision=0.8)
+        if cords is not None:
+            self.f.clica_random(cords)
+            cords = self.procura_ate_achar("rss_claim", precision=0.8)
+            if cords is not None:
+                self.f.clica_random(cords)
+            self.volta()

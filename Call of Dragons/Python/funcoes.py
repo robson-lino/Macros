@@ -94,10 +94,10 @@ class Funcoes:
         if janela:
             # gera_log(rect)
             self.user32.GetWindowRect(self.hwnd, ctypes.byref(self.rect))
-            window_x, window_y = self.rect.left, self.rect.top
+            self.window_x, self.window_y = self.rect.left, self.rect.top
 
             # Calcula a posição do mouse relativa à janela
-            cords = (cords[0] + window_x, cords[1] + window_y)
+            cords = (cords[0] + self.window_x, cords[1] + self.window_y)
         for _ in range(clicks):
             rand = random.randint(-var, var)
             rand2 = random.randint(-var, var)
@@ -172,5 +172,19 @@ class Funcoes:
                     time.sleep(1)  # Dá uma pausa para garantir que a janela seja restaurada
                     self.user32.ShowWindow(self.hwnd, self.SW_SHOW)
                 self.user32.SetForegroundWindow(self.hwnd)
+                self.user32.GetWindowRect(self.hwnd, ctypes.byref(self.rect))
+                self.window_x, self.window_y = self.rect.left, self.rect.top
         except:
             pass
+    
+    def scroll(self, direction, vezes = 1, velo=7):
+        for _ in range(vezes):
+            interception.scroll(direction=direction)
+            self.espera_random(velo)
+
+    def convert_cords_janela(self, cords):
+        self.user32.GetWindowRect(self.hwnd, ctypes.byref(self.rect))
+        window_x, window_y = self.rect.left, self.rect.top
+
+        # Calcula a cordenada relativa à janela
+        return (cords[0] + window_x, cords[1] + window_y)
